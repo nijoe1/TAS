@@ -5,6 +5,7 @@ import {
   RainbowKitProvider,
   lightTheme,
   darkTheme,
+  midnightTheme
 } from "@rainbow-me/rainbowkit";
 import {
   injectedWallet,
@@ -64,7 +65,7 @@ const Web3Provider = (props: Props) => {
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider
         chains={chains}
-        theme={darkTheme({
+        theme={lightTheme({
           accentColor: "black", // Change this to your desired color
           accentColorForeground: "white",
           borderRadius: "large",
