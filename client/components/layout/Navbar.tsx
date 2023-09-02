@@ -1,62 +1,64 @@
-import Image from "next/image";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import Link from "next/link";
+import React from "react";
+import { Navbar, Button } from "@material-tailwind/react";
 import { useRouter } from "next/router";
-import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/utils/config";
-const origin =
-  typeof window !== "undefined" && window.location.origin
-    ? window.location.origin
-    : SITE_URL;
-const Navbar = () => {
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Image from "next/image";
+import Link from "next/link";
+
+const navLinks = [
+  { text: "Attestations", href: "/" },
+  { text: "Create Schema", href: "/" },
+  { text: "Exclusive Content", href: "/" },
+  { text: "Docs", href: "/" },
+];
+
+const CustomNavbar = () => {
   const router = useRouter();
 
-  const handleLinkClick = (href: any) => {
+  const handleLinkClick = (href) => {
     router.push(href);
   };
 
   return (
-    <nav className="w-full border-b border-gray-800 bg-zinc-800/30 backdrop-blur-2xl bg-gradient-to-b from-zinc-200 dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:dark:bg-zinc-800/30 mt-3">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row justify-between items-center py-6 px-12 xl:px-0">
-          <div className="lg:flex-initial">
-            <button onClick={() => handleLinkClick("/")}>
+    <Navbar color="transparent">
+      <div className="bg-gradient-to-r from-black to-blue-gray-900 rounded-lg py-4">
+        <div className="container mx-auto">
+          <div className="flex flex-wrap items-center justify-between">
+            {/* Logo */}
+            <div className="text-white cursor-pointer ml-3">
               <Image
-                className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
                 src="/boilr3.svg"
                 alt="BOILR3 Logo"
                 width={125}
                 height={37}
                 priority
               />
-            </button>
-          </div>
-          <div className="lg:flex lg:items-center space-x-4">
-            <button
-              onClick={() => handleLinkClick("/")}
-              className="text-black font-bold hover:text-gray-700 hover:bg-white hover:rounded-md py-2 px-6 transition-colors"
-            >
-              Attestations
-            </button>
-            <button
-              onClick={() => handleLinkClick("/")}
-              className="text-black font-bold hover:text-gray-700 hover:bg-white hover:rounded-md py-2 px-6 transition-colors"
-            >
-              Create Schema
-            </button>
-            <button
-              onClick={() => handleLinkClick("/")}
-              className="text-black font-bold hover:text-gray-700 hover:bg-white hover:rounded-md py-2 px-6 transition-colors"
-            >
-              Exclusive Content
-            </button>
-          </div>
-          <div className="bottom-0 left-0 lg:flex lg:items-end lg:justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black static h-auto w-auto lg:bg-none my-6 lg:my-0">
-            <ConnectButton />
+            </div>
+
+            {/* Navigation Links */}
+            <div className="space-x-4">
+              {navLinks.map((item, index) => (
+                <Link key={index} href={item.href}>
+                  <Button
+                    color="black"
+                    onClick={() => handleLinkClick(item.href)}
+                    className="rounded-full hover:bg-white hover:text-black mx-2"
+                  >
+                    {item.text}
+                  </Button>
+                </Link>
+              ))}
+            </div>
+
+            {/* Connect Button */}
+            <div className="mx-3">
+              <ConnectButton />
+            </div>
           </div>
         </div>
       </div>
-    </nav>
+    </Navbar>
   );
 };
 
-export default Navbar;
+export default CustomNavbar;

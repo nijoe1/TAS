@@ -21,45 +21,44 @@ export default function Home() {
     {
       title: "Tableland",
       description:
-        "Seamlessly integrate your decentralized application with Next.js, a popular React-based framework.",
-      href: "https://nextjs.org",
+        "Tableland is an open source, permissionless cloud database built on SQLite. Read and write tamperproof data from apps, data pipelines, or EVM smart contracts.",
+      href: "https://tableland.xyz/",
     },
     {
       title: "Filecoin",
-      description: "A powerful and easy-to-use wallet Ethereum-based dApps.",
-      href: "https://www.rainbowkit.com",
+      description:
+        "Filecoin is making the web more secure and efficient with a decentralized data storage marketplace, protocol, and cryptocurrency.",
+      href: "https://filecoin.io/",
     },
     {
       title: "Lighthouse",
       description:
-        "wagmi is a collection of React Hooks containing everything you need to start working with Ethereum.",
-      href: "https://testnet.hypercerts.org/app/gallery-all",
+        "Store Files Permanently. Perpetual storage powered by decentralized web. Easily store and secure your data.",
+      href: "https://www.lighthouse.storage/",
     },
     {
       title: "Lilypad",
       description:
-        "Start by exploring some pre-built examples to inspire your creativity!",
-      href: `https://co2.storage/assets/bafyreifyxfrvpf4xek2afrp46snz6oho4ydc3m7ykviagrmtla52r3knli`,
+        "Lilypad is building the infrastructure for internet-scale trustless distributed compute networks for #web3 underpinned by the Bacalhau Project.",
+      href: `https://docs.lilypadnetwork.org/`,
     },
   ];
   return (
-    <div className={`flex flex-col min-h-screen ${inter.className}`}>
+    <div className={`flex flex-col min-h-screen ${inter.className} bg-blue-gray-100`}>
       <Navbar />
       <section className="dark:bg-gray-800 dark:text-gray-100">
         <div className="container mx-auto flex flex-col items-center px-4 py-16 text-center md:py-32 md:px-10 lg:px-32 xl:max-w-3xl">
-          <h1 className="text-4xl font-bold leadi sm:text-5xl">
-            Tableland
-            <span className="dark:text-violet-400"> Attestation </span>
-            Service
+          <h1 className="text-4xl font-bold leading-tight sm:text-5xl text-black dark:text-white">
+            Welcome to Tableland Attestation Service
           </h1>
-          <p className="px-8 mt-8 mb-12 text-lg">
-            EAS build using tableland as a better and more decentralized and gas efficient solution. Bridging attestation service on the filecoin network
+          <p className="px-8 mt-6 mb-12 text-lg text-gray-600 dark:text-gray-300">
+            Building a better and more decentralized attestation service on the Filecoin network.
           </p>
           <div className="flex flex-wrap justify-center">
-            <button className="px-8 py-3 m-2 text-lg font-semibold rounded dark:bg-violet-400 dark:text-gray-900">
-              Get started
+            <button className="px-8 py-3 m-2 text-lg font-semibold rounded-full bg-black text-white hover:bg-white hover:text-black transition duration-300">
+              Get Started
             </button>
-            <button className="px-8 py-3 m-2 text-lg border rounded dark:text-gray-50 dark:border-gray-700">
+            <button className="px-8 py-3 m-2 text-lg border rounded-full dark:border-white dark:hover:border-black dark:hover:bg-white dark:text-black hover:bg-black hover:text-white transition duration-300">
               Source Code
             </button>
           </div>
@@ -86,11 +85,9 @@ export default function Home() {
             </Link>
           ))}
         </div>
-        {/* Add ClaimTokensComponent if needed */}
       </main>
-      {/* <ClaimTokensComponent></ClaimTokensComponent> */}
-      <div className="flex-grow"></div> {/* Empty block to push the footer */}
-      <Footer /> {/* Add the Footer component here */}
+      <div className="flex-grow"></div>
+      <Footer />
     </div>
   );
 }

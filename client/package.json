@@ -9,7 +9,6 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@heroicons/react": "v1",
 		"@hypercerts-org/sdk": "^0.3.0",
 		"@material-tailwind/react": "^2.1.0",
 		"@rainbow-me/rainbowkit": "^1.0.1",

@@ -1,57 +1,43 @@
-import { Typography } from "@material-tailwind/react";
+import React from "react";
+import { Button } from "@material-tailwind/react";
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-white p-8">
-      <div className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 bg-white text-center md:justify-between">
-        <img src="../boilr3.svg" alt="logo-ct" className="w-20" />
-        <ul className="flex flex-wrap items-center gap-y-2 gap-x-8">
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              About Us
-            </Typography>
-          </li>
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              License
-            </Typography>
-          </li>
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              Contribute
-            </Typography>
-          </li>
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              Contact Us
-            </Typography>
-          </li>
-        </ul>
+    <footer className=" mx-8 my-3 bg-gradient-to-r mr-8 ml-8 from-black to-blue-gray-900 rounded-lg py-4 text-white">
+      <div className="container mx-auto max-w-screen-xl flex items-center justify-center">
+        <Button
+          color="blue-gray"
+          size="sm"
+          className="hover:bg-gray-200 hover:text-black hover:rounded-full"
+        >
+          About Us
+        </Button>
+        <Button
+          color="blue-gray"
+          size="sm"
+          className="hover:bg-gray-200 hover:text-black hover:rounded-full"
+        >
+          License
+        </Button>
+        <Button
+          color="blue-gray"
+          size="sm"
+          className="hover:bg-gray-200 hover:text-black hover:rounded-full"
+        >
+          Contribute
+        </Button>
+        <Button
+          color="blue-gray"
+          size="sm"
+          className="hover:bg-gray-200 hover:text-black hover:rounded-full"
+        >
+          Contact Us
+        </Button>
       </div>
       <hr className="my-8 border-blue-gray-50" />
-      <Typography color="blue-gray" className="text-center font-normal">
-        &copy; 2023 Material Tailwind
-      </Typography>
+      <Button color="blue-gray" size="sm" className="mx-auto block">
+        &copy; 2023 Tableland Attestation Service
+      </Button>
     </footer>
   );
 };
