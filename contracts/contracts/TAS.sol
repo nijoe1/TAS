@@ -8,10 +8,14 @@ import { EIP1271Verifier } from "./eip1271/EIP1271Verifier.sol";
 
 import { ISchemaResolver } from "./resolver/ISchemaResolver.sol";
 
-import "@tableland/evm/contracts/utils/TablelandDeployments.sol";
-import "@tableland/evm/contracts/utils/SQLHelpers.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
+
+import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
+
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
 
 // prettier-ignore
 import {
@@ -41,11 +45,12 @@ import {
 } from "./ITAS.sol";
 
 import { Semver } from "./Semver.sol";
+
 import { ISchemaRegistry, SchemaRecord } from "./ISchemaRegistry.sol";
 
 /// @title TAS
 /// @notice The Tableland Attestation Service protocol.
-contract TAS is ITAS, Semver, EIP1271Verifier {
+contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
     using Address for address payable;
 
     error AlreadyRevoked();
@@ -79,6 +84,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     string[] public tables;
 
     uint256[] tableIDs;
+
+    uint256 tablesUpdates;
+
+    uint256 private tablesRowsCounter;
 
     string private constant ATTESTATION_TABLE_PREFIX = "attestation";
 
@@ -121,7 +130,11 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     function insertAttestation(
         Attestation memory attestation
     ) internal {
-        // require(attestation.data.length <= 1024, "Tableland limitation");
+        require(attestation.data.length <= 1024, "Tableland limitation");
+        // Managing tableland rows limitation.
+        if(tablesRowsCounter == 100000){
+            renewTables();
+        }
         mutate(
             tableIDs[0],
             SQLHelpers.toInsert(
@@ -147,6 +160,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
                 )
             )
         );
+        tablesRowsCounter++;
         insertRevocationInfo(attestation.uid, attestation.revocable);
     }
 
@@ -154,7 +168,6 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
         bytes32 uid,
         bool revocable
     ) internal {
-        // require(attestation.data.length <= 1024, "Tableland limitation");
         mutate(
             tableIDs[1],
             SQLHelpers.toInsert(
@@ -189,6 +202,19 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
                 string.concat("uid=",SQLHelpers.quote(bytes32ToString(uid)))
             )
         );
+    }
+
+    function renewTables()internal{
+        
+        tableIDs = tablelandContract.create(address(this), createTableStatements);
+
+        tables.push(SQLHelpers.toNameFromId(ATTESTATION_TABLE_PREFIX, tableIDs[0]));
+
+        tables.push(SQLHelpers.toNameFromId(REVOCATION_TABLE_PREFIX, tableIDs[1]));
+
+        tablesRowsCounter = 0; 
+
+        tablesUpdates++;
     }
 
     /// @inheritdoc ITAS
@@ -765,6 +791,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
             );
     }
 
+    function getTime()external view returns(uint256){
+        return _time();
+    }
+
     /// @dev Refunds remaining ETH amount to the attester.
     /// @param remainingValue The remaining ETH amount that was not sent to the resolver.
     function _refund(uint256 remainingValue) private {
@@ -835,5 +865,9 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     */
     function mutate(uint256 tableId, string memory statement) internal {
         tablelandContract.mutate(address(this), tableId, statement);
+    }
+
+    function onERC721Received(address, address, uint256, bytes calldata) external pure returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
     }
 }

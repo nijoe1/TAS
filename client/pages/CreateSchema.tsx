@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Typography } from "@material-tailwind/react";
 import AttributeFormComponent from "@/components/AttributeFormComponent"; // Import the form component
 import DynamicForm from "@/components/DynamicForm"; // Import the form component
@@ -6,6 +6,10 @@ import DynamicForm from "@/components/DynamicForm"; // Import the form component
 import { Navbar } from "@/components/layout"; // Import your Navbar and Footer components
 import Footer from "@/components/Footer";
 import { Inter } from "next/font/google";
+import { Orbis } from "@orbisclub/orbis-sdk";
+
+const orbis = new Orbis();
+
 const inter = Inter({ subsets: ["latin"] });
 
 const CreateSchema = () => {
@@ -14,6 +18,7 @@ const CreateSchema = () => {
     margin: "0 auto", // Center the container horizontally
     padding: "16px", // Add padding as needed
   };
+
   return (
     <div
       className={`flex flex-col min-h-screen ${inter.className} bg-blue-gray-100`}
@@ -32,6 +37,7 @@ const CreateSchema = () => {
           ]}
         />
       </div>
+    
       <div className="flex-grow"></div>
       <Footer /> {/* Include your Footer component */}
     </div>

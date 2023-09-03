@@ -1,17 +1,19 @@
 import {
 	polygonMumbai,
 	// polygonZkEvmTestnet,
-	// goerli,
-	// optimismGoerli,
+	goerli,
+	optimismGoerli,
 	// filecoinHyperspace,
+	filecoinCalibration
 	// baseGoerli
 } from 'wagmi/chains';
 
 export const ETH_CHAINS = [
 	polygonMumbai,
 	// polygonZkEvmTestnet,
-	// goerli,
-	// optimismGoerli,
+	goerli,
+	optimismGoerli,
+	{...filecoinCalibration,iconUrl:"https://gateway.lighthouse.storage/ipfs/QmXQMtADMsCqsYEvyuEA3PkFq2xtWAQetQFtkybjEXvk3Z"}
 	// filecoinHyperspace,
 	// baseGoerli,
 ];

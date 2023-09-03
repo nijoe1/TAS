@@ -19,7 +19,7 @@ abstract contract SchemaResolver is ISchemaResolver, Semver {
 
     /// @dev Creates a new resolver.
     /// @param tas The address of the global tas contract.
-    constructor(ITAS tas) Semver(1, 2, 0) {
+    constructor(ITAS tas) Semver(0, 0, 1) {
         if (address(tas) == address(0)) {
             revert InvalidTAS();
         }
