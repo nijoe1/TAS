@@ -63,9 +63,9 @@ const CustomNavbar = () => {
         <div className="container mx-auto">
           <div className="flex flex-wrap items-center justify-between">
             {/* Logo */}
-            <div className="text-white cursor-pointer ml-3 rounded-full">
+            <div className="text-white cursor-pointer ml-1 rounded-full">
               <Image
-                className="text-white cursor-pointer ml-3 rounded-lg"
+                className="text-white cursor-pointer ml-1 rounded-lg"
                 src="/logo.png"
                 alt="BOILR3 Logo"
                 width={125}
@@ -75,13 +75,14 @@ const CustomNavbar = () => {
             </div>
 
             {/* Navigation Links */}
-            <div className="space-x-4">
+            <div className="space-x-1">
               {navLinks.map((item, index) => (
                 <Link key={index} href={item.href}>
                   <Button
                     color="black"
                     onClick={() => handleLinkClick(item.href)}
-                    className="rounded-full hover:bg-white hover:text-black mx-2"
+                    size="sm"
+                    className="hover:bg-gray-200 hover:text-black hover:rounded-full"
                   >
                     {item.text}
                   </Button>
@@ -90,7 +91,7 @@ const CustomNavbar = () => {
             </div>
 
             {/* Connect Button */}
-            <div className="mx-3">
+            <div>
               <ConnectButton />
             </div>
           </div>

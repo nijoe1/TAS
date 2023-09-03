@@ -1,43 +1,25 @@
-import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 import { NFTStorage, Blob } from "nft.storage";
 import axios from "axios";
-import { ENS } from "@ensdomains/ensjs";
 import { providers } from "ethers";
-
+import lighthouse from "@lighthouse-web3/sdk";
 const tables = {
-  categories: "hypercert_categories_5_1641",
-  fundings: "hypercert_fundings_5_1642",
-  attestations: "hypercert_attestations_5_1643",
-  tasks: "hypercert_completed_tasks_5_1644",
-  project_events: "hypercert_events_5_1645",
-  project_splitters: "hypercert_splitters_5_1646",
-  company: "company_5_1647",
-  company_event: "event_5_1648",
-  company_event_verifiers: "event_verifiers_5_1649",
+  attestation: "",
+  revocation: "",
 };
 
 export const getIpfsGatewayUri = (cidOrIpfsUri) => {
-  const NFT_STORAGE_IPFS_GATEWAY = "https://nftstorage.link/ipfs/{cid}";
+  const LIGHTHOUSE_IPFS_GATEWAY = "https://gateway.lighthouse.storage/ipfs/{cid}";
   // const cid = cidOrIpfsUri.replace("ipfs://", "");
-  return NFT_STORAGE_IPFS_GATEWAY.replace("{cid}", cidOrIpfsUri);
+  return LIGHTHOUSE_IPFS_GATEWAY.replace("{cid}", cidOrIpfsUri);
 };
 
-const defaultNftStorageClient = new NFTStorage({
-  token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDAyYTBDMUE4NjVDYUQ2QjRkNThBMmQ3ZTczM2QxQmZlODExMGI1MTIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1Mzc2MzE0NjQ2NiwibmFtZSI6Im5mdHMifQ.muYCOBPi5WGkwgsQIxNe2GOSpgVxzZf_4Dv5jiEq9Dk",
-});
 
-export const storeMetadata = async (data) => {
-  console.log("Storing metadata: ", data);
-  const client = defaultNftStorageClient; // Update this if you have a custom NFT storage client
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  return await client.storeBlob(blob);
-};
+
 
 export const getMetadata = async (cidOrIpfsUri) => {
-  const nftStorageGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
-  console.log(`Getting metadata ${cidOrIpfsUri} at ${nftStorageGatewayLink}`);
-  const link = nftStorageGatewayLink.replace("ipfs://", "");
+  const LighthouseGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
+  console.log(`Getting metadata ${cidOrIpfsUri} at ${LighthouseGatewayLink}`);
+  const link = LighthouseGatewayLink.replace("ipfs://", "");
   try {
     const result = await axios.get(link);
     return result.data;
@@ -47,83 +29,12 @@ export const getMetadata = async (cidOrIpfsUri) => {
   }
 };
 
-export const getProfile = async (handle) => {
-  const ens = new ENS();
-  // const transactions  = {
-  //    textSet: resolver.contract.methods.setText(node, "url", "https://ethereum.org/").encodeABI();
-  // }
-  const provider = new providers.JsonRpcProvider(
-    "https://rpc.ankr.com/eth_goerli"
-  );
-  await ens.setProvider(provider);
-  let name = await ens.getText(handle, "name");
-  let description = await ens.getText(handle, "description");
-  let image = await ens.getText(handle, "image");
-  let github = await ens.getText(handle, "com.github");
-  github = "https://github.com/" + github;
-  let twitter = await ens.getText(handle, "twitter");
-
-  let profile = {
-    name: name ? name : "Name",
-    title: description ? description : "Web Developer",
-    image: image
-      ? image
-      : "https://gateway.lighthouse.storage/ipfs/QmbWt4Fyggz6dWEvvGFW6TjSSyL4TLo2FfBKmC7MWD1r6n",
-    github: github ? github : "https://github.com",
-    twitter: twitter ? twitter : "https://twitter.com",
-  };
-  return profile;
-};
-
-export const updateProfile = async (handle) => {
-  const ens = new ENS();
-  // const transactions  = {
-  //    textSet: resolver.contract.methods.setText(node, "url", "https://ethereum.org/").encodeABI();
-  // }
-  const provider = new providers.JsonRpcProvider(
-    "https://rpc.ankr.com/eth_goerli"
-  );
-  const resolver = await ens.getResolver(handle);
-  await ens.setProvider(provider);
-  let name = await ens.getText(handle, "name");
-  let description = await ens.getText(handle, "description");
-  let image = await ens.getText(handle, "image");
-  let github = await ens.getText(handle, "com.github");
-  github = "https://github.com/" + github;
-  let twitter = await ens.getText(handle, "twitter");
-
-  let profile = {
-    name: name ? name : "Name",
-    title: description ? description : "Web Developer",
-    image: image
-      ? image
-      : "https://gateway.lighthouse.storage/ipfs/QmbWt4Fyggz6dWEvvGFW6TjSSyL4TLo2FfBKmC7MWD1r6n",
-    github: github ? github : "https://github.com",
-    twitter: twitter ? twitter : "https://twitter.com",
-  };
-  return profile;
-};
-
-export const storeData = async (data) => {
-  const client = defaultNftStorageClient; // Update this if you have a custom NFT storage client
-  const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-  console.log("Storing blob of: ", data);
-  return await client.storeBlob(blob);
-};
-
-export const storeImage = async (image) => {
-  const client = defaultNftStorageClient; // Update this if you have a custom NFT storage client
-  const cid = await client.storeDirectory([
-    new File([image], `image.png`, { type: "image/png" }),
-  ]);
-  return cid;
-};
 
 export const getData = async (cidOrIpfsUri) => {
-  let nftStorageGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
+  let LighthouseGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
 
   console.log(`Getting data ${cidOrIpfsUri} at ${nftStorageGatewayLink}`);
-  const link = nftStorageGatewayLink.replace("ipfs://", "");
+  const link = LighthouseGatewayLink.replace("ipfs://", "");
 
   try {
     const result = await axios.get(link);
@@ -133,3 +44,130 @@ export const getData = async (cidOrIpfsUri) => {
     return null;
   }
 };
+
+const progressCallback = (progressData) => {
+  let percentageDone =
+    100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
+  console.log(percentageDone);
+};
+
+export const uploadFile = async (file, address,signedMessage) => {
+
+  const API_KEY = await lighthouse.getApiKey(address, signedMessage);
+  console.log(API_KEY.data.apiKey);
+  const output = await lighthouse.upload(
+    file,
+    API_KEY.data.apiKey,
+    false,
+    null,
+    progressCallback
+  );
+  console.log("File Status:", output);
+  console.log(
+    "Visit at https://gateway.lighthouse.storage/ipfs/" + output.data.Hash
+  );
+};
+
+/* Deploy file along with encryption */
+export const uploadFileEncrypted = async (file, address,signEncryption, signedMessage) => {
+
+  const API_KEY = await lighthouse.getApiKey(address, signedMessage);
+
+ const output = await lighthouse.uploadEncrypted(
+    file,
+    API_KEY.data.apiKey,
+    address,
+    signEncryption,
+    null
+  );
+  console.log(output)
+  return output
+};
+
+export const decrypt = async(cid,address, signedMessage) =>{
+  // Fetch file encryption key
+  /*
+    fetchEncryptionKey(cid, publicKey, signedMessage)
+      Parameters:
+        CID: CID of the file to decrypt
+        publicKey: public key of the user who has access to file or owner
+        signedMessage: message signed by the owner of publicKey
+  */
+  const keyObject = await lighthouse.fetchEncryptionKey(
+    "Qmf16EAyRyBRRJXTrb7ErgpZEdCkANLHqngZiZAcs5cRD9",
+    address,
+    signedMessage
+  );
+
+  // Decrypt file
+  /*
+    decryptFile(cid, key, mimeType)
+      Parameters:
+        CID: CID of the file to decrypt
+        key: the key to decrypt the file
+        mimeType: default null, mime type of file
+  */
+ 
+  const fileType = "video/mp4";
+  const decrypted = await lighthouse.decryptFile("Qmf16EAyRyBRRJXTrb7ErgpZEdCkANLHqngZiZAcs5cRD9", keyObject.data.key, fileType);
+  console.log(decrypted)
+  /*
+    Response: blob
+  */
+
+  // View File
+  const url = URL.createObjectURL(decrypted);
+  return url
+}
+
+export const applyAccessConditions = async(address, signedMessage) =>{
+  // CID on which you are applying encryption
+  // CID is generated by uploading a file with encryption
+  // Only the owner of the file can apply access conditions
+  const cid = "QmUk8oYGfADHx8Dg6JVU1DpNSkS3oPPXtuhdDkU6p4jcxk";
+
+  // Conditions to add
+  const conditions = [
+    {
+      id: 1,
+      chain: "Optimism",
+      method: "getBlockNumber",
+      standardContractType: "",
+      returnValueTest: {
+        comparator: ">=",
+        value: "1"
+      },
+    },
+  ];
+
+  // Aggregator is what kind of operation to apply to access conditions
+  // Suppose there are two conditions then you can apply ([1] and [2]), ([1] or [2]), !([1] and [2]).
+  const aggregator = "([1])";
+
+  /*
+    accessCondition(publicKey, cid, signedMessage, conditions, aggregator)
+      Parameters:
+        publicKey: owners public key
+        CID: CID of the file to decrypt
+        signedMessage: message signed by the owner of publicKey
+        conditions: should be in a format like above
+        aggregator: aggregator to apply conditions
+  */
+  const response = await lighthouse.applyAccessCondition(
+    address,
+    cid,
+    signedMessage,
+    conditions,
+    aggregator
+  );
+
+  console.log(response);
+  /*
+    {
+      data: {
+        cid: "QmZkEMF5y5Pq3n291fG45oyrmX8bwRh319MYvj7V4W4tNh",
+        status: "Success"
+      }
+    }
+  */
+}
