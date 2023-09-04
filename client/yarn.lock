@@ -7522,6 +7522,7 @@ __metadata:
     eslint-config-next: 13.3.1
     ethers: ^5.7.2
     iron-session: ^6.3.1
+    multiformats: ^12.1.0
     next: 13.3.1
     next-seo: ^6.0.0
     nft.storage: ^7.1.1
@@ -7529,6 +7530,7 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-hot-toast: ^2.4.0
+    react-icons: ^4.10.1
     react-slick: ^0.29.0
     react-tag-cloud: ^1.3.3
     react-tagsinput: ^3.20.3
@@ -16097,7 +16099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"multiformats@npm:^12.0.0":
+"multiformats@npm:^12.0.0, multiformats@npm:^12.1.0":
   version: 12.1.0
   resolution: "multiformats@npm:12.1.0"
   checksum: af6922a8646fbbafc1c892b12bb1a0b97ec2b076239c777d9ca9e16df672a9663d0d9eb4ea9e264fcc1239ab67029c18acbb76ce248613bf9b5e9454dfcc41bf
@@ -17813,6 +17815,15 @@ __metadata:
     react: ">=16"
     react-dom: ">=16"
   checksum: 3e337816db574782454bf09c63a8aca546bf9c5be3f83d0494d24bdcfd97ca2db64d4c151c4ab0184d2342d7a7226403e6812e70caf03c8b55a07787bb4ad0f2
+  languageName: node
+  linkType: hard
+
+"react-icons@npm:^4.10.1":
+  version: 4.10.1
+  resolution: "react-icons@npm:4.10.1"
+  peerDependencies:
+    react: "*"
+  checksum: b6c8d4fe482b112e1041515d93ef7670a0af128855c926052a076b64d0b991cdd4391394b26467100f8da3859db1ebd8f9c6b7614fa5969fde83de45c71031a3
   languageName: node
   linkType: hard
 
