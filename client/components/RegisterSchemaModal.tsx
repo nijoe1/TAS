@@ -5,7 +5,17 @@ import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
 
-const RegisterSchema = () => {
+type RegisterSchemaModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onCreate: (schemaData: any) => void; // Replace 'any' with the actual type of your event data
+};
+
+const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
+  isOpen,
+  onClose,
+  onCreate,
+}) => {
   const [attributes, setAttributes] = useState([
     { type: "Select Type", name: "", isArray: false },
   ]);
@@ -96,9 +106,16 @@ const RegisterSchema = () => {
     };
 
     console.log(JSON.stringify(schemaData, null, 2));
+    onCreate(schemaData);
+    onClose();
   };
 
   return (
+    <div
+      className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 ${
+        isOpen ? "block" : "hidden"
+      }`}
+    >
     <Card
       color="white"
       shadow={false}
@@ -271,7 +288,7 @@ const RegisterSchema = () => {
             add field
           </Typography>
         </div>
-        <div className="flex justify-center mt-4">
+        {/* <div className="flex justify-center mt-4">
           <button
             type="button"
             onClick={handleSubmit}
@@ -279,16 +296,35 @@ const RegisterSchema = () => {
           >
             Submit
           </button>
+        </div> */}
+        <div className="mt-4">
+          <Typography variant="h6" color="black">
+            Generated schema :
+          </Typography>
+          <Typography color="black">{generateAttributeString()}</Typography>
+        </div>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+          >
+            Submit
+          </button>
+          <button
+            type="button"
+            className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+            onClick={onClose}
+          >
+        
+            Cancel
+          </button>
+  
         </div>
       </form>
-      <div className="mt-4">
-        <Typography variant="h6" color="black">
-          Generated schema :
-        </Typography>
-        <Typography color="black">{generateAttributeString()}</Typography>
-      </div>
     </Card>
+    </div>
   );
 };
 
-export default RegisterSchema;
+export default RegisterSchemaModal;

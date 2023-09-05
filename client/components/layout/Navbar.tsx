@@ -32,8 +32,8 @@ async function connect() {
 }
 
 const navLinks = [
-  { text: "Attestations", href: "/" },
-  { text: "Create Schema", href: "/CreateSchema" },
+  { text: "Attestations", href: "/attestations" },
+  { text: "Schemas", href: "/schemas" },
   { text: "Exclusive Content", href: "/" },
   { text: "Docs", href: "/" },
 ];
@@ -59,7 +59,7 @@ const CustomNavbar = () => {
 
   return (
     <Navbar color="transparent">
-      <div className="bg-gradient-to-r from-black to-blue-gray-900 rounded-lg py-4">
+      <div className="bg-black  rounded-lg py-4">
         <div className="container mx-auto">
           <div className="flex flex-wrap items-center justify-between">
             {/* Logo */}

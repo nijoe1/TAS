@@ -1,6 +1,4 @@
-import { NFTStorage, Blob } from "nft.storage";
 import axios from "axios";
-import { providers } from "ethers";
 import lighthouse from "@lighthouse-web3/sdk";
 const tables = {
   attestation: "",

@@ -7535,7 +7535,6 @@ __metadata:
     multiformats: ^12.1.0
     next: 13.3.1
     next-seo: ^6.0.0
-    nft.storage: ^7.1.1
     postcss: 8.4.23
     react: 18.2.0
     react-dom: 18.2.0
@@ -16325,7 +16324,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nft.storage@npm:^7.0.0, nft.storage@npm:^7.1.1":
+"nft.storage@npm:^7.0.0":
   version: 7.1.1
   resolution: "nft.storage@npm:7.1.1"
   dependencies:
