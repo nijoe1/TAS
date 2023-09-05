@@ -94,7 +94,7 @@ export const decrypt = async(cid,address, signedMessage) =>{
         signedMessage: message signed by the owner of publicKey
   */
   const keyObject = await lighthouse.fetchEncryptionKey(
-    "Qmf16EAyRyBRRJXTrb7ErgpZEdCkANLHqngZiZAcs5cRD9",
+    "QmapiyY9t9DdDFJxNKg5au6ZqvRuVRnaJxomm8eKvj5HP6",
     address,
     signedMessage
   );
@@ -109,7 +109,7 @@ export const decrypt = async(cid,address, signedMessage) =>{
   */
  
   const fileType = "video/mp4";
-  const decrypted = await lighthouse.decryptFile("Qmf16EAyRyBRRJXTrb7ErgpZEdCkANLHqngZiZAcs5cRD9", keyObject.data.key, fileType);
+  const decrypted = await lighthouse.decryptFile("QmapiyY9t9DdDFJxNKg5au6ZqvRuVRnaJxomm8eKvj5HP6", keyObject.data.key, fileType);
   console.log(decrypted)
   /*
     Response: blob

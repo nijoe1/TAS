@@ -63,7 +63,7 @@ const CreateSchema = () => {
           Create Schema
         </Typography>
         <RegisterSchema /> {/* Include your form component */}
-        <DynamicForm schema="uint256 id, string name, address wallet, bytes32 hash, bool isActive, uint8[] numbers" />
+        <DynamicForm schema="uint256 id, string name, address wallet, bytes32 hash, bool isActive, string[] tsifsa" />
       </div>
       <div className="App">
         <input
@@ -99,9 +99,10 @@ const CreateSchema = () => {
           decrypt
         </button>
         {fileURL ? (
-          <a href={fileURL} target="_blank">
-            viewFile
-          </a>
+              <video className="h-500 w-500 rounded-lg" controls>
+              <source src={`${fileURL}`} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
         ) : null}
       </div>
       <div className="App">

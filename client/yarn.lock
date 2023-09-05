@@ -7485,6 +7485,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@yaireo/tagify@npm:^4.17.9":
+  version: 4.17.9
+  resolution: "@yaireo/tagify@npm:4.17.9"
+  peerDependencies:
+    prop-types: ^15.7.2
+  checksum: 0db7dd5458f5bcfe849cd3922b9e245ff684defc90ce7f5d9443ec5c2d940ba4cb878934f2138074848f50e3fde25b6d4619aa12e72d101aa583c01ce1b3f3e2
+  languageName: node
+  linkType: hard
+
 "@zxing/text-encoding@npm:0.9.0":
   version: 0.9.0
   resolution: "@zxing/text-encoding@npm:0.9.0"
@@ -7517,6 +7526,7 @@ __metadata:
     "@types/react": 18.0.38
     "@types/react-dom": 18.0.11
     "@types/react-slick": ^0.23.10
+    "@yaireo/tagify": ^4.17.9
     autoprefixer: 10.4.14
     eslint: 8.39.0
     eslint-config-next: 13.3.1

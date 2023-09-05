@@ -127,7 +127,9 @@ const DynamicForm = ({ schema }) => {
     if (Object.keys(errors).length === 0) {
       console.log("Form data:", formData); // Move the logging here
       const encodedData = encoder.encodeData(transformFormData(formData,schema));
-console.log('Encoded Data:', encodedData);
+const decoded = encoder.decodeData(encodedData)
+console.log('Encoded Data:', decoded);
+
     } else {
       console.log("Form data contains errors:", formData); // Log with errors
     }

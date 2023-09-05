@@ -1,13 +1,9 @@
 import React, { useState } from "react";
-import {
-  Card,
-  Input,
-  Typography,
-  Checkbox,
-} from "@material-tailwind/react";
+import { Card, Input, Typography, Tooltip } from "@material-tailwind/react";
 import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
+import { FaInfoCircle } from "react-icons/fa";
 
 const RegisterSchema = () => {
   const [attributes, setAttributes] = useState([
@@ -31,12 +27,6 @@ const RegisterSchema = () => {
     "uint64",
     "uint128",
     "uint256",
-    "int8",
-    "int16",
-    "int32",
-    "int64",
-    "int128",
-    "int256",
     "bytes",
     "bytes32",
   ];
@@ -51,6 +41,7 @@ const RegisterSchema = () => {
       updatedAttributes[index]["readonly"] = true;
     } else {
       updatedAttributes[index]["type"] = value;
+      updatedAttributes[index]["name"] = "";
       updatedAttributes[index]["readonly"] = false;
     }
 
@@ -115,59 +106,109 @@ const RegisterSchema = () => {
     >
       <div className="mb-4">
         <Typography variant="h4" color="black">
-          Register Schema
+          Create Schema
+        </Typography>
+        <Typography variant="h6" color="black">
+          Add fields below that are relevant to your use case.
         </Typography>
       </div>
       <form className="mt-4">
-        <div className="mb-4">
-          <label className="text-black font-medium">Schema Name</label>
+        <div className="mb-1 ">
+          <div className="mb-1 flex">
+            <Tooltip
+              placement="right-start"
+              content="add a relevant name to your schema"
+            >
+              <label className="text-black font-medium">Schema Name</label>
+            </Tooltip>
+
+            <FaInfoCircle className="mt-1 ml-2" />
+          </div>
           <Input
             type="text"
             value={schemaName}
             onChange={(e) => setSchemaName(e.target.value)}
-            fullWidth
             className="rounded-full px-4 py-2 border border-black"
           />
         </div>
         <div className="mb-4">
-          <label className="text-black font-medium">Schema Description</label>
+          <div className="mb-1 flex">
+            <Tooltip
+              placement="right-start"
+              content="describe your schema useCase"
+            >
+              <label className="text-black font-medium">
+                Schema Description
+              </label>
+            </Tooltip>
+
+            <FaInfoCircle className="mt-1 ml-2" />
+          </div>
           <Input
             type="text"
             value={schemaDescription}
             onChange={(e) => setSchemaDescription(e.target.value)}
-            fullWidth
             className="rounded-full px-4 py-2 border border-black"
           />
         </div>
-        <div className="ml-4 mb-4">
-          <input
-            type="checkbox"
-            checked={isRevocable}
-            onChange={() => setIsRevocable(!isRevocable)}
-            className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-          />
-          <label className="ml-2 text-sm text-gray-900">isRevocable</label>
-        </div>
-        <div className="mb-4">
-          <label className="text-black font-medium">Resolver Address</label>
+        <div className="mb-4 items-center">
+          <div className="mb-1 flex">
+            <Tooltip
+              placement="right-start"
+              content="Optional smart contract.
+(Can be used to verify, limit, act upon any attestation)"
+            >
+              <label className="text-black font-medium">Resolver Address</label>
+            </Tooltip>
+
+            <FaInfoCircle className="mt-1 ml-2" />
+          </div>
           <Input
             type="text"
             value={resolver}
             onChange={(e) => setResolver(e.target.value)}
             placeholder="Resolver Address"
-            fullWidth
-            className="rounded-full px-4 py-2 border border-black"
+            className="rounded-full flex-grow px-4 py-2 border border-black"
           />
+        </div>
+        <div className="flex justify-center items-center gap-2 ">
+          {" "}
+          <input
+            type="checkbox"
+            checked={isRevocable}
+            onChange={() => setIsRevocable(!isRevocable)}
+            className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3 cursor-pointer "
+          />
+          <Typography
+            className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3"
+            variant="h8"
+            color="black"
+            onClick={() => setIsRevocable(!isRevocable)}
+          >
+            Revocable
+          </Typography>
         </div>
         {attributes.map((attr, index) => (
           <div
             key={index}
-            className="mb-4 border border-black p-4 rounded-xl flex items-center mx-2 gap-7"
+            className="mb-4 flex border border-black p-4 rounded-xl flex items-center mx-2 gap-7"
           >
             <div className="w-1/4">
               <div className="flex-shrink-0">
                 <SlOptionsVertical className="text-gray-500" />
               </div>
+            </div>
+            <div className="w-full">
+              <Input
+                type="text"
+                value={attr.name}
+                onChange={(e) =>
+                  handleAttributeNameChange(index, "name", e.target.value)
+                }
+                placeholder="field name"
+                readOnly={attr.readonly}
+                className="rounded-full px-4 py-2 border border-black"
+              />
             </div>
             <div className="w-1/4">
               <select
@@ -188,28 +229,23 @@ const RegisterSchema = () => {
                 ))}
               </select>
             </div>
-            <div className="w-1/4">
+            <div className="flex justify-center items-center gap-2 ">
               <input
                 type="checkbox"
                 checked={attr.isArray}
                 onChange={() => handleCheckboxChange(index)}
-                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 ml-2"
+                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 ml-2 cursor-pointer"
               />
-              <label className=" text-sm text-gray-900">Array</label>
+              <Typography
+                className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                variant="h8"
+                color="black"
+                onClick={() => handleCheckboxChange(index)}
+              >
+                Array
+              </Typography>{" "}
             </div>
-            <div className="w-full">
-              <Input
-                type="text"
-                value={attr.name}
-                onChange={(e) =>
-                  handleAttributeNameChange(index, "name", e.target.value)
-                }
-                placeholder={`Attribute Name (${attr.type})`}
-                fullWidth
-                readOnly={attr.readonly}
-                className="rounded-full px-4 py-2 border border-black"
-              />
-            </div>
+
             <div className="w-1/4 text-right">
               {index > 0 && (
                 <BsTrash3Fill
@@ -221,11 +257,19 @@ const RegisterSchema = () => {
           </div>
         ))}
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center items-center gap-2 ">
           <CgAddR
             onClick={addAttribute}
-            className="cursor-pointer text-gray-600 hover:text-black"
+            className="cursor-pointer text-gray-600 hover:text-black size-lg"
           />
+          <Typography
+            onClick={addAttribute}
+            className="cursor-pointer"
+            variant="h8"
+            color="black"
+          >
+            add field
+          </Typography>
         </div>
         <div className="flex justify-center mt-4">
           <button
@@ -239,7 +283,7 @@ const RegisterSchema = () => {
       </form>
       <div className="mt-4">
         <Typography variant="h6" color="black">
-          Generated Attribute String:
+          Generated schema :
         </Typography>
         <Typography color="black">{generateAttributeString()}</Typography>
       </div>
