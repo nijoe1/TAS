@@ -54,6 +54,8 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
     using Address for address payable;
 
     error AlreadyRevoked();
+    error AlreadyRevokedOffchain();
+    error AlreadyTimestamped();
     error InsufficientValue();
     error InvalidAttestation();
     error InvalidAttestations();
@@ -97,8 +99,24 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
 
     string private constant REVOCATION_SCHEMA = "uid text primary key, revocationTime text, revoker text, revocable text";
 
+    string private constant TIMESTAMP_TABLE_PREFIX = "offChain_timestamp";
+
+    string private constant TIMESTAMP_SCHEMA = "uid text, timestampedAt text";
+
+    string private constant OFF_CHAIN_REVOCATIONS_TABLE_PREFIX = "offChain_revocation";
+
+    string private constant OFF_CHAIN_REVOCATIONS_SCHEMA = "revoker text, uid text, revokedAt text";
+
+
+
     // The global mapping between attestations and their UIDs.
     mapping(bytes32 uid => Attestation attestation) private _db;
+
+    // The global mapping between data and their timestamps.
+    mapping(bytes32 data => uint64 timestamp) private _timestamps;
+
+    // The global mapping between data and their revocation timestamps.
+    mapping(address revoker => mapping(bytes32 data => uint64 timestamp) timestamps) private _revocationsOffchain;
 
     /// @dev Creates a new TAS instance.
     /// @param registry The address of the global schema registry.
@@ -121,16 +139,29 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
             REVOCATION_TABLE_PREFIX
         ));
 
+        createTableStatements.push(SQLHelpers.toCreateFromSchema(
+            TIMESTAMP_SCHEMA,
+            TIMESTAMP_TABLE_PREFIX
+        ));
+
+        createTableStatements.push(SQLHelpers.toCreateFromSchema(
+            OFF_CHAIN_REVOCATIONS_SCHEMA,
+            OFF_CHAIN_REVOCATIONS_TABLE_PREFIX
+        ));
+
         tableIDs = tablelandContract.create(address(this), createTableStatements);
 
         tables.push(SQLHelpers.toNameFromId(ATTESTATION_TABLE_PREFIX, tableIDs[0]));
         tables.push(SQLHelpers.toNameFromId(REVOCATION_TABLE_PREFIX, tableIDs[1]));
+        tables.push(SQLHelpers.toNameFromId(TIMESTAMP_TABLE_PREFIX, tableIDs[2]));
+        tables.push(SQLHelpers.toNameFromId(OFF_CHAIN_REVOCATIONS_TABLE_PREFIX, tableIDs[3]));
     }
 
     function insertAttestation(
         Attestation memory attestation
     ) internal {
-        require(attestation.data.length <= 1024, "Tableland limitation");
+        string memory data = bytesToString(attestation.data); 
+        require(strlen(data) <= 1024, "Tableland limitation");
         // Managing tableland rows limitation.
         if(tablesRowsCounter == 100000){
             renewTables();
@@ -156,7 +187,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
                 ",",
                 SQLHelpers.quote(Strings.toHexString(attestation.attester)),
                 ",",
-                SQLHelpers.quote(bytesToString(attestation.data))
+                SQLHelpers.quote(data)
                 )
             )
         );
@@ -204,13 +235,58 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
         );
     }
 
+    function Timestamped(
+        bytes32 uid,
+        uint256 time
+    ) internal {
+        mutate(
+            tableIDs[2],
+            SQLHelpers.toInsert(
+                TIMESTAMP_TABLE_PREFIX,
+                tableIDs[2],
+                "uid, timestampedAt",
+                string.concat(
+                SQLHelpers.quote(bytes32ToString(uid)),
+                ",",
+                SQLHelpers.quote(Strings.toString(time))
+                )
+            )
+        );
+    }
+
+    function RevokedOffChain(
+        address revoker,
+        bytes32 uid,
+        uint256 time
+    ) internal {
+        mutate(
+            tableIDs[3],
+            SQLHelpers.toInsert(
+                OFF_CHAIN_REVOCATIONS_TABLE_PREFIX,
+                tableIDs[3],
+                "revoker, uid, revokedAt",
+                string.concat(
+                SQLHelpers.quote(Strings.toHexString(revoker)),
+                ",",
+                SQLHelpers.quote(bytes32ToString(uid)),
+                ",",
+                SQLHelpers.quote(Strings.toString(time))
+                )
+            )
+        );
+    }
+
     function renewTables()internal{
-        
+
         tableIDs = tablelandContract.create(address(this), createTableStatements);
 
         tables.push(SQLHelpers.toNameFromId(ATTESTATION_TABLE_PREFIX, tableIDs[0]));
 
         tables.push(SQLHelpers.toNameFromId(REVOCATION_TABLE_PREFIX, tableIDs[1]));
+
+        tables.push(SQLHelpers.toNameFromId(TIMESTAMP_TABLE_PREFIX, tableIDs[2]));
+
+        tables.push(SQLHelpers.toNameFromId(OFF_CHAIN_REVOCATIONS_TABLE_PREFIX, tableIDs[3]));
 
         tablesRowsCounter = 0; 
 
@@ -459,6 +535,48 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
                 last
             );
         }
+    }
+
+    /// @inheritdoc ITAS
+    function timestamp(bytes32 data) external returns (uint64) {
+        uint64 time = _time();
+
+        _timestamp(data, time);
+
+        return time;
+    }
+
+    /// @inheritdoc ITAS
+    function revokeOffchain(bytes32 data) external returns (uint64) {
+        uint64 time = _time();
+
+        _revokeOffchain(msg.sender, data, time);
+
+        return time;
+    }
+
+    /// @inheritdoc ITAS
+    function multiRevokeOffchain(bytes32[] calldata data) external returns (uint64) {
+        uint64 time = _time();
+
+        uint256 length = data.length;
+        for (uint256 i = 0; i < length; i = uncheckedInc(i)) {
+            _revokeOffchain(msg.sender, data[i], time);
+        }
+
+        return time;
+    }
+
+    /// @inheritdoc ITAS
+    function multiTimestamp(bytes32[] calldata data) external returns (uint64) {
+        uint64 time = _time();
+
+        uint256 length = data.length;
+        for (uint256 i = 0; i < length; i = uncheckedInc(i)) {
+            _timestamp(data[i], time);
+        }
+
+        return time;
     }
 
 
@@ -806,6 +924,35 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
         }
     }
 
+    /// @dev Timestamps the specified bytes32 data.
+    /// @param data The data to timestamp.
+    /// @param time The timestamp.
+    function _timestamp(bytes32 data, uint64 time) private {
+        if (_timestamps[data] != 0) {
+            revert AlreadyTimestamped();
+        }
+
+        _timestamps[data] = time;
+
+        Timestamped(data, time);
+    }
+
+    /// @dev Revokes the specified bytes32 data.
+    /// @param revoker The revoking account.
+    /// @param data The data to revoke.
+    /// @param time The timestamp the data was revoked with.
+    function _revokeOffchain(address revoker, bytes32 data, uint64 time) private {
+        mapping(bytes32 data => uint64 timestamp) storage revocations = _revocationsOffchain[revoker];
+
+        if (revocations[data] != 0) {
+            revert AlreadyRevokedOffchain();
+        }
+
+        revocations[data] = time;
+
+        RevokedOffChain(revoker, data, time);
+    }
+
     /// @dev Merges lists of UIDs.
     /// @param uidLists The provided lists of UIDs.
     /// @param uidsCount Total UIDs count.
@@ -856,6 +1003,35 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
         }
 
         return string(abi.encodePacked("0x", converted));
+    }
+
+    /**
+     * @dev Returns the length of a given string
+     *
+     * @param s The string to measure the length of
+     * @return The length of the input string
+     */
+    function strlen(string memory s) internal pure returns (uint256) {
+        uint256 len;
+        uint256 i = 0;
+        uint256 bytelength = bytes(s).length;
+        for (len = 0; i < bytelength; len++) {
+            bytes1 b = bytes(s)[i];
+            if (b < 0x80) {
+                i += 1;
+            } else if (b < 0xE0) {
+                i += 2;
+            } else if (b < 0xF0) {
+                i += 3;
+            } else if (b < 0xF8) {
+                i += 4;
+            } else if (b < 0xFC) {
+                i += 5;
+            } else {
+                i += 6;
+            }
+        }
+        return len;
     }
 
     /*

@@ -303,6 +303,27 @@ interface ITAS {
         MultiDelegatedRevocationRequest[] calldata multiDelegatedRequests
     ) external payable;
 
+    /// @notice Timestamps the specified bytes32 data.
+    /// @param data The data to timestamp.
+    /// @return The timestamp the data was timestamped with.
+    function timestamp(bytes32 data) external returns (uint64);
+
+    /// @notice Timestamps the specified multiple bytes32 data.
+    /// @param data The data to timestamp.
+    /// @return The timestamp the data was timestamped with.
+    function multiTimestamp(bytes32[] calldata data) external returns (uint64);
+
+    /// @notice Revokes the specified bytes32 data.
+    /// @param data The data to timestamp.
+    /// @return The timestamp the data was revoked with.
+    function revokeOffchain(bytes32 data) external returns (uint64);
+
+    /// @notice Revokes the specified multiple bytes32 data.
+    /// @param data The data to timestamp.
+    /// @return The timestamp the data was revoked with.
+    function multiRevokeOffchain(bytes32[] calldata data) external returns (uint64);
+
+
     /// @notice Returns an existing attestation by UID.
     /// @param uid The UID of the attestation to retrieve.
     /// @return The attestation data members.

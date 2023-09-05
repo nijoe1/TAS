@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
+
+import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
+
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {ITAS, Attestation} from "../../ITAS.sol";
@@ -27,6 +33,26 @@ contract ACResolver is SchemaResolver, AccessControl {
 
     mapping(bytes32 => SchemaInfo) private schemas;
 
+    ITablelandTables private tablelandContract;
+    
+    string[] createTableStatements; 
+
+    string[] public tables;
+
+    uint256[] tableIDs;
+
+    uint256 tablesUpdates;
+
+    uint256 private tablesRowsCounter;
+
+    string private constant ATTESTER_TABLE_PREFIX = "schema_attesters";
+
+    string private constant ATTESTER_SCHEMA = "schemaUID text, attester text";
+
+    string private constant REVOKER_TABLE_PREFIX = "schema_revokers";
+
+    string private constant REVOKER_SCHEMA = "schemaUID text, revoker text";
+
     constructor(
         ITAS tas,
         address _splitterFactory,
@@ -36,7 +62,71 @@ contract ACResolver is SchemaResolver, AccessControl {
         schemaRegistry = _schemaRegistry;
 
         splitterFactory = _splitterFactory;
+        tablelandContract = TablelandDeployments.get();        
+
+        createTableStatements.push(SQLHelpers.toCreateFromSchema(
+            ATTESTER_SCHEMA,
+            ATTESTER_TABLE_PREFIX
+        ));
+
+        createTableStatements.push(SQLHelpers.toCreateFromSchema(
+            REVOKER_SCHEMA,
+            REVOKER_TABLE_PREFIX
+        ));
+
+
+        tableIDs = tablelandContract.create(address(this), createTableStatements);
+
+        tables.push(SQLHelpers.toNameFromId(ATTESTER_TABLE_PREFIX, tableIDs[0]));
+        tables.push(SQLHelpers.toNameFromId(REVOKER_TABLE_PREFIX, tableIDs[1]));
+
     }
+
+    function insertSchemaInfo(
+        bytes32 schemaUID,
+        address[] calldata attesters,
+        address[] calldata revokers
+    ) internal {
+        uint256 totalMax = attesters.length > revokers.length? attesters.length : revokers.length;
+        // Managing tableland rows limitation.
+        if(tablesRowsCounter + totalMax >= 100000){
+            renewTables();
+        }
+        for(uint i =0; i < attesters.length; i++){
+            mutate(
+                tableIDs[0],
+                SQLHelpers.toInsert(
+                    ATTESTER_TABLE_PREFIX,
+                    tableIDs[0],
+                    "schemaUID, attester",
+                    string.concat(
+                    SQLHelpers.quote(bytes32ToString(schemaUID)),
+                    ",",
+                    SQLHelpers.quote(Strings.toHexString(attesters[i]))
+                    )
+                )
+            );
+            _grantRole(keccak256(abi.encode(schemaUID, "ATTESTER")), attesters[i]);
+        }
+        for(uint i =0; i < revokers.length; i++){
+            mutate(
+                tableIDs[1],
+                SQLHelpers.toInsert(
+                    REVOKER_TABLE_PREFIX,
+                    tableIDs[1],
+                    "schemaUID, revoker",
+                    string.concat(
+                    SQLHelpers.quote(bytes32ToString(schemaUID)),
+                    ",",
+                    SQLHelpers.quote(Strings.toHexString(revokers[i]))
+                    )
+                )
+            );
+            _grantRole(keccak256(abi.encode(schemaUID, "REVOKER")), revokers[i]);
+        }
+        tablesRowsCounter += totalMax;
+    }
+
 
     function registerAccessControlledSchema(
         address[] calldata attesters,
@@ -62,13 +152,7 @@ contract ACResolver is SchemaResolver, AccessControl {
             schemas[schemaUID].AllowAllToRevoke = true;
         }
 
-        for(uint256 i = 0; i < attestersSize; i++){
-            _grantRole(schemaUID, attesters[i]);
-        }
-        for(uint256 i = 0; i < revokersSize; i++){
-            _grantRole(schemaUID, revokers[i]);
-        }
-
+        insertSchemaInfo(schemaUID, attesters, revokers);       
     }
 
     /**
@@ -85,7 +169,7 @@ contract ACResolver is SchemaResolver, AccessControl {
         if(schemas[schemaUID].AllowAllToAttest){
             return true;
         }
-        if (hasRole(schemaUID, attester)) {
+        if (hasRole(keccak256(abi.encode(schemaUID, "ATTESTER")), attester)) {
             return true;
         }
         return false;
@@ -103,7 +187,7 @@ contract ACResolver is SchemaResolver, AccessControl {
         if(schemas[schemaUID].AllowAllToRevoke){
             return true;
         }
-        if (hasRole(schemaUID, tx.origin)) {
+        if (hasRole(keccak256(abi.encode(schemaUID, "REVOKER")), tx.origin)) {
             return true;
         }
         return false;
@@ -115,5 +199,41 @@ contract ACResolver is SchemaResolver, AccessControl {
      */
     function isPayable() public pure override returns (bool) {
         return false;
+    }
+
+    function renewTables()internal{
+        
+        tableIDs = tablelandContract.create(address(this), createTableStatements);
+
+        tables.push(SQLHelpers.toNameFromId(ATTESTER_TABLE_PREFIX, tableIDs[0]));
+        tables.push(SQLHelpers.toNameFromId(REVOKER_TABLE_PREFIX, tableIDs[1]));
+
+        tablesRowsCounter = 0; 
+
+        tablesUpdates++;
+    }
+
+    function bytes32ToString(bytes32 data) public pure returns (string memory) {
+        // Fixed buffer size for hexadecimal convertion
+        bytes memory converted = new bytes(data.length * 2);
+
+        bytes memory _base = "0123456789abcdef";
+
+        for (uint256 i = 0; i < data.length; i++) {
+        converted[i * 2] = _base[uint8(data[i]) / _base.length];
+        converted[i * 2 + 1] = _base[uint8(data[i]) % _base.length];
+        }
+
+        return string(abi.encodePacked("0x", converted));
+    }
+
+
+    /*
+    * @dev Internal function to execute a mutation on a table.
+    * @param {uint256} tableId - Table ID.
+    * @param {string} statement - Mutation statement.
+    */
+    function mutate(uint256 tableId, string memory statement) internal {
+        tablelandContract.mutate(address(this), tableId, statement);
     }
 }
