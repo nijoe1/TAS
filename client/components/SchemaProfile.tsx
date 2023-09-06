@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState,} from "react";
 import EthereumAddress from "@/components/EthereumAddress"; // Assuming your EthereumAddress component is in a separate file
 import Field from "./Field";
 import DecodedSchema from "./DecodedSchema";
 import ChatModal from "./ChatModal";
 import DynamicForm from "./DynamicForm";
+
 
 type SchemaDataProps = {
   schemaData: {
@@ -23,7 +24,7 @@ type SchemaDataProps = {
   };
 };
 
-const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData}) => {
+const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const openModal = () => {
@@ -43,46 +44,57 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData}) => {
   const closeAttestModal = () => {
     setIsAttestModalOpen(false);
   };
-  function createAttestation(schemaData: any): void {
-  }
+  function createAttestation(schemaData: any): void {}
+  const formattedDescription = formatDescription(
+    "Test"
+  );
 
   return (
     <div className={`flex-grow mx-auto`}>
-      <div className={`flex-grow mx-8 ${isAttestModalOpen ? "filter blur-md" : ""}`}>
+      <div className={` `}>
+        <Field label={"Schema Details"} value="" />
         <div className="bg-white rounded-xl p-4">
-          {/* Header */}
-          <div className="mb-4 mt-3 w-3/4">
-            <Field
-              label="SchemaUID"
-              value={<EthereumAddress address={schemaData.schemaUID} />}
-              isAddress={true}
-            />
-            <Field label="Name" value={"Name"} />
-            <Field
-              label="Description"
-              value={
-                "jhtffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-              }
-            />
-            <button
-              className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded"
-              onClick={openModal}
-            >
-              Feedback
-            </button>
-            <button
-              type="button"
-              className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded"
-              onClick={openAttestModal}
-            >
-              Attest with Schema
-            </button>
-            <ChatModal isOpen={modalIsOpen} closeModal={closeModal} />
+          <div className="flex justify-between mx-auto">
+            {/* Header */}
+            <div className=" w-2/4  border rounded-xl p-4 mx-auto">
+              <Field
+                label="SchemaUID"
+                value={<EthereumAddress address={schemaData.schemaUID} />}
+              />
+              <Field label="Name" value={"Name"} />
+            </div>
+            <div className="w-2/4  text-center border rounded-xl p-4 mx-auto">
+              <Field label="Description" value={""} />
+              {/* <span
+                className="text-center"
+                style={{
+                  maxWidth: "50%",
+                  overflowWrap: "break-word",
+                  wordWrap: "break-word",
+                }}
+              >
+                {formattedDescription}
+              </span> */}
+
+              {formattedDescription.map((paragraph, index) => (
+                <div
+                  className="text-center mx-auto"
+                  style={{
+                    maxWidth: "100%",
+                    overflowWrap: "break-word",
+                    wordWrap: "break-word",
+                  }}
+                  key={index}
+                >
+                  {paragraph}
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-between  ">
             {/* Left Box */}
-            <div className="w-3/5 flex flex-col">
+            <div className="w-2/4  border rounded-xl p-4 mx-auto">
               <Field label="Created" value={schemaData.created} />
               <Field
                 label="Creator"
@@ -99,23 +111,75 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData}) => {
             </div>
 
             {/* Right Box */}
-
-            <div className="w-2/5 ml-5 mt-7 border rounded-xl p-4">
-              <Field
-                label="Decoded Schema"
-                value={<DecodedSchema schema={schemaData.decodedSchema} />}
-              />
+            <div className="w-2/4  text-center border rounded-xl p-4 mx-auto ">
+              <Field label="AttestAccess" value={"YES"} />
+              <Field label="RevokeAccess" value={"YES"} />
+              <Field label="ViewAccess" value={"YES"} />
             </div>
+          </div>
+          <div className="w-full  border rounded-xl p-4 mx-auto my-auto">
+            <Field
+              label="Decoded Schema"
+              value={<DecodedSchema schema={schemaData.decodedSchema} />}
+            />
+          </div>
+          <div className="flex flex-col justify-right">
+            <ChatModal context={schemaData.schemaUID} isOpen={modalIsOpen} closeModal={closeModal} />
+            <button
+              type="button"
+              className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+              onClick={openAttestModal}
+            >
+              Attest with Schema
+            </button>
+            <button
+              className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+              onClick={openModal}
+            >
+              feedbackChat
+            </button>
+            {isAttestModalOpen && (
+              <DynamicForm
+                schema={schemaData.rawSchema}
+                schemaUID={schemaData.schemaUID}
+                isOpen={isAttestModalOpen}
+                onClose={closeAttestModal}
+                onCreate={createAttestation}
+              />
+            )}
           </div>
         </div>
       </div>
-      <DynamicForm
-        schema={schemaData.rawSchema}
-        isOpen={isAttestModalOpen}
-        onClose={closeAttestModal}
-        onCreate={createAttestation}
-      />
     </div>
   );
 };
 export default SchemaProfile;
+
+function formatDescription(description) {
+  const maxLength = 50; // Maximum characters per line
+  const words = description.split(" "); // Split the text into words
+
+  let currentLine = "";
+  let formattedDescription = [];
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+
+    if (currentLine.length + word.length <= maxLength) {
+      // Add the word to the current line if it doesn't exceed the maximum length
+      if (currentLine !== "") {
+        currentLine += " "; // Add a space if it's not the first word on the line
+      }
+      currentLine += word;
+    } else {
+      // If adding the word would exceed the maximum length, start a new paragraph
+      formattedDescription.push(currentLine);
+      currentLine = word; // Start a new paragraph with the current word
+    }
+  }
+
+  // Add the last paragraph
+  formattedDescription.push(currentLine);
+
+  return formattedDescription;
+}

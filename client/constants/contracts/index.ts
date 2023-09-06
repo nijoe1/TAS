@@ -1,11 +1,11 @@
 import { Address } from "viem";
-// import TASABI from "../abi/TASABI.json";
+import TAS from "../../../contracts/deployments/goerli/TAS.json";
 
 export const CONTRACTS = {
-  fundTheCommons: {
+  TAS: {
     5: {
-      contract: "" as Address,
-      abi: "TASABI",
+      contract: TAS.address as Address,
+      abi: TAS.abi,
     },
   },
 };

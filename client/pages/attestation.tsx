@@ -1,65 +1,84 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Button } from "@material-tailwind/react";
+import Loading from "@/components/Loading/Loading";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
 import Link from "next/link"; // Import Link from Next.js
-import SchemaProfile from "@/components/SchemaProfile";
 import AttestationProfile from "@/components/AttestationProfile";
-import { Discussion } from "@orbisclub/components";
-import "@orbisclub/components/dist/index.modern.css";
-const attestation = () => {
-  // Use React Router or a similar library to get the schema UID from the URL
+import { useRouter } from "next/router";
+import { getAttestation } from "@/lib/tableland";
+import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 
-  // Mock data for the schema profile (replace with actual data)
-  const attestationData = {
-    attestationUID:
-      "0x3cd3a8cf2ac6e6b6e53d825c50a39412bce0a5334448474f3a0cfb4fc83401b6",
-    created: "09/05/2023",
-    expiration: "Never",
-    resolver: "0xCf7ecA52dE76E72e562ADddb513CeF4c609f1fd2",
-    revoked: false,
-    revocable: true,
-    schemaUID:
-      "0x461e04108d4569e0cd6ae3ddd34fac162d1e659c688af682bcd65489d7975d74",
-    from: {
-      name: "matallo.eth",
-      address: "0xCf7ecA52dE76E72e562ADddb513CeF4c609f1fd2",
-    },
-    to: "No recipient",
-    decodedData: [
-      {
-        type: "bytes32",
-        name: "Book Id",
-        value:
-          "0x4a839d2ab2d72022389992bf4a0413446fd4ddca5be71c4c2c08d1546e5ff14a",
-      },
-      {
-        type: "bytes32",
-        name: "Book Id",
-        value:
-          "0x4a839d2ab2d72022389992bf4a0413446fd4ddca5be71c4c2c08d1546e5ff14a",
-      },
-      {
-        type: "bytes32",
-        name: "Book Id",
-        value:
-          "0x4a839d2ab2d72022389992bf4a0413446fd4ddca5be71c4c2c08d1546e5ff14a",
-      },
-      { type: "bool", name: "Is Read", value: "True" },
-      { type: "uint8", name: "Score", value: "5" },
-    ],
-    referencedAttestation: "No reference",
-    referencingAttestations: 0,
-  };
+const attestation = () => {
+  const [taken, setTaken] = useState(false);
+  const [attestationData, setAttestationData] = useState();
+  const router = useRouter();
+  const uid = router?.query?.uid;
+
+  function transformDecodedData(inputObject) {
+    const transformedArray = [];
+    
+    inputObject.forEach((item) => {
+      const transformedItem = {
+        type: item.type ,
+        name: item.name,
+        value: item.value.value,
+      };
+      
+      transformedArray.push(transformedItem);
+    });
+    
+    return transformedArray;
+  }
+
+  useEffect(() => {
+    async function fetch() {
+      let attestation = await getAttestation(uid);
+
+      attestation = attestation[0];
+
+      const encoder = new SchemaEncoder(attestation.schema);
+      const data = transformDecodedData(encoder.decodeData(attestation.data))
+      console.log(data)
+      setTaken(!taken);
+      setAttestationData({
+        attestationUID: uid,
+        created: attestation.creationTimestamp,
+        expiration: attestation.expirationTime === "0" ? "Never" : "Somewhere",
+        revoked:
+          attestation.revoker === "0x0000000000000000000000000000000000000000"
+            ? false
+            : true,
+        revocable: attestation.revocable === "true" ? true : false,
+        resolver: attestation.resolver,
+
+        schemaUID: attestation.schemaUID,
+        from: attestation.attester,
+        to: attestation.recipient,
+        decodedData: data,
+        referencedAttestation: "No reference",
+        referencingAttestations: 0,
+      });
+
+      console.log(attestationData);
+    }
+    if (!taken && uid) {
+      fetch();
+    }
+  }, [uid]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
       <Navbar />
-      <div className="mx-auto">
-        <AttestationProfile attestationData={attestationData} />
-      </div>
+      {taken ? (
+        <>
+          <div className="mx-auto">
+            <AttestationProfile attestationData={attestationData} />
+          </div>
+        </>
+      ) : (
+        <Loading />
+      )}
       <div className="flex-grow"></div>
-
       <Footer />
     </div>
   );

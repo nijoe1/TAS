@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
-import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { CONTRACTS } from "@/constants/contracts";
+import { useAccount } from "wagmi";
 
 type DynamicFormModalProps = {
   schema: string;
+  schemaUID?: string;
   isOpen: boolean;
   onClose: () => void;
   onCreate: (schemaData: any) => void; // Replace 'any' with the actual type of your event data
@@ -12,6 +16,7 @@ type DynamicFormModalProps = {
 
 const DynamicForm: React.FC<DynamicFormModalProps> = ({
   schema,
+  schemaUID,
   isOpen,
   onClose,
   onCreate,
@@ -23,17 +28,25 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   });
 
   const [formData, setFormData] = useState({});
+  const [data, setData] = useState();
+
   const [formErrors, setFormErrors] = useState({});
+  const [open, setOpen] = useState(isOpen);
+  const [recipient, setRecipient] = useState(
+    "0x0000000000000000000000000000000000000000"
+  );
+  const [referencedAttestation, setReferencedAttestation] = useState(
+    "0x0000000000000000000000000000000000000000000000000000000000000000"
+  );
 
-  // Initialize tags for each array attribute in the schema
-  const initialTags = schemaArray
-    .filter((attribute) => attribute.type.endsWith("[]"))
-    .reduce((tags, attribute) => {
-      tags[attribute.name] = [];
-      return tags;
-    }, {});
-
-  const [tags, setTags] = useState(initialTags);
+  const { config } = usePrepareContractWrite({
+    address: CONTRACTS.TAS[5].contract,
+    abi: CONTRACTS.TAS[5].abi,
+    functionName: "attest",
+    args: [[schemaUID, [recipient, 0, true, referencedAttestation, data, 0]]],
+    value: BigInt(0),
+  });
+  const { write } = useContractWrite(config);
 
   const transformFormData = (formData, schema) => {
     const transformedData = [];
@@ -111,10 +124,19 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
     // Check if the value is valid before updating form data
     if (!error) {
-      setFormData((prevData) => ({
-        ...prevData,
-        [attributeName]: parsedValue,
-      }));
+      if (
+        attributeName !== "recipient" &&
+        attributeName !== "ReferencedAttestation"
+      ) {
+        setFormData((prevData) => ({
+          ...prevData,
+          [attributeName]: parsedValue,
+        }));
+      } else if (attributeName == "recipient") {
+        setRecipient(newValue);
+      } else {
+        setReferencedAttestation(newValue);
+      }
     }
 
     // Always update form errors with dynamic error
@@ -124,11 +146,12 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     }));
   };
 
-  const handleSubmit = (e) => {
+  const prepareData = async (e: any) => {
     e.preventDefault();
     const errors = {};
     schemaArray.forEach((attribute) => {
       const error = validateInput(formData[attribute.name], attribute.type);
+      console.log(error);
       if (error) {
         errors[attribute.name] = error;
       }
@@ -136,28 +159,36 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
     if (Object.keys(errors).length === 0) {
       console.log("Form data:", formData); // Move the logging here
-      const encodedData = encoder.encodeData(
-        transformFormData(formData, schema)
-      );
-      const decoded = encoder.decodeData(encodedData);
-      console.log("Encoded Data:", decoded);
+      let encodedData = encoder.encodeData(transformFormData(formData, schema));
+      setData(encodedData);
     } else {
       console.log("Form data contains errors:", formData); // Log with errors
     }
-
-    setFormErrors(errors); // Always update form errors
-    onCreate(formData);
-    onClose();
   };
+  const handleSubmit = async (e: any) => {
+    console.log("Form data:", data); // Move the logging here
+    try {
+      write; // This will send the transaction to the contract
+      console.log("Transaction sent successfully.");
+    } catch (error) {
+      console.error("Error sending transaction:", error);
+    }
+  };
+  function closeModal() {
+    setOpen(!isOpen);
+  }
 
   return (
-    
     <div
       className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 ${
-        isOpen ? "block" : "hidden"
+        open ? "block" : "hidden"
       }`}
     >
-      <Card color="transparent" shadow={false}>
+      <Card
+        color="white"
+        shadow={false}
+        className="mb-4 p-4 border border-black rounded-xl"
+      >
         <Typography color="gray" className="mt-1 font-normal">
           Enter your details to register.
         </Typography>
@@ -207,14 +238,39 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                 )}
               </div>
             ))}
+            <Input
+              size="lg"
+              placeholder={`${"recipient"} (${"address"})`}
+              name={"recipient"}
+              value={recipient || ""}
+              onChange={(e) => handleInputChange(e, "recipient", "address")}
+              error={formErrors["recipient"]}
+            />
+            <Input
+              size="lg"
+              placeholder={`${"ReferencedAttestation"} (${"bytes32"})`}
+              name={"ReferencedAttestation"}
+              value={referencedAttestation || ""}
+              onChange={(e) =>
+                handleInputChange(e, "ReferencedAttestation", "bytes32")
+              }
+              error={formErrors["ReferencedAttestation"]}
+            />
           </div>
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={handleSubmit}
+              onClick={write}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit
+            </button>
+            <button
+              type="button"
+              onClick={prepareData}
+              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+            >
+              data
             </button>
             <button
               type="button"

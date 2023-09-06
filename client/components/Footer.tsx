@@ -3,7 +3,7 @@ import { Button } from "@material-tailwind/react";
 
 const Footer = () => {
   return (
-    <footer className=" mx-8 my-3 bg-black rounded-lg py-4 text-white">
+    <footer className="bg-black py-4 mx-1px mt-20 border text-white">
       <div className="container mx-auto max-w-screen-xl flex items-center justify-center">
         <Button
           color="blue-gray"

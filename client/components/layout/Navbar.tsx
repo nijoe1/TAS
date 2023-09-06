@@ -58,45 +58,36 @@ const CustomNavbar = () => {
   }, [address]);
 
   return (
-    <Navbar color="transparent">
-      <div className="bg-black rounded-lg py-4">
-        <div className="container mx-auto my-auto">
-          <div className="flex flex-wrap items-center justify-between">
-            {/* Logo */}
-            <div className="text-white cursor-pointer ml-3 rounded-full">
-              <Image
-                src="/logo.png"
-                alt="BOILR3 Logo"
-                width={125}
-                height={37}
-                
-            className="rounded-lg"
-              />
-            </div>
-
+    <div>
+        <div className="bg-black  py-2 border flex items-center mb-3">
+          <div className="w-1/40 flex rounded-xl ml-4">
+            <Image
+              src="/logo.png"
+              alt="BOILR3 Logo"
+              width={125}
+              height={37}
+              className="rounded-lg "
+            />
+          </div>
+          <div className="w-8/10 flex flex-wrap rounded-xl mx-auto gap-2">
             {/* Navigation Links */}
-            <div className="">
-              {navLinks.map((item, index) => (
-                <Link key={index} href={item.href}>
-                  <Button
-                    onClick={() => handleLinkClick(item.href)}
-                    size="md"
-                    className="hover:bg-gray-200 hover:text-black hover:rounded-md"
-                  >
-                    {item.text}
-                  </Button>
-                </Link>
-              ))}
-            </div>
-
-            {/* Connect Button */}
-            <div className="  mr-3 flex items-center">
-              <ConnectButton />
-            </div>
+            {navLinks.map((item, index) => (
+              <Link key={index} href={item.href}>
+                <Button
+                  onClick={() => handleLinkClick(item.href)}
+                  size="md"
+                  className="hover:bg-gray-200 hover:text-black hover:rounded-md w-full mx-1"
+                >
+                  {item.text}
+                </Button>
+              </Link>
+            ))}
+          </div>
+          <div className="w-7/40 flex rounded-xl mr-4 ">
+            <ConnectButton />
           </div>
         </div>
-      </div>
-    </Navbar>
+    </div>
   );
 };
 

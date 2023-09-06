@@ -1,22 +1,15 @@
 import React from "react";
 import { Typography } from "@material-tailwind/react";
 
-type FieldProps = {
-  label: string;
-  value: React.ReactNode;
-  isAddress?: boolean; // Specify if the value is an Ethereum address
-  className?:string
-};
 
-const Field: React.FC<FieldProps> = ({ label, value, isAddress,className }) => {
+
+const Field: React.FC<{ label: string; value: string | React.ReactNode }> = ({
+  label,
+  value,
+}) => {
   return (
-    <div className={`mb-2 flex items-center ${className}`}>
-      <Typography variant="h6" color="black" className={`w-1/4 flex space-x-1 ${isAddress ? "w-1/5" : ""}`}>
-        {label}:
-      </Typography>
-      <div className={`w-3/4 flex space-x-1 ${isAddress ? "w-3/4" : ""}`}>
-        {value}
-      </div>
+    <div className="mb-2 mx-auto">
+      <span className="font-semibold">{label}:</span> {value}
     </div>
   );
 };

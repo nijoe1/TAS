@@ -1,8 +1,19 @@
 import axios from "axios";
 import lighthouse from "@lighthouse-web3/sdk";
 const tables = {
-  attestation: "",
-  revocation: "",
+  // SchemaRegistry
+  schema:"schema_5_1650",
+  // Tableland Attestation Service
+  attestation: "attestation_5_1651",
+  revocation: "revocation_5_1652",
+  // ContentSubscriptionsResolver
+  content_group:"group_5_1657",
+  content_admins:"creator_5_1658",
+  content_subscription:"subscription_5_1659",
+  group_revenue:"revenue_5_1660",
+  // ACResolver
+  attesters:"schema_attesters_5_1655",
+  revokers:"schema_revokers_5_1656"
 };
 
 export const getIpfsGatewayUri = (cidOrIpfsUri) => {

@@ -11,10 +11,7 @@ type AttestationProfileProps = {
     revocable: boolean;
     resolver: string;
     schemaUID: string;
-    from: {
-      name: string;
-      address: string;
-    };
+    from: string;
     to: string;
     decodedData: Array<{ type: string; name: string; value: string }>;
     referencedAttestation: string;
@@ -55,7 +52,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
             />
             <Field
               label="FROM"
-              value={<EthereumAddress address={attestationData.from.address} />}
+              value={<EthereumAddress address={attestationData.from} />}
             />
             <Field
               label="TO"

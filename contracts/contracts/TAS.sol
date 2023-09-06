@@ -206,13 +206,13 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
                 tableIDs[1],
                 "uid, revocationTime, revoker, revocable",
                 string.concat(
-                SQLHelpers.quote(bytes32ToString(uid)),
-                ",",
-                SQLHelpers.quote("0"),
-                ",",
-                SQLHelpers.quote(Strings.toHexString(address(0))),
-                ",",
-                SQLHelpers.quote(revocable?"true":"false")
+                    SQLHelpers.quote(bytes32ToString(uid)),
+                    ",",
+                    SQLHelpers.quote("0"),
+                    ",",
+                    SQLHelpers.quote(Strings.toHexString(address(0))),
+                    ",",
+                    SQLHelpers.quote(revocable?"true":"false")
                 )
             )
         );

@@ -9,7 +9,7 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
   address,
   className,
 }) => {
-  const formattedAddress = `${address.slice(0,30)}`;
+  const formattedAddress =  `${address}`;
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {

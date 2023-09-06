@@ -3,7 +3,7 @@ import { Discussion } from "@orbisclub/components";
 import "@orbisclub/components/dist/index.modern.css";
 
 
-const ChatModal = ({ isOpen, closeModal }) => {
+const ChatModal = ({ context ,isOpen, closeModal }) => {
     if (!isOpen) {
       return null;
     }
@@ -33,7 +33,7 @@ const ChatModal = ({ isOpen, closeModal }) => {
           <div className="p-6">
             <Discussion
             theme="kjzl6cwe1jw148zvv7qwzddew4dj4d1pp04a1q71zgghbkagfrpt71iaatwgf2d" 
-              context="HEY"
+              context={context}
               className="!p-0 !m-0 !bg-white !rounded-lg" // Apply styles here
             />
           </div>
