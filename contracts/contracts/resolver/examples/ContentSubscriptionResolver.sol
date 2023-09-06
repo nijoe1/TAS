@@ -86,7 +86,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         schemaRegistry = _schemaRegistry;
 
         splitterFactory = _splitterFactory;
-        
+
         tablelandContract = TablelandDeployments.get();        
 
         createTableStatements.push(SQLHelpers.toCreateFromSchema(
@@ -118,7 +118,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     }
 
-    function insertSchemaInfo(
+    function SchemaInfoInserted(
         bytes32 schemaUID,
         address[] calldata contentCreators,
         uint256[] calldata creatorsShares,
@@ -127,7 +127,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
     ) internal {
         // Managing tableland rows limitation.
         if(tablesRowsCounter == 100000){
-            renewTables();
+            RenewTables();
         }
         mutate(
             tableIDs[0],
@@ -145,11 +145,11 @@ contract ContentSubscriptionResolver is SchemaResolver {
             )
         );
         tablesRowsCounter++;
-        insertGroupInfo(schemaUID, contentCreators, creatorsShares);
-        createRevenueRecord(schemaUID);
+        SchemaAdminsInserted(schemaUID, contentCreators, creatorsShares);
+        SchemaRevenueRecordCreated(schemaUID);
     }
 
-    function insertGroupInfo(
+    function SchemaAdminsInserted(
         bytes32 schemaUID,
         address[] calldata contentCreators,
         uint256[] calldata creatorsShares
@@ -173,7 +173,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         }
     }
 
-    function insertSubscription(
+    function SchemaSubscriptionCreated(
         bytes32 schemaUID,
         address subscriber,
         uint256 subscriptionEndsAt
@@ -195,7 +195,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         );
     }
 
-    function updateSubscription(
+    function SchemaSubscriptionUpdated(
         bytes32 schemaUID,
         address subscriber,
         uint256 subscriptionEndsAt
@@ -211,7 +211,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         );
     }
 
-    function createRevenueRecord(
+    function SchemaRevenueRecordCreated(
         bytes32 schemaUID
     ) internal {
         uint256 ZERO = 0;
@@ -232,7 +232,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         );
     }
 
-    function updateRevenueRecord(
+    function SchemaRevenueUpdated(
         bytes32 schemaUID,
         uint256 totalUnclaimed,
         uint256 totalClaimed
@@ -248,7 +248,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         );
     }
 
-    function renewTables()internal{
+    function RenewTables()internal{
         
         tableIDs = tablelandContract.create(address(this), createTableStatements);
 
@@ -287,7 +287,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
             Schema.contentCreators.add(contentCreators[i]);
         }
 
-        insertSchemaInfo(schemaUID, contentCreators, creatorsShares, monthlySubscriptionPrice, Schema.splitterContract);
+        SchemaInfoInserted(schemaUID, contentCreators, creatorsShares, monthlySubscriptionPrice, Schema.splitterContract);
     }
 
     /**
@@ -308,21 +308,21 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
         if(subscriptionEndDate == 0){
             time += block.timestamp;
-            insertSubscription(schemaUID, msg.sender, time);
+            SchemaSubscriptionCreated(schemaUID, msg.sender, time);
             userSubscriptions[msg.sender][schemaUID] = time;
         }else if(subscriptionEndDate > block.timestamp){
             subscriptionEndDate += time;
             userSubscriptions[msg.sender][schemaUID] = subscriptionEndDate;
-            updateSubscription(schemaUID, msg.sender, subscriptionEndDate);
+            SchemaSubscriptionUpdated(schemaUID, msg.sender, subscriptionEndDate);
         }else{
             time += block.timestamp;
-            updateSubscription(schemaUID, msg.sender, time);
+            SchemaSubscriptionUpdated(schemaUID, msg.sender, time);
             userSubscriptions[msg.sender][schemaUID] = time;
         }
 
         schemas[schemaUID].subscriptionsPool += msg.value;
 
-        updateRevenueRecord(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
+        SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
     }
 
     /**
@@ -369,7 +369,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
         schemas[schemaUID].subscriptionsPool = 0;
 
-        updateRevenueRecord(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
+        SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
     }
 
 

@@ -157,14 +157,14 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
         tables.push(SQLHelpers.toNameFromId(OFF_CHAIN_REVOCATIONS_TABLE_PREFIX, tableIDs[3]));
     }
 
-    function insertAttestation(
+    function AttestationInserted(
         Attestation memory attestation
     ) internal {
         string memory data = bytesToString(attestation.data); 
         require(strlen(data) <= 1024, "Tableland limitation");
         // Managing tableland rows limitation.
         if(tablesRowsCounter == 100000){
-            renewTables();
+            RenewTables();
         }
         mutate(
             tableIDs[0],
@@ -192,10 +192,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
             )
         );
         tablesRowsCounter++;
-        insertRevocationInfo(attestation.uid, attestation.revocable);
+        RevocationInfoInserted(attestation.uid, attestation.revocable);
     }
 
-    function insertRevocationInfo(
+    function RevocationInfoInserted(
         bytes32 uid,
         bool revocable
     ) internal {
@@ -219,7 +219,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
     }
 
 
-    function attestationRevokedUpdate(
+    function AttestationRevokedUpdate(
         bytes32 uid,
         address revoker,
         uint256 revocationTime
@@ -276,7 +276,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
         );
     }
 
-    function renewTables()internal{
+    function RenewTables()internal{
 
         tableIDs = tablelandContract.create(address(this), createTableStatements);
 
@@ -673,7 +673,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
 
             res.uids[i] = uid;
 
-            insertAttestation(attestation);
+            AttestationInserted(attestation);
         }
 
         res.usedValue = _resolveAttestations(schemaRecord, attestations, values, false, availableValue, last);
@@ -740,7 +740,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier, IERC721Receiver {
             attestations[i] = attestation;
             values[i] = request.value;
 
-            attestationRevokedUpdate(attestation.uid, revoker, attestation.revocationTime);
+            AttestationRevokedUpdate(attestation.uid, revoker, attestation.revocationTime);
 
         }
 

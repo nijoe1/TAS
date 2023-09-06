@@ -19,7 +19,7 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 /// @title SchemaRegistry
 /// @notice The global schema registry.
 contract SchemaRegistry is ISchemaRegistry, Semver {
-    
+
     error AlreadyExists();
 
     // The global mapping between schema records and their IDs.
@@ -76,7 +76,7 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
         schemaRecord.uid = uid;
         _registry[uid] = schemaRecord;
 
-        registerSchema(
+        SchemaRegistered(
             schemaRecord.uid,
             schema,
             schemaName,
@@ -88,7 +88,7 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
         return uid;
     }
 
-    function registerSchema(
+    function SchemaRegistered(
         bytes32 schemaUID,
         string memory schema,
         string memory schemaName,

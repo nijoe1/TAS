@@ -82,7 +82,34 @@ contract ACResolver is SchemaResolver, AccessControl {
 
     }
 
-    function insertSchemaInfo(
+    function ACSchemaRegistered(
+        address[] calldata attesters,
+        address[] calldata revokers,
+        string calldata schema,
+        string calldata schemaName,
+        string calldata schemaDescription
+    )external{
+        // Register the schema and get its UID
+        bytes32 schemaUID = schemaRegistry.register(
+            schema,
+            schemaName,
+            schemaDescription,
+            ISchemaResolver(address(this)),
+            true
+        );
+        uint attestersSize = attesters.length;
+        if(attestersSize == 0){
+            schemas[schemaUID].AllowAllToAttest = true;
+        }
+        uint revokersSize = revokers.length;
+        if(revokersSize == 0){
+            schemas[schemaUID].AllowAllToRevoke = true;
+        }
+
+        SchemaInfoInserted(schemaUID, attesters, revokers);       
+    }
+
+    function SchemaInfoInserted(
         bytes32 schemaUID,
         address[] calldata attesters,
         address[] calldata revokers
@@ -125,34 +152,6 @@ contract ACResolver is SchemaResolver, AccessControl {
             _grantRole(keccak256(abi.encode(schemaUID, "REVOKER")), revokers[i]);
         }
         tablesRowsCounter += totalMax;
-    }
-
-
-    function registerAccessControlledSchema(
-        address[] calldata attesters,
-        address[] calldata revokers,
-        string calldata schema,
-        string calldata schemaName,
-        string calldata schemaDescription
-    )external{
-        // Register the schema and get its UID
-        bytes32 schemaUID = schemaRegistry.register(
-            schema,
-            schemaName,
-            schemaDescription,
-            ISchemaResolver(address(this)),
-            true
-        );
-        uint attestersSize = attesters.length;
-        if(attestersSize == 0){
-            schemas[schemaUID].AllowAllToAttest = true;
-        }
-        uint revokersSize = revokers.length;
-        if(revokersSize == 0){
-            schemas[schemaUID].AllowAllToRevoke = true;
-        }
-
-        insertSchemaInfo(schemaUID, attesters, revokers);       
     }
 
     /**
