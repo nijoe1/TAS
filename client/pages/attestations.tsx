@@ -7,16 +7,6 @@ import Link from "next/link"; // Import Link from Next.js
 import EthereumAddress from "@/components/EthereumAddress";
 
 const Attestations = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   // Define a function to handle creating a schema
   const createAttestation = (attestationData) => {
     // Handle schema creation logic here
@@ -45,7 +35,6 @@ const Attestations = () => {
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
       <Navbar />
-      <div className={`flex-grow mx-8 ${isModalOpen ? "filter blur-md" : ""}`}>
         <div className="px-4 py-4 bg-white rounded-t-xl">
           <div className="flex flex-col items-center">
             <Typography variant="h4" color="black">
@@ -78,13 +67,6 @@ const Attestations = () => {
                 16981
               </Typography>
             </div>
-            <Button
-              type="button"
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black self-center"
-              onClick={openModal}
-            >
-              Create Attestation
-            </Button>
           </div>
         </div>
         <div className="mt-4">
@@ -145,13 +127,7 @@ const Attestations = () => {
             </table>
           </div>
         </div>
-      </div>
       <Footer />
-      <RegisterSchemaModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onCreate={createAttestation} // Replace with the actual function to create attestations
-      />
     </div>
   );
 };

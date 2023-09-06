@@ -9,6 +9,7 @@ type AttestationProfileProps = {
     expiration: string;
     revoked: boolean;
     revocable: boolean;
+    resolver: string;
     schemaUID: string;
     from: {
       name: string;
@@ -52,8 +53,16 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
               label="SCHEMAUID"
               value={<EthereumAddress address={attestationData.schemaUID} />}
             />
+            <Field
+              label="FROM"
+              value={<EthereumAddress address={attestationData.from.address} />}
+            />
+            <Field
+              label="TO"
+              value={<EthereumAddress address={attestationData.to} />}
+            />
           </div>
-          <div className="w-2/5  border rounded-xl p-4">
+          <div className="w-1/4  border rounded-xl p-4">
             <Field label="CREATED" value={attestationData.created} />
             <Field label="EXPIRATION" value={attestationData.expiration} />
             <Field
@@ -64,20 +73,16 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
               label="REVOCABLE"
               value={attestationData.revocable ? "Yes" : "No"}
             />
+            <Field
+              label="Resolver"
+              value={<EthereumAddress address={attestationData.resolver} />}
+            />
           </div>
         </div>
 
         <div className="flex justify-between">
           {/* Left Box */}
-          <div className="w-3/5 flex flex-col">
-            <Field
-              label="FROM"
-              value={<EthereumAddress address={attestationData.from.address} />}
-            />
-            <Field
-              label="TO"
-              value={<EthereumAddress address={attestationData.to} />}
-            />
+          <div className="w-3/4 flex flex-col">
             <Field
               label="Referencing Attestations"
               value={attestationData.referencingAttestations.toString()}
@@ -89,10 +94,24 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
           </div>
 
           {/* Right Box */}
-          <div className="w-2/5  border rounded-xl p-4">
-            <div className="text-xl font-semibold">Decoded Data</div>
-            <DecodedData decodedData={attestationData.decodedData} />
+          <div className="w-1/4  text-center border rounded-xl p-4">
+            <Field
+              label="AttestAccess"
+              value={"YES"}
+            />
+            <Field
+              label="RevokeAccess"
+              value={"YES"}
+            />
+                        <Field
+              label="ViewAccess"
+              value={"YES"}
+            />
           </div>
+        </div>
+        <div className="w-full  border rounded-xl p-4">
+          <div className="text-xl font-semibold">Decoded Data</div>
+          <DecodedData decodedData={attestationData.decodedData} />
         </div>
       </div>
     </div>

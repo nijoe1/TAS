@@ -5,7 +5,8 @@ import Footer from "@/components/Footer";
 import Link from "next/link"; // Import Link from Next.js
 import SchemaProfile from "@/components/SchemaProfile";
 import AttestationProfile from "@/components/AttestationProfile";
-
+import { Discussion } from "@orbisclub/components";
+import "@orbisclub/components/dist/index.modern.css";
 const attestation = () => {
   // Use React Router or a similar library to get the schema UID from the URL
 
@@ -15,6 +16,7 @@ const attestation = () => {
       "0x3cd3a8cf2ac6e6b6e53d825c50a39412bce0a5334448474f3a0cfb4fc83401b6",
     created: "09/05/2023",
     expiration: "Never",
+    resolver: "0xCf7ecA52dE76E72e562ADddb513CeF4c609f1fd2",
     revoked: false,
     revocable: true,
     schemaUID:
@@ -30,12 +32,14 @@ const attestation = () => {
         name: "Book Id",
         value:
           "0x4a839d2ab2d72022389992bf4a0413446fd4ddca5be71c4c2c08d1546e5ff14a",
-      },      {
+      },
+      {
         type: "bytes32",
         name: "Book Id",
         value:
           "0x4a839d2ab2d72022389992bf4a0413446fd4ddca5be71c4c2c08d1546e5ff14a",
-      },      {
+      },
+      {
         type: "bytes32",
         name: "Book Id",
         value:
@@ -54,7 +58,6 @@ const attestation = () => {
       <div className="mx-auto">
         <AttestationProfile attestationData={attestationData} />
       </div>
-
       <div className="flex-grow"></div>
 
       <Footer />

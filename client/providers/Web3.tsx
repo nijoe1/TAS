@@ -66,8 +66,8 @@ const Web3Provider = (props: Props) => {
       <RainbowKitProvider
         chains={chains}
         theme={lightTheme({
-          accentColor: "black", // Change this to your desired color
-          accentColorForeground: "white",
+          accentColor: "white", // Change this to your desired color
+          accentColorForeground: "black",
           borderRadius: "large",
           fontStack: "system",
         })}

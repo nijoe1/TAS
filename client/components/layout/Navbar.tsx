@@ -59,30 +59,29 @@ const CustomNavbar = () => {
 
   return (
     <Navbar color="transparent">
-      <div className="bg-black  rounded-lg py-4">
-        <div className="container mx-auto">
+      <div className="bg-black rounded-lg py-4">
+        <div className="container mx-auto my-auto">
           <div className="flex flex-wrap items-center justify-between">
             {/* Logo */}
-            <div className="text-white cursor-pointer ml-1 rounded-full">
+            <div className="text-white cursor-pointer ml-3 rounded-full">
               <Image
-                className="text-white cursor-pointer ml-1 rounded-lg"
                 src="/logo.png"
                 alt="BOILR3 Logo"
                 width={125}
                 height={37}
-                priority
+                
+            className="rounded-lg"
               />
             </div>
 
             {/* Navigation Links */}
-            <div className="space-x-1">
+            <div className="">
               {navLinks.map((item, index) => (
                 <Link key={index} href={item.href}>
                   <Button
-                    color="black"
                     onClick={() => handleLinkClick(item.href)}
-                    size="sm"
-                    className="hover:bg-gray-200 hover:text-black hover:rounded-full"
+                    size="md"
+                    className="hover:bg-gray-200 hover:text-black hover:rounded-md"
                   >
                     {item.text}
                   </Button>
@@ -91,7 +90,7 @@ const CustomNavbar = () => {
             </div>
 
             {/* Connect Button */}
-            <div>
+            <div className="  mr-3 flex items-center">
               <ConnectButton />
             </div>
           </div>

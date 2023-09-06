@@ -7,16 +7,6 @@ import SchemaProfile from "@/components/SchemaProfile";
 import DynamicForm from "@/components/DynamicForm";
 
 const schema = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   // Define a function to handle creating a schema
   const createSchema = (schemaData) => {
     // Handle schema creation logic here
@@ -45,7 +35,7 @@ const schema = () => {
       { type: "uint8", name: "score" },
       { type: "uint8", name: "score" },
     ],
-    rawSchema: "bytes32 bookId,bool isRead,uint8 score, uint8 ",
+    rawSchema: "bytes32 bookId,bool isRead,uint8 score, uint8 tavros",
   };
 
   // Mock data for the table of attestations (replace with actual data)
@@ -68,15 +58,7 @@ const schema = () => {
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
       <Navbar />
-      <div className={`flex-grow mx-8 ${isModalOpen ? "filter blur-md" : ""}`}>
-        <Button
-          type="button"
-          className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black self-center"
-          onClick={openModal}
-        >
-          Create Schema
-        </Button>
-        <SchemaProfile schemaData={schemaData}></SchemaProfile>
+        <SchemaProfile schemaData={schemaData} ></SchemaProfile>
         <div className={`flex-grow mx-8`}>
           <div className="rounded-b-xl bg-white mt-4">
             <div
@@ -112,15 +94,8 @@ const schema = () => {
             </div>
           </div>
         </div>
-      </div>
 
       <Footer />
-      <DynamicForm
-        schema="uint256 id, string name, address wallet, bytes32 hash, bool isActive, string[] tsifsa"
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onCreate={createSchema}
-      />
     </div>
   );
 };
