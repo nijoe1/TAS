@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Input, Typography } from "@material-tailwind/react";
-
+import { validateInput } from "@/lib/utils";
 interface TagSelectProps {
   name: string;
   onChange: (value: string) => void;
@@ -31,7 +31,12 @@ function TagSelect({
       return;
     }
 
-    if (!tags.includes(textInput)) {
+    if (!tags) {
+      const newTags = [name];
+      setTags(newTags);
+      onChange(newTags); // Pass the array of tags directly
+      setTextInput("");
+    }else if(!tags.includes(textInput)) {
       setTextInput("");
       const newTags = [...tags, textInput];
       setTags(newTags);
@@ -47,62 +52,36 @@ function TagSelect({
     onChange(updatedTags); // Pass the array of tags directly
   };
 
-  const validateInput = (value, attributeType) => {
-    if (attributeType === "address" && !/^0x[a-fA-F0-9]{40}$/.test(value)) {
-        return "Invalid Ethereum address";
-      } else if (attributeType === "string" && value.length < 1) {
-        return "Field cannot be empty";
-      } else if (attributeType === "bytes" && !/^0x[a-fA-F0-9]*$/.test(value)) {
-        return "Invalid bytes value";
-      } else if (attributeType === "bytes32" && !/^0x[a-fA-F0-9]{64}$/.test(value)) {
-        return "Invalid bytes32 value";
-      } else if (attributeType === "bool" && !/^(true|false)$/.test(value)) {
-        return "Must be true or false";
-      } else if (attributeType.startsWith("uint")) {
-        const uintSize = parseInt(attributeType.replace("uint", ""));
-        const uintMaxValue = BigInt(`0x${'ff'.repeat(uintSize / 4)}`);
-        const valueStr = String(value);
-        const numericValueStr = valueStr.replace(/[^0-9]/g, '');
-        const numericValue = BigInt(numericValueStr);
-        
-    
-        if (isNaN(Number(numericValueStr)) || numericValue < BigInt(0) || numericValue > uintMaxValue) {
-            return `Must be a positive integer that fits into uint${uintSize}`;
-          }
-      }
-
-    return null;
-  };
-
   return (
     <div>
       <div className="mt-2">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="inline-flex items-center bg-indigo-100 text-sm rounded mt-2 mr-1"
-            style={{ minHeight: "2rem" }}
-          >
-            <span className="ml-2 mr-1 leading-relaxed truncate max-w-xs">
-              {tag}
-            </span>
-            <button
-              onClick={() => removeTag(tag)}
-              className="w-6 h-8 inline-block align-middle text-gray-500 hover:text-gray-600 focus:outline-none"
+        {tags &&
+          tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center bg-indigo-100 text-sm rounded mt-2 mr-1"
+              style={{ minHeight: "2rem" }}
             >
-              <svg
-                className="w-6 h-6 fill-current mx-auto"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
+              <span className="ml-2 mr-1 leading-relaxed truncate max-w-xs">
+                {tag}
+              </span>
+              <button
+                onClick={() => removeTag(tag)}
+                className="w-6 h-8 inline-block align-middle text-gray-500 hover:text-gray-600 focus:outline-none"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"
-                />
-              </svg>
-            </button>
-          </span>
-        ))}
+                <svg
+                  className="w-6 h-6 fill-current mx-auto"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M15.78 14.36a1 1 0 0 1-1.42 1.42l-2.82-2.83-2.83 2.83a1 1 0 1 1-1.42-1.42l2.83-2.82L7.3 8.7a1 1 0 0 1 1.42-1.42l2.83 2.83 2.82-2.83a1 1 0 0 1 1.42 1.42l-2.83 2.83 2.83 2.82z"
+                  />
+                </svg>
+              </button>
+            </span>
+          ))}
       </div>
       <div className="relative mt-2">
         <input

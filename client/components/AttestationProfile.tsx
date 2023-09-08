@@ -1,6 +1,8 @@
 import React from "react";
 import EthereumAddress from "@/components/EthereumAddress";
 import DecodedData from "@/components/DecodedData";
+import TimeCreated from "./TimeCreated";
+import Field from "@/components/Field";
 
 type AttestationProfileProps = {
   attestationData: {
@@ -17,17 +19,6 @@ type AttestationProfileProps = {
     referencedAttestation: string;
     referencingAttestations: number;
   };
-};
-
-const Field: React.FC<{ label: string; value: string | React.ReactNode }> = ({
-  label,
-  value,
-}) => {
-  return (
-    <div className="mb-2">
-      <span className="font-semibold">{label}:</span> {value}
-    </div>
-  );
 };
 
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
@@ -60,7 +51,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
             />
           </div>
           <div className="w-1/4  border rounded-xl p-4">
-            <Field label="CREATED" value={attestationData.created} />
+            <Field label="CREATED" value={<TimeCreated createdAt={attestationData.created}/>} />
             <Field label="EXPIRATION" value={attestationData.expiration} />
             <Field
               label="REVOKED"

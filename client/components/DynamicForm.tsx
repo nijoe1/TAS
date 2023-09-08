@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { validateInput, transformFormData } from "@/lib/utils";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
-import { useAccount } from "wagmi";
 
 type DynamicFormModalProps = {
   schema: string;
@@ -28,7 +28,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   });
 
   const [formData, setFormData] = useState({});
-  const [data, setData] = useState();
+  const [data, setData] = useState("");
 
   const [formErrors, setFormErrors] = useState({});
   const [open, setOpen] = useState(isOpen);
@@ -46,137 +46,61 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     args: [[schemaUID, [recipient, 0, true, referencedAttestation, data, 0]]],
     value: BigInt(0),
   });
-  const { write } = useContractWrite(config);
+  const { write, isLoading, isSuccess, isError } = useContractWrite(config);
 
-  const transformFormData = (formData, schema) => {
-    const transformedData = [];
+  useEffect(() => {
 
-    const schemaArray = schema.split(",").map((item) => {
-      const [type, name] = item.trim().split(" ");
-      return { type, name };
-    });
-
-    for (const [name, value] of Object.entries(formData)) {
-      const type = getTypeForAttribute(name, schemaArray);
-      transformedData.push({ name, value, type });
+    try {
+      prepareData();
+    } catch {
+      // Handle errors
     }
-
-    return transformedData;
-  };
-
-  const getTypeForAttribute = (attributeName, schemaArray) => {
-    const schemaEntry = schemaArray.find(
-      (entry) => entry.name === attributeName
-    );
-
-    return schemaEntry.type;
-  };
-
-  const validateInput = (value, attributeType) => {
-    if (attributeType === "address" && !/^0x[a-fA-F0-9]{40}$/.test(value)) {
-      return "Invalid Ethereum address";
-    } else if (attributeType === "string" && value?.length < 1) {
-      return "Field cannot be empty";
-    } else if (attributeType === "bytes" && !/^0x[a-fA-F0-9]*$/.test(value)) {
-      return "Invalid bytes value";
-    } else if (
-      attributeType === "bytes32" &&
-      !/^0x[a-fA-F0-9]{64}$/.test(value)
-    ) {
-      return "Invalid bytes32 value";
-    } else if (attributeType === "bool" && !/^(true|false)$/.test(value)) {
-      return "Must be true or false";
-    } else if (attributeType.startsWith("uint")) {
-      const uintSize = parseInt(attributeType.replace("uint", ""));
-      const uintMaxValue = BigInt(2 ** uintSize - 1);
-      let size = value?.length;
-      let valueStr;
-      if (size) {
-        valueStr = String(value[size - 1]);
-      } else {
-        valueStr = String(value);
-        valueStr = valueStr.replace(/[^0-9]/g, "");
-      }
-
-      const numericValue = BigInt(valueStr);
-
-      if (numericValue < BigInt(0) || numericValue > uintMaxValue) {
-        return `Must be a positive integer that fits into uint${uintSize} (max: ${uintMaxValue})`;
-      }
-    } else if (attributeType === "int" && !/^-?\d+$/.test(value)) {
-      return "Must be an integer";
-    }
-    return null;
-  };
+  }, [formData]);
 
   const handleInputChange = (newValue, attributeName, attributeType) => {
-    let parsedValue;
+    let newFormData = (prevData: any) => {
+      // Create a copy of the existing formData
+      const updatedFormData = { ...prevData };
 
-    if (attributeType.endsWith("[]")) {
-      // For array attributes, newValue should already be an array of tags
-      parsedValue = newValue;
-    } else {
-      // For other types, keep the values as is
-      parsedValue = newValue.target.value;
-    }
-
-    const error = validateInput(parsedValue, attributeType);
-
-    // Check if the value is valid before updating form data
-    if (!error) {
-      if (
-        attributeName !== "recipient" &&
-        attributeName !== "ReferencedAttestation"
-      ) {
-        setFormData((prevData) => ({
-          ...prevData,
-          [attributeName]: parsedValue,
-        }));
-      } else if (attributeName == "recipient") {
-        setRecipient(newValue);
+      // Update the specific attribute based on its type
+      if (attributeType.endsWith("[]")) {
+        // For array attributes, update the attribute directly within the array
+        updatedFormData[attributeName] = newValue;
       } else {
-        setReferencedAttestation(newValue);
+        // For non-array attributes, update as before
+        updatedFormData[attributeName] = newValue.target.value;
       }
-    }
 
-    // Always update form errors with dynamic error
-    setFormErrors((prevErrors) => ({
-      ...prevErrors,
-      [attributeName]: error,
-    }));
-  };
+      return updatedFormData;
+    };
+    // Use the functional form of setFormData to ensure the latest state
+    setFormData(newFormData);
+    try {
+      prepareData();
+    } catch {  };
+  }
 
-  const prepareData = async (e: any) => {
-    e.preventDefault();
+  const prepareData = () => {
     const errors = {};
+    let empty;
     schemaArray.forEach((attribute) => {
       const error = validateInput(formData[attribute.name], attribute.type);
-      console.log(error);
+      console.log(error, formData);
       if (error) {
         errors[attribute.name] = error;
       }
+      if (formData[attribute.name] === undefined) {
+        empty = true;
+      }
     });
 
-    if (Object.keys(errors).length === 0) {
+    if (!empty) {
       console.log("Form data:", formData); // Move the logging here
       let encodedData = encoder.encodeData(transformFormData(formData, schema));
       setData(encodedData);
-    } else {
-      console.log("Form data contains errors:", formData); // Log with errors
+      console.log(formData, "  ", data);
     }
   };
-  const handleSubmit = async (e: any) => {
-    console.log("Form data:", data); // Move the logging here
-    try {
-      write; // This will send the transaction to the contract
-      console.log("Transaction sent successfully.");
-    } catch (error) {
-      console.error("Error sending transaction:", error);
-    }
-  };
-  function closeModal() {
-    setOpen(!isOpen);
-  }
 
   return (
     <div
@@ -190,12 +114,9 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         className="mb-4 p-4 border border-black rounded-xl"
       >
         <Typography color="gray" className="mt-1 font-normal">
-          Enter your details to register.
+          Enter your details to attest.
         </Typography>
-        <form
-          onSubmit={handleSubmit}
-          className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
-        >
+        <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
           <div className="mb-4 flex flex-col gap-6">
             {schemaArray.map((attribute, index) => (
               <div key={index}>
@@ -243,7 +164,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               placeholder={`${"recipient"} (${"address"})`}
               name={"recipient"}
               value={recipient || ""}
-              onChange={(e) => handleInputChange(e, "recipient", "address")}
+              onChange={() => setRecipient(recipient)}
               error={formErrors["recipient"]}
             />
             <Input
@@ -251,26 +172,19 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               placeholder={`${"ReferencedAttestation"} (${"bytes32"})`}
               name={"ReferencedAttestation"}
               value={referencedAttestation || ""}
-              onChange={(e) =>
-                handleInputChange(e, "ReferencedAttestation", "bytes32")
-              }
+              onChange={() => setReferencedAttestation(referencedAttestation)}
               error={formErrors["ReferencedAttestation"]}
             />
           </div>
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={write}
+              
+              // @ts-ignore
+              onClick={()=> {write(); onClose() }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit
-            </button>
-            <button
-              type="button"
-              onClick={prepareData}
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
-            >
-              data
             </button>
             <button
               type="button"

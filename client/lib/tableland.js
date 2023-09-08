@@ -43,7 +43,9 @@ export const getAllSchemas = async () => {
 export const getAttestations = async () => {
     const getAllSchemaAttestationsQuery =
       TablelandGateway +
-      `SELECT * FROM ${tables.attestation}`;
+      `SELECT ${tables.attestation}.uid , ${tables.attestation}.attester , ${tables.attestation}.schemaUID , ${tables.attestation}.creationTimestamp , ${tables.attestation}.data , ${tables.attestation}.recipient , ${tables.attestation}.expirationTime , ${tables.attestation}.refUID
+       FROM ${tables.attestation}
+       ORDER BY ${tables.attestation}.creationTimestamp DESC`;
     try {
       const result = await axios.get(getAllSchemaAttestationsQuery);
       console.log(result);
@@ -71,7 +73,8 @@ export const getSchema = async (schemaUID) => {
 export const getSchemaAttestations = async (schemaUID) => {
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
-    `SELECT * FROM ${tables.attestation} WHERE ${tables.attestation}.schemaUID=%27${schemaUID}%27`;
+    `SELECT ${tables.attestation}.uid , ${tables.attestation}.attester , ${tables.attestation}.creationTimestamp , ${tables.attestation}.data , ${tables.attestation}.recipient , ${tables.attestation}.expirationTime , ${tables.attestation}.refUID  FROM ${tables.attestation} WHERE ${tables.attestation}.schemaUID=%27${schemaUID}%27
+    ORDER BY ${tables.attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
     console.log(result);

@@ -83,11 +83,11 @@ contract ACResolver is SchemaResolver, AccessControl {
     }
 
     function ACSchemaRegistered(
-        address[] calldata attesters,
-        address[] calldata revokers,
-        string calldata schema,
-        string calldata schemaName,
-        string calldata schemaDescription
+        address[] memory attesters,
+        address[] memory revokers,
+        string memory schema,
+        string memory schemaName,
+        string memory schemaDescription
     )external{
         // Register the schema and get its UID
         bytes32 schemaUID = schemaRegistry.register(
@@ -111,8 +111,8 @@ contract ACResolver is SchemaResolver, AccessControl {
 
     function SchemaInfoInserted(
         bytes32 schemaUID,
-        address[] calldata attesters,
-        address[] calldata revokers
+        address[] memory attesters,
+        address[] memory revokers
     ) internal {
         uint256 totalMax = attesters.length > revokers.length? attesters.length : revokers.length;
         // Managing tableland rows limitation.

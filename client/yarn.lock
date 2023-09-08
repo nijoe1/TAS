@@ -10172,6 +10172,7 @@ __metadata:
     react-icons: ^4.10.1
     react-slick: ^0.29.0
     react-tag-cloud: ^1.3.3
+    react-tag-input: ^6.8.1
     react-tagsinput: ^3.20.3
     siwe: ^1.1.6
     slick-carousel: ^1.8.1
@@ -12877,7 +12878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:2.3.2, classnames@npm:^2.2.5":
+"classnames@npm:2.3.2, classnames@npm:^2.2.5, classnames@npm:~2.3.1":
   version: 2.3.2
   resolution: "classnames@npm:2.3.2"
   checksum: 2c62199789618d95545c872787137262e741f9db13328e216b093eea91c85ef2bfb152c1f9e63027204e2559a006a92eb74147d46c800a9f96297ae1d9f96f4e
@@ -22711,7 +22712,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:>=3.5 <5, lodash@npm:^4.17.11, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.17.5, lodash@npm:^4.7.0, lodash@npm:~4.17.0":
+"lodash@npm:>=3.5 <5, lodash@npm:^4.17.11, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.17.5, lodash@npm:^4.7.0, lodash@npm:~4.17.0, lodash@npm:~4.17.12":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -26717,7 +26718,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.8.1, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:15.8.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -27536,6 +27537,22 @@ __metadata:
     prop-types: ^15.6.2
     react: ^16.0.0
   checksum: 46700ca1bf9dca69c8b0864fe37978ed4717506163144bcbc584c4f54d86bac932c110d395a532ba9bd98f7179ace465934c33d55184cfe4ba7613c56ef230ae
+  languageName: node
+  linkType: hard
+
+"react-tag-input@npm:^6.8.1":
+  version: 6.8.1
+  resolution: "react-tag-input@npm:6.8.1"
+  dependencies:
+    classnames: ~2.3.1
+    lodash: ~4.17.12
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ^17.0.2 || ^18.2.0
+    react-dnd: ^14.0.2
+    react-dnd-html5-backend: ^14.0.0
+    react-dom: 17.0.2 || ^18.2.0
+  checksum: b0b26bb3416455ab6af9f0fc69df28c1e573410b6dc1a349ae5eb20164d79934d727ec696776768ef2037a0fcb004fd28ed4c841f1a6e1266adca130f60dca26
   languageName: node
   linkType: hard
 

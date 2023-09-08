@@ -16,17 +16,17 @@ const attestation = () => {
 
   function transformDecodedData(inputObject) {
     const transformedArray = [];
-    
+
     inputObject.forEach((item) => {
       const transformedItem = {
-        type: item.type ,
+        type: item.type,
         name: item.name,
         value: item.value.value,
       };
-      
+
       transformedArray.push(transformedItem);
     });
-    
+
     return transformedArray;
   }
 
@@ -37,8 +37,8 @@ const attestation = () => {
       attestation = attestation[0];
 
       const encoder = new SchemaEncoder(attestation.schema);
-      const data = transformDecodedData(encoder.decodeData(attestation.data))
-      console.log(data)
+      const data = transformDecodedData(encoder.decodeData(attestation.data));
+      console.log(data);
       setTaken(!taken);
       setAttestationData({
         attestationUID: uid,

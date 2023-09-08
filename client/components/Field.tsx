@@ -8,7 +8,7 @@ const Field: React.FC<{ label: string; value: string | React.ReactNode }> = ({
   value,
 }) => {
   return (
-    <div className="mb-2 mx-auto">
+    <div className="mb-2">
       <span className="font-semibold">{label}:</span> {value}
     </div>
   );

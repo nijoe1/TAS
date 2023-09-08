@@ -7,6 +7,8 @@ import Link from "next/link"; // Import Link from Next.js
 import SchemaProfile from "@/components/SchemaProfile";
 import { useRouter } from "next/router";
 import { getSchemaAttestations, getSchema } from "@/lib/tableland";
+import TimeCreated from "@/components/TimeCreated"; // Replace with the actual path
+import EthereumAddress from "@/components/EthereumAddress";
 
 const schema = () => {
   const [taken, setTaken] = useState(false);
@@ -63,7 +65,7 @@ const schema = () => {
             fromAddress: inputObject.attester,
             toAddress: inputObject.recipient,
 
-            age: "3mins ago",
+            age: inputObject.creationTimestamp,
             // Add other properties as needed from the inputObject
           };
 
@@ -81,6 +83,7 @@ const schema = () => {
         schemaInfo.resolverContract = schema.resolver;
         schemaInfo.rawSchema = schema.schema;
         schemaInfo.revocable = schema.revocable === "true" ? true : false;
+        schemaInfo.created = schema.creationTimestamp;
         setTaken(!taken);
 
         setTableData(attestationTableInfo);
@@ -99,41 +102,66 @@ const schema = () => {
       {taken ? (
         <>
           <SchemaProfile schemaData={schemaData}></SchemaProfile>
-          <div className={`flex-grow mx-8`}>
-            <div className="rounded-b-xl bg-white mt-4">
-              <div
-                className="rounded-lg overflow-hidden"
-                style={{ background: "rgba(0, 0, 0, 0)" }}
-              >
-                <table className="w-full table-fixed border-collapse border border-gray-200">
-                  <thead className="bg-black">
-                    <tr>
-                      <th className="w-2/12 py-2 text-white">UID</th>
-                      <th className="w-3/12 py-2 text-white">From Address</th>
-                      <th className="w-3/12 py-2 text-white">To Address</th>
-                      <th className="w-4/12 py-2 text-white">Age</th>
+          {tableData.length > 0 ? (<div className="mt-10 mx-[25%]">
+            <div className="overflow-x-auto rounded-lg">
+              <table className="w-screen-md table-fixed border-b border-gray">
+                <thead className="bg-black">
+                  <tr>
+                    <th className="w-4/12 py-2 text-white border-r border-gray">
+                      attestationUID
+                    </th>
+                    <th className="w-3/12 py-2 text-white border-r border-gray">
+                      From Address
+                    </th>
+                    <th className="w-3/12 py-2 text-white border-r border-gray">
+                      To Address
+                    </th>
+                    <th className="w-2/12 py-2 text-white">createdAt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableData.map((row, index) => (
+                    <tr
+                      key={index}
+                      className={`${
+                        index % 2 === 0 ? "bg-gray-100" : "bg-white"
+                      } text-center`}
+                    >
+                      <td className="py-2 border-r border-gray border-b border-gray">
+                        <div className="flex items-center justify-center">
+                          <EthereumAddress
+                            link={`/attestation?uid=${row.uid}`}
+                            address={row.uid}
+                          />
+                        </div>
+                      </td>
+                      <td className="py-2 border-r border-gray border-b border-gray">
+                        <div className="flex items-center justify-center">
+                          <EthereumAddress address={row.fromAddress} />
+                        </div>
+                      </td>
+                      <td className="py-2 border-r border-gray border-b border-gray">
+                        <div className="flex items-center justify-center">
+                          <EthereumAddress address={row.toAddress} />
+                        </div>
+                      </td>
+                      <td className="py-2 border-b border-gray">
+                        <div className="flex items-center justify-center">
+                          <p className="px-2 py-2">
+                            {<TimeCreated createdAt={row.age} />}
+                          </p>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {tableData.map((row) => (
-                      <tr key={row.uid} className="bg-white text-center">
-                        <td className="py-2">
-                          <Link href={`/attestation?uid=${row.uid}`} passHref>
-                            <p className="rounded-full px-4 py-2 cursor-pointer hover:bg-gradient-to-r from-black to-blue-gray-10000 hover:text-white">
-                              {row.uid}
-                            </p>
-                          </Link>
-                        </td>
-                        <td className="py-2">{row.fromAddress}</td>
-                        <td className="py-2">{row.toAddress}</td>
-                        <td className="py-2">{row.age}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
+          </div>): (
+            <div>
+              <Typography className="mt-5 text-center"variant="h5">No attestations</Typography>
+            </div>
+          )}
         </>
       ) : (
         <Loading />

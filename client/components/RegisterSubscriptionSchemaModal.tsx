@@ -4,112 +4,59 @@ import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
-import {
-  useContractWrite,
-  usePrepareContractWrite,
-  useContractRead,
-} from "wagmi";
-import { CONTRACTS } from "@/constants/contracts";
-import schema from "@/pages/schema";
+// @ts-ignore
+import TagsInput from "react-tagsinput";
+// import 'react-tagsinput/react-tagsinput.css'
+// import "@/styles/globals.css"
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (schemaData: any) => void; // Replace 'any' with the actual type of your event data
+  onCreate: (schemaData: any) => void; // Replace 'any' with the actual address of your event data
 };
 
-const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
+
+const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   isOpen,
   onClose,
   onCreate,
 }) => {
-  const [attributes, setAttributes] = useState([
-    { type: "Select Type", name: "", isArray: false },
-  ]);
-  const [rawSchema, setRawSchema] = useState();
   const [schemaName, setSchemaName] = useState("");
   const [schemaDescription, setSchemaDescription] = useState("");
-  const [isRevocable, setIsRevocable] = useState(true);
+  const [isRevocable, setIsRevocable] = useState(false);
   const [resolver, setResolver] = useState(
     "0x0000000000000000000000000000000000000000"
   );
+  const [monthlySubscriptionPrice, setMonthlySubscriptionPrice] = useState(0);
+  const [categories, setCategories] = useState({ tags: [] });
+  const [attributes, setAttributes] = useState([
+    { address: "creator address", shares: 0 },
+  ]);
 
-  const solidityTypes = [
-    "string",
-    "address",
-    "bool",
-    "uint8",
-    "uint16",
-    "uint32",
-    "uint64",
-    "uint128",
-    "uint256",
-    "bytes",
-    "bytes32",
-  ];
-
-  const { config } = usePrepareContractWrite({
-    address: CONTRACTS.SchemaRegistry[5].contract,
-    abi: CONTRACTS.SchemaRegistry[5].abi,
-    functionName: "register",
-    args: [rawSchema, schemaName, schemaDescription, resolver, isRevocable],
-  });
-  const { write } = useContractWrite(config);
+  const handleTagChange = (tags) => {
+    setCategories({ tags });
+    console.log(tags);
+  };
 
   const handleAttributeChange = (index, key, value) => {
     const updatedAttributes = [...attributes];
     updatedAttributes[index][key] = value;
-
-    if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
-      updatedAttributes[index]["type"] = "string";
-      updatedAttributes[index]["name"] = value;
-      updatedAttributes[index]["readonly"] = true;
-    } else {
-      updatedAttributes[index]["type"] = value;
-      updatedAttributes[index]["name"] = "";
-      updatedAttributes[index]["readonly"] = false;
-    }
-
     setAttributes(updatedAttributes);
   };
 
-  const handleAttributeNameChange = (index, key, value) => {
+  const handleAttributeAddressChange = (index, key, value) => {
     const updatedAttributes = [...attributes];
     updatedAttributes[index][key] = value;
     setAttributes(updatedAttributes);
   };
 
-  const handleCheckboxChange = (index) => {
-    const updatedAttributes = [...attributes];
-    updatedAttributes[index]["isArray"] = !updatedAttributes[index]["isArray"];
-    setAttributes(updatedAttributes);
-    generateAttributeString()
-  };
-
   const addAttribute = () => {
-    setAttributes([
-      ...attributes,
-      { type: "Select Type", name: "", isArray: false },
-    ]);
-    generateAttributeString()
+    setAttributes([...attributes, { address: "Select address", shares: 0 }]);
   };
 
   const removeAttribute = (index) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
-    generateAttributeString()
-  };
-
-  const generateAttributeString = () => {
-    setRawSchema(
-      attributes
-        .map((attr) => {
-          const type = attr.isArray ? `${attr.type}[]` : attr.type;
-          return `${type} ${attr.name}`;
-        })
-        .join(", ")
-    );
-    return rawSchema
   };
 
   const handleSubmit = () => {
@@ -119,9 +66,8 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       isRevocable,
       resolver,
       attributes: attributes.map((attr) => ({
-        type: attr.type,
-        name: attr.name,
-        isArray: attr.isArray,
+        address: attr.address,
+        shares: attr.shares,
       })),
     };
 
@@ -188,6 +134,21 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
+          <div className="mb-4">
+            <div className="mb-1 flex">
+              <Tooltip
+                placement="right-start"
+                content="describe your schema useCase"
+              >
+                <label htmlFor="picture" className="text-black font-medium">
+                  Categories
+                </label>
+              </Tooltip>
+
+              <FaInfoCircle className="mt-1 ml-2" />
+            </div>
+              <TagsInput className="background-color-white" value={categories.tags} onChange={handleTagChange} />
+          </div>
           <div className="mb-4 items-center">
             <div className="mb-1 flex">
               <Tooltip
@@ -196,96 +157,69 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 (Can be used to verify, limit, act upon any attestation)"
               >
                 <label className="text-black font-medium">
-                  Resolver Address
+                  Monthly Subscription Price
                 </label>
               </Tooltip>
 
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
             <Input
-              type="text"
-              value={resolver}
-              onChange={(e) => setResolver(e.target.value)}
-              placeholder="Resolver Address"
+              type="number"
+              value={monthlySubscriptionPrice}
+              onChange={(e) => setMonthlySubscriptionPrice(e.target.value)}
+              placeholder="Monthly Subscription Price"
               className="rounded-full flex-grow px-4 py-2 border border-black"
             />
           </div>
-          <div className="flex justify-center items-center gap-2 ">
-            {" "}
-            <input
-              type="checkbox"
-              checked={isRevocable}
-              onChange={() => setIsRevocable(!isRevocable)}
-              className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3 cursor-pointer "
-            />
-            <Typography
-              className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3"
-              variant="h8"
-              color="black"
-              onClick={() => setIsRevocable(!isRevocable)}
+          <div className="mb-1 flex">
+            <Tooltip
+              placement="right-start"
+              content="Optional smart contract.
+(Can be used to verify, limit, act upon any attestation)"
             >
-              Revocable
-            </Typography>
+              <label className="text-black font-medium">Content Creators</label>
+            </Tooltip>
+
+            <FaInfoCircle className="mt-1 ml-2" />
           </div>
           {attributes.map((attr, index) => (
             <div
               key={index}
               className="mb-4 flex border border-black p-4 rounded-xl flex items-center mx-2 gap-7"
             >
-              <div className="w-1/4">
+              <div className="w-1/7">
                 <div className="flex-shrink-0">
                   <SlOptionsVertical className="text-gray-500" />
                 </div>
               </div>
-              <div className="w-full">
+              <div className="w-4/7">
                 <Input
                   type="text"
                   value={attr.name}
                   onChange={(e) =>
-                    handleAttributeNameChange(index, "name", e.target.value)
+                    handleAttributeAddressChange(
+                      index,
+                      "address",
+                      e.target.value
+                    )
                   }
-                  placeholder="field name"
-                  readOnly={attr.readonly}
+                  placeholder="creator address"
                   className="rounded-full px-4 py-2 border border-black"
                 />
               </div>
-              <div className="w-1/4">
-                <select
-                  value={attr.type}
+              <div className="w-1/7">
+                <Input
+                  type="number"
+                  value={attr.name}
                   onChange={(e) =>
-                    handleAttributeChange(index, "type", e.target.value)
+                    handleAttributeChange(index, "shares", e.target.value)
                   }
-                  className="attribute-select rounded-full px-4 py-2 border border-black mr-20"
-                >
-                  <option value="Select Type">Select Type</option>
-                  <option value="imageCID">imageCID</option>
-                  <option value="videoCID">VideoCID</option>
-                  <option value="jsonCID">JSONCID</option>
-                  {solidityTypes.map((type, typeIndex) => (
-                    <option key={typeIndex} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex justify-center items-center gap-2 ">
-                <input
-                  type="checkbox"
-                  checked={attr.isArray}
-                  onChange={() => handleCheckboxChange(index)}
-                  className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 ml-2 cursor-pointer"
+                  placeholder="creator shares"
+                  className="rounded-full px-4 py-2 border border-black "
                 />
-                <Typography
-                  className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  variant="h8"
-                  color="black"
-                  onClick={() => handleCheckboxChange(index)}
-                >
-                  Array
-                </Typography>{" "}
               </div>
 
-              <div className="w-1/4 text-right">
+              <div className="w-1/7 text-right">
                 {index > 0 && (
                   <BsTrash3Fill
                     onClick={() => removeAttribute(index)}
@@ -307,19 +241,13 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               variant="h8"
               color="black"
             >
-              add field
+              add creator
             </Typography>
-          </div>
-          <div className="mt-4">
-            <Typography variant="h6" color="black">
-              Generated schema :
-            </Typography>
-            <Typography color="black">{rawSchema}</Typography>
           </div>
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={write}
+              onClick={handleSubmit}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit
@@ -338,4 +266,4 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   );
 };
 
-export default RegisterSchemaModal;
+export default RegisterSubscriptionSchemaModal;

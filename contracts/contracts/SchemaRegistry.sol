@@ -46,17 +46,19 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
             SQLHelpers.toCreateFromSchema(SCHEMA_SCHEMA, SCHEMA_TABLE_PREFIX)
         );
 
+
         tableIDs = tablelandContract.create(
             address(this),
             createTableStatements
         );
 
         tables.push(SQLHelpers.toNameFromId(SCHEMA_TABLE_PREFIX, tableIDs[0]));
+
     }
 
     function register(
-        string calldata schema,
-        string calldata schemaName,
+        string memory schema,
+        string memory schemaName,
         string memory schemaDescription,
         ISchemaResolver resolver,
         bool revocable

@@ -32,6 +32,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     struct SchemaInfo{
         EnumerableSet.AddressSet contentCreators;
+        address multisig;
         uint256 subscriptionPrice;
         uint256 subscriptionsPool;
         uint256 totalRevenue;
@@ -61,7 +62,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     string private constant GROUP_TABLE_PREFIX = "group";
 
-    string private constant GROUP_SCHEMA = "schemaUID text primary key, monthlySubscriptionPrice text, splitterContract text";
+    string private constant GROUP_SCHEMA = "schemaUID text primary key, jsonSchema text, monthlySubscriptionPrice text, splitterContract text";
 
     string private constant CREATOR_TABLE_PREFIX = "creator";
 
@@ -120,8 +121,9 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     function SchemaInfoInserted(
         bytes32 schemaUID,
-        address[] calldata contentCreators,
-        uint256[] calldata creatorsShares,
+        address[] memory contentCreators,
+        uint256[] memory creatorsShares,
+        string memory jsonSchema,
         uint256 monthlySubscriptionPrice,
         address splitterContract
     ) internal {
@@ -134,9 +136,11 @@ contract ContentSubscriptionResolver is SchemaResolver {
             SQLHelpers.toInsert(
                 GROUP_TABLE_PREFIX,
                 tableIDs[0],
-                "schemaUID, monthlySubscriptionPrice, splitterContract",
+                "schemaUID, jsonSchema, monthlySubscriptionPrice, splitterContract",
                 string.concat(
                 SQLHelpers.quote(bytes32ToString(schemaUID)),
+                ",",
+                SQLHelpers.quote(jsonSchema),
                 ",",
                 SQLHelpers.quote((Strings.toString(monthlySubscriptionPrice))),
                 ",",
@@ -151,8 +155,8 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     function SchemaAdminsInserted(
         bytes32 schemaUID,
-        address[] calldata contentCreators,
-        uint256[] calldata creatorsShares
+        address[] memory contentCreators,
+        uint256[] memory creatorsShares
     ) internal {
         for(uint i =0; i < contentCreators.length; i++){
             mutate(
@@ -266,11 +270,12 @@ contract ContentSubscriptionResolver is SchemaResolver {
     }
 
     function registerSubscriptionSchema(
-        address[] calldata contentCreators,
-        uint256[] calldata creatorsShares,
+        address[] memory contentCreators,
+        uint256[] memory creatorsShares,
         uint256 monthlySubscriptionPrice,
-        string calldata schemaName,
-        string calldata schemaDescription
+        string memory schemaName,
+        string memory schemaDescription,
+        string memory jsonSchema
     )external{
         // Register the schema and get its UID
         bytes32 schemaUID = schemaRegistry.register(
@@ -286,8 +291,9 @@ contract ContentSubscriptionResolver is SchemaResolver {
         for(uint256 i = 0; i < contentCreators.length; i++){
             Schema.contentCreators.add(contentCreators[i]);
         }
+        Schema.multisig = msg.sender;
 
-        SchemaInfoInserted(schemaUID, contentCreators, creatorsShares, monthlySubscriptionPrice, Schema.splitterContract);
+        SchemaInfoInserted(schemaUID, contentCreators, creatorsShares, jsonSchema,  monthlySubscriptionPrice, Schema.splitterContract);
     }
 
     /**

@@ -36,7 +36,7 @@ const Footer = () => {
       </div>
       <hr className="my-8 border-blue-gray-50" />
       <Button color="blue-gray" size="sm" className="mx-auto block">
-        &copy; 2023 Tableland Attestation Service
+      Copyright &copy; 2023 Tableland Attestation Service, All rights reserved.
       </Button>
     </footer>
   );

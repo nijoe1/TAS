@@ -22,8 +22,8 @@ interface ISchemaRegistry {
     /// @param revocable Whether the schema allows revocations explicitly.
     /// @return The UID of the new schema.
     function register(        
-        string calldata schema,
-        string calldata schemaName,
+        string memory schema,
+        string memory schemaName,
         string memory schemaDescription,
         ISchemaResolver resolver,
         bool revocable
