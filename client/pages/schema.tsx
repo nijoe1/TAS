@@ -9,8 +9,10 @@ import { useRouter } from "next/router";
 import { getSchemaAttestations, getSchema } from "@/lib/tableland";
 import TimeCreated from "@/components/TimeCreated"; // Replace with the actual path
 import EthereumAddress from "@/components/EthereumAddress";
+import { useChainId } from "wagmi";
 
 const schema = () => {
+  const chainID = useChainId()
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [schemaData, setSchemaData] = useState({
@@ -54,8 +56,8 @@ const schema = () => {
     async function fetch() {
       if (schemaUID) {
         const attestationTableInfo = [];
-        let attestations = await getSchemaAttestations(schemaUID);
-        let schema = await getSchema(schemaUID);
+        let attestations = await getSchemaAttestations(chainID,schemaUID);
+        let schema = await getSchema(chainID, schemaUID);
         schema = schema[0];
         let schemaInfo = schemaData;
         attestations.forEach((inputObject, index) => {
@@ -91,10 +93,10 @@ const schema = () => {
         console.log(schemaData);
       }
     }
-    if (!taken && schemaUID) {
+    if (!taken && schemaUID && chainID) {
       fetch();
     }
-  }, [schemaUID]);
+  }, [schemaUID, chainID]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>

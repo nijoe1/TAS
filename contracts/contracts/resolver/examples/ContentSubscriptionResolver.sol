@@ -17,6 +17,8 @@ import {ITAS, Attestation} from "../../ITAS.sol";
 
 import {SchemaResolver} from "../SchemaResolver.sol";
 
+import { ITablelandSubscriptionsIndexer } from "./interfaces/ITablelandSubscriptionsIndexer.sol";
+
 import "../../ISchemaRegistry.sol";
 
 /**
@@ -46,228 +48,34 @@ contract ContentSubscriptionResolver is SchemaResolver {
     mapping(address => mapping(bytes32 => uint256)) public userSubscriptions;
 
     // The global schema registry.
-    ISchemaRegistry private immutable schemaRegistry;
+    ISchemaRegistry private schemaRegistry;
 
-    ITablelandTables private tablelandContract;
-    
-    string[] createTableStatements; 
+    ISchemaResolver schemaResolver;
 
-    string[] public tables;
+    ITablelandSubscriptionsIndexer tableland;
 
-    uint256[] tableIDs;
-
-    uint256 tablesUpdates;
-
-    uint256 private tablesRowsCounter;
-
-    string private constant GROUP_TABLE_PREFIX = "group";
-
-    string private constant GROUP_SCHEMA = "schemaUID text primary key, jsonSchema text, monthlySubscriptionPrice text, splitterContract text";
-
-    string private constant CREATOR_TABLE_PREFIX = "creator";
-
-    string private constant CREATOR_SCHEMA = "schemaUID text primary key, attester text, shares text";
-
-    string private constant SUBSCRIPTION_TABLE_PREFIX = "subscription";
-
-    string private constant SUBSCRIPTION_SCHEMA = "schemaUID text, subscriber text, subscriptionEndsAt text";
-
-    string private constant GROUP_REVENUE_TABLE_PREFIX = "revenue";
-
-    string private constant GROUP_REVENUE_SCHEMA = "schemaUID text primary key, totalUnclaimed text, totalClaimed text";
+    bool revocable;
 
     address public splitterFactory;
 
     constructor(
         ITAS tas,
         address _splitterFactory,
-        ISchemaRegistry _schemaRegistry
+        ISchemaRegistry _schemaRegistry,
+        ITablelandSubscriptionsIndexer _tableland
     )SchemaResolver(tas){
+
+        schemaResolver = ISchemaResolver(address(this));
 
         schemaRegistry = _schemaRegistry;
 
         splitterFactory = _splitterFactory;
 
-        tablelandContract = TablelandDeployments.get();        
-
-        createTableStatements.push(SQLHelpers.toCreateFromSchema(
-            GROUP_SCHEMA,
-            GROUP_TABLE_PREFIX
-        ));
-
-        createTableStatements.push(SQLHelpers.toCreateFromSchema(
-            CREATOR_SCHEMA,
-            CREATOR_TABLE_PREFIX
-        ));
-
-        createTableStatements.push(SQLHelpers.toCreateFromSchema(
-            SUBSCRIPTION_SCHEMA,
-            SUBSCRIPTION_TABLE_PREFIX
-        ));
-
-        createTableStatements.push(SQLHelpers.toCreateFromSchema(
-            GROUP_REVENUE_SCHEMA,
-            GROUP_REVENUE_TABLE_PREFIX
-        ));
-
-        tableIDs = tablelandContract.create(address(this), createTableStatements);
-
-        tables.push(SQLHelpers.toNameFromId(GROUP_TABLE_PREFIX, tableIDs[0]));
-        tables.push(SQLHelpers.toNameFromId(CREATOR_TABLE_PREFIX, tableIDs[1]));
-        tables.push(SQLHelpers.toNameFromId(SUBSCRIPTION_TABLE_PREFIX, tableIDs[2]));
-        tables.push(SQLHelpers.toNameFromId(GROUP_REVENUE_TABLE_PREFIX, tableIDs[3]));
+        tableland = _tableland;
 
     }
 
-    function SchemaInfoInserted(
-        bytes32 schemaUID,
-        address[] memory contentCreators,
-        uint256[] memory creatorsShares,
-        string memory jsonSchema,
-        uint256 monthlySubscriptionPrice,
-        address splitterContract
-    ) internal {
-        // Managing tableland rows limitation.
-        if(tablesRowsCounter == 100000){
-            RenewTables();
-        }
-        mutate(
-            tableIDs[0],
-            SQLHelpers.toInsert(
-                GROUP_TABLE_PREFIX,
-                tableIDs[0],
-                "schemaUID, jsonSchema, monthlySubscriptionPrice, splitterContract",
-                string.concat(
-                SQLHelpers.quote(bytes32ToString(schemaUID)),
-                ",",
-                SQLHelpers.quote(jsonSchema),
-                ",",
-                SQLHelpers.quote((Strings.toString(monthlySubscriptionPrice))),
-                ",",
-                SQLHelpers.quote((Strings.toHexString(splitterContract)))
-                )
-            )
-        );
-        tablesRowsCounter++;
-        SchemaAdminsInserted(schemaUID, contentCreators, creatorsShares);
-        SchemaRevenueRecordCreated(schemaUID);
-    }
-
-    function SchemaAdminsInserted(
-        bytes32 schemaUID,
-        address[] memory contentCreators,
-        uint256[] memory creatorsShares
-    ) internal {
-        for(uint i =0; i < contentCreators.length; i++){
-            mutate(
-                tableIDs[1],
-                SQLHelpers.toInsert(
-                    CREATOR_TABLE_PREFIX,
-                    tableIDs[1],
-                    "schemaUID, attester, shares",
-                    string.concat(
-                    SQLHelpers.quote(bytes32ToString(schemaUID)),
-                    ",",
-                    SQLHelpers.quote(Strings.toHexString(contentCreators[i])),
-                    ",",
-                    SQLHelpers.quote(Strings.toString(creatorsShares[i]))
-                    )
-                )
-            );
-        }
-    }
-
-    function SchemaSubscriptionCreated(
-        bytes32 schemaUID,
-        address subscriber,
-        uint256 subscriptionEndsAt
-    ) internal {
-        mutate(
-            tableIDs[2],
-            SQLHelpers.toInsert(
-                SUBSCRIPTION_TABLE_PREFIX,
-                tableIDs[2],
-                "schemaUID, subscriber, subscriptionEndsAt",
-                string.concat(
-                SQLHelpers.quote(bytes32ToString(schemaUID)),
-                ",",
-                SQLHelpers.quote(Strings.toHexString(subscriber)),
-                ",",
-                SQLHelpers.quote(Strings.toString(subscriptionEndsAt))
-                )
-            )
-        );
-    }
-
-    function SchemaSubscriptionUpdated(
-        bytes32 schemaUID,
-        address subscriber,
-        uint256 subscriptionEndsAt
-    ) internal {
-        mutate(
-            tableIDs[2],
-            SQLHelpers.toUpdate(
-                SUBSCRIPTION_TABLE_PREFIX,
-                tableIDs[2],
-                string.concat("subscriptionEndsAt=",SQLHelpers.quote(Strings.toString(subscriptionEndsAt))),
-                string.concat("subscriber=",SQLHelpers.quote(Strings.toHexString(subscriber)),"and schemaUID=",SQLHelpers.quote(bytes32ToString(schemaUID)))
-            )
-        );
-    }
-
-    function SchemaRevenueRecordCreated(
-        bytes32 schemaUID
-    ) internal {
-        uint256 ZERO = 0;
-        mutate(
-            tableIDs[3],
-            SQLHelpers.toInsert(
-                SUBSCRIPTION_TABLE_PREFIX,
-                tableIDs[3],
-                "schemaUID, totalUnclaimed, totalClaimed",
-                string.concat(
-                SQLHelpers.quote(bytes32ToString(schemaUID)),
-                ",",
-                SQLHelpers.quote(Strings.toString(ZERO)),
-                ",",
-                SQLHelpers.quote(Strings.toString(ZERO))
-                )
-            )
-        );
-    }
-
-    function SchemaRevenueUpdated(
-        bytes32 schemaUID,
-        uint256 totalUnclaimed,
-        uint256 totalClaimed
-    ) internal {
-        mutate(
-            tableIDs[3],
-            SQLHelpers.toUpdate(
-                SUBSCRIPTION_TABLE_PREFIX,
-                tableIDs[3],
-                string.concat("totalUnclaimed=",SQLHelpers.quote(Strings.toString(totalUnclaimed))," , totalClaimed=",SQLHelpers.quote(Strings.toString(totalClaimed))),
-                string.concat("schemaUID=",SQLHelpers.quote(bytes32ToString(schemaUID)))
-            )
-        );
-    }
-
-    function RenewTables()internal{
-        
-        tableIDs = tablelandContract.create(address(this), createTableStatements);
-
-        tables.push(SQLHelpers.toNameFromId(GROUP_TABLE_PREFIX, tableIDs[0]));
-
-        tables.push(SQLHelpers.toNameFromId(CREATOR_TABLE_PREFIX, tableIDs[1]));
-
-        tables.push(SQLHelpers.toNameFromId(SUBSCRIPTION_TABLE_PREFIX, tableIDs[2]));
-
-        tables.push(SQLHelpers.toNameFromId(GROUP_REVENUE_TABLE_PREFIX, tableIDs[3]));
-
-        tablesRowsCounter = 0; 
-
-        tablesUpdates++;
-    }
+    
 
     function registerSubscriptionSchema(
         address[] memory contentCreators,
@@ -278,22 +86,40 @@ contract ContentSubscriptionResolver is SchemaResolver {
         string memory jsonSchema
     )external{
         // Register the schema and get its UID
-        bytes32 schemaUID = schemaRegistry.register(
-            schema,
-            schemaName,
-            schemaDescription,
-            ISchemaResolver(address(this)),
-            false
-        );
+        bytes32 schemaUID = registerSchema(schemaName, schemaDescription);
+
         SchemaInfo storage Schema = schemas[schemaUID];
+
         Schema.splitterContract = createSplitter(contentCreators,creatorsShares);
+
         Schema.subscriptionPrice = monthlySubscriptionPrice;
+
         for(uint256 i = 0; i < contentCreators.length; i++){
             Schema.contentCreators.add(contentCreators[i]);
         }
+
         Schema.multisig = msg.sender;
 
-        SchemaInfoInserted(schemaUID, contentCreators, creatorsShares, jsonSchema,  monthlySubscriptionPrice, Schema.splitterContract);
+        tableland.SchemaInfoInserted(schemaUID, jsonSchema,  monthlySubscriptionPrice, Schema.splitterContract);
+
+        tableland.SchemaAdminsInserted(schemaUID, contentCreators, creatorsShares);
+
+        tableland.SchemaRevenueRecordCreated(schemaUID);
+
+    }
+
+    function registerSchema(
+        string memory schemaName,
+        string memory schemaDescription
+    )internal returns(bytes32 schemaUID){
+        // Register the schema and get its UID
+        schemaUID = schemaRegistry.register(
+            schema,
+            schemaName,
+            schemaDescription,
+            schemaResolver,
+            revocable
+        );
     }
 
     /**
@@ -314,21 +140,21 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
         if(subscriptionEndDate == 0){
             time += block.timestamp;
-            SchemaSubscriptionCreated(schemaUID, msg.sender, time);
+            tableland.SchemaSubscriptionCreated(schemaUID, msg.sender, time);
             userSubscriptions[msg.sender][schemaUID] = time;
         }else if(subscriptionEndDate > block.timestamp){
             subscriptionEndDate += time;
             userSubscriptions[msg.sender][schemaUID] = subscriptionEndDate;
-            SchemaSubscriptionUpdated(schemaUID, msg.sender, subscriptionEndDate);
+            tableland.SchemaSubscriptionUpdated(schemaUID, msg.sender, subscriptionEndDate);
         }else{
             time += block.timestamp;
-            SchemaSubscriptionUpdated(schemaUID, msg.sender, time);
+            tableland.SchemaSubscriptionUpdated(schemaUID, msg.sender, time);
             userSubscriptions[msg.sender][schemaUID] = time;
         }
 
         schemas[schemaUID].subscriptionsPool += msg.value;
 
-        SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
+        tableland.SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
     }
 
     /**
@@ -375,7 +201,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
         schemas[schemaUID].subscriptionsPool = 0;
 
-        SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
+        tableland.SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
     }
 
 
@@ -420,13 +246,4 @@ contract ContentSubscriptionResolver is SchemaResolver {
         return string(abi.encodePacked("0x", converted));
     }
 
-
-    /*
-    * @dev Internal function to execute a mutation on a table.
-    * @param {uint256} tableId - Table ID.
-    * @param {string} statement - Mutation statement.
-    */
-    function mutate(uint256 tableId, string memory statement) internal {
-        tablelandContract.mutate(address(this), tableId, statement);
-    }
 }

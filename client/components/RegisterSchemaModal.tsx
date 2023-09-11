@@ -4,13 +4,8 @@ import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
-import {
-  useContractWrite,
-  usePrepareContractWrite,
-  useContractRead,
-} from "wagmi";
+import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
-import schema from "@/pages/schema";
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -22,6 +17,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   onClose,
   onCreate,
 }) => {
+  const chainID = useChainId();
   const [attributes, setAttributes] = useState([
     { type: "Select Type", name: "", isArray: false },
   ]);
@@ -32,6 +28,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const [resolver, setResolver] = useState(
     "0x0000000000000000000000000000000000000000"
   );
+  const [chainid, setChainid] = useState(chainID);
 
   const solidityTypes = [
     "string",
@@ -48,8 +45,8 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   ];
 
   const { config } = usePrepareContractWrite({
-    address: CONTRACTS.SchemaRegistry[5].contract,
-    abi: CONTRACTS.SchemaRegistry[5].abi,
+    address: CONTRACTS.SchemaRegistry[chainid].contract,
+    abi: CONTRACTS.SchemaRegistry[chainid].abi,
     functionName: "register",
     args: [rawSchema, schemaName, schemaDescription, resolver, isRevocable],
   });
@@ -82,7 +79,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     const updatedAttributes = [...attributes];
     updatedAttributes[index]["isArray"] = !updatedAttributes[index]["isArray"];
     setAttributes(updatedAttributes);
-    generateAttributeString()
+    generateAttributeString();
   };
 
   const addAttribute = () => {
@@ -90,14 +87,14 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       ...attributes,
       { type: "Select Type", name: "", isArray: false },
     ]);
-    generateAttributeString()
+    generateAttributeString();
   };
 
   const removeAttribute = (index) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
-    generateAttributeString()
+    generateAttributeString();
   };
 
   const generateAttributeString = () => {
@@ -109,7 +106,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
         })
         .join(", ")
     );
-    return rawSchema
+    return rawSchema;
   };
 
   const handleSubmit = () => {
@@ -319,7 +316,8 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={write}
+              // @ts-ignore
+              onClick={() => write()}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit

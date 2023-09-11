@@ -3,11 +3,10 @@ import {
   decrypt,
   uploadFileEncrypted,
   applyAccessConditions,
-} from "@/lib/index";
+} from "@/lib/lighthouse";
 import { useAccount } from "wagmi";
 import { signMessage } from "@wagmi/core";
 import lighthouse from "@lighthouse-web3/sdk";  
-import DynamicForm from "@/components/DynamicForm"; // Import the form component
 import axios from "axios";
   
   const { address } = useAccount();
@@ -33,9 +32,7 @@ import axios from "axios";
     });
   };
 return(
-    <div>
-            <DynamicForm schema="uint256 id, string name, address wallet, bytes32 hash, bool isActive, string[] tsifsa" />
-</div>
+
 <div className="App">
         <input
           onChange={async (e) =>

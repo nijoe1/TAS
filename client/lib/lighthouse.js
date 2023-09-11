@@ -1,5 +1,7 @@
 import axios from "axios";
 import lighthouse from "@lighthouse-web3/sdk";
+import { getJWT } from '@lighthouse-web3/kavach';
+
 
 export const getIpfsGatewayUri = (cidOrIpfsUri) => {
   const LIGHTHOUSE_IPFS_GATEWAY = "https://gateway.lighthouse.storage/ipfs/{cid}";
@@ -42,13 +44,11 @@ const progressCallback = (progressData) => {
   console.log(percentageDone);
 };
 
-export const uploadFile = async (file, address,signedMessage) => {
+export const uploadFile = async (file, apiKey) => {
 
-  const API_KEY = await lighthouse.getApiKey(address, signedMessage);
-  console.log(API_KEY.data.apiKey);
   const output = await lighthouse.upload(
     file,
-    API_KEY.data.apiKey,
+    apiKey,
     false,
     null,
     progressCallback
@@ -57,25 +57,36 @@ export const uploadFile = async (file, address,signedMessage) => {
   console.log(
     "Visit at https://gateway.lighthouse.storage/ipfs/" + output.data.Hash
   );
+  return output.data
 };
 
 /* Deploy file along with encryption */
-export const uploadFileEncrypted = async (file, address,signEncryption, signedMessage) => {
-
-  const API_KEY = await lighthouse.getApiKey(address, signedMessage);
+export const uploadFileEncrypted = async (file, apiKey , address, signEncryption) => {
 
  const output = await lighthouse.uploadEncrypted(
     file,
-    API_KEY.data.apiKey,
+    apiKey,
     address,
     signEncryption,
     null
   );
   console.log(output)
-  return output
+  return output.data
 };
 
-export const decrypt = async(cid,address, signedMessage) =>{
+export const generateLighthouseJWT = async(address, signEncryption) => {
+  const response = await getJWT(address, signEncryption);
+    if (response.JWT) {
+        localStorage.setItem(`lighthouse-jwt-${address}`, response.JWT);
+        return response.JWT;
+    }
+    
+    if(response.error){
+        return null
+    }
+}
+
+export const decrypt = async(cid, address, signedMessage) =>{
   // Fetch file encryption key
   /*
     fetchEncryptionKey(cid, publicKey, signedMessage)
@@ -85,7 +96,7 @@ export const decrypt = async(cid,address, signedMessage) =>{
         signedMessage: message signed by the owner of publicKey
   */
   const keyObject = await lighthouse.fetchEncryptionKey(
-    "QmapiyY9t9DdDFJxNKg5au6ZqvRuVRnaJxomm8eKvj5HP6",
+    cid,
     address,
     signedMessage
   );
@@ -99,8 +110,8 @@ export const decrypt = async(cid,address, signedMessage) =>{
         mimeType: default null, mime type of file
   */
  
-  const fileType = "video/mp4";
-  const decrypted = await lighthouse.decryptFile("QmapiyY9t9DdDFJxNKg5au6ZqvRuVRnaJxomm8eKvj5HP6", keyObject.data.key, fileType);
+  const fileType = "application/json"
+  const decrypted = await lighthouse.decryptFile(cid, keyObject.data.key, fileType);
   console.log(decrypted)
   /*
     Response: blob

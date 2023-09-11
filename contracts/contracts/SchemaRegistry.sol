@@ -10,50 +10,24 @@ import { Semver } from "./Semver.sol";
 
 import { ISchemaRegistry, SchemaRecord } from "./ISchemaRegistry.sol";
 
-import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
-
-import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
-
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {ISchemaTablelandIndexer} from "./interfaces/ISchemaTablelandIndexer.sol";
 
 /// @title SchemaRegistry
 /// @notice The global schema registry.
 contract SchemaRegistry is ISchemaRegistry, Semver {
+
+    ISchemaTablelandIndexer tableland;
 
     error AlreadyExists();
 
     // The global mapping between schema records and their IDs.
     mapping(bytes32 uid => SchemaRecord schemaRecord) private _registry;
 
-    ITablelandTables private tablelandContract;
-
-    string[] createTableStatements;
-
-    string[] public tables;
-
-    uint256[] tableIDs;
-
-    string private constant SCHEMA_TABLE_PREFIX = "schema";
-
-    string private constant SCHEMA_SCHEMA = "schemaUID text primary key, schema text, resolver text, revocable text, name text, description text, creator text, creationTimestamp text";
-
     /// @dev Creates a new SchemaRegistry instance.
-    constructor() Semver(0, 0, 1) {
-
-        tablelandContract = TablelandDeployments.get();
-
-        createTableStatements.push(
-            SQLHelpers.toCreateFromSchema(SCHEMA_SCHEMA, SCHEMA_TABLE_PREFIX)
-        );
-
-
-        tableIDs = tablelandContract.create(
-            address(this),
-            createTableStatements
-        );
-
-        tables.push(SQLHelpers.toNameFromId(SCHEMA_TABLE_PREFIX, tableIDs[0]));
-
+    constructor(
+        ISchemaTablelandIndexer _tableland
+    ) Semver(0, 0, 1) {
+        tableland = _tableland;
     }
 
     function register(
@@ -78,52 +52,16 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
         schemaRecord.uid = uid;
         _registry[uid] = schemaRecord;
 
-        SchemaRegistered(
+        tableland.SchemaRegistered(
             schemaRecord.uid,
             schema,
             schemaName,
             schemaDescription,
-            resolver,
+            address(resolver),
             revocable
         );
 
         return uid;
-    }
-
-    function SchemaRegistered(
-        bytes32 schemaUID,
-        string memory schema,
-        string memory schemaName,
-        string memory schemaDescription,
-        ISchemaResolver resolver,
-        bool revocable
-    ) internal {
-        // require(attestation.data.length <= 1024, "Tableland limitation");
-        mutate(
-            tableIDs[0],
-            SQLHelpers.toInsert(
-                SCHEMA_TABLE_PREFIX,
-                tableIDs[0],
-                "schemaUID, schema, resolver, revocable, name, description, creator, creationTimestamp",
-                string.concat(
-                    SQLHelpers.quote(bytes32ToString(schemaUID)),
-                    ",",
-                    SQLHelpers.quote(schema),
-                    ",",
-                    SQLHelpers.quote(Strings.toHexString(address(resolver))),
-                    ",",
-                    SQLHelpers.quote(revocable ? "true" : "false"),
-                    ",",
-                    SQLHelpers.quote(schemaName),
-                    ",",
-                    SQLHelpers.quote(schemaDescription),
-                    ",",
-                    SQLHelpers.quote(Strings.toHexString(msg.sender)),
-                    ",",
-                    SQLHelpers.quote(Strings.toString(block.timestamp))
-                )
-            )
-        );
     }
 
     /// @inheritdoc ISchemaRegistry
@@ -148,28 +86,5 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
                     block.timestamp
                 )
             );
-    }
-
-    function bytes32ToString(bytes32 data) public pure returns (string memory) {
-        // Fixed buffer size for hexadecimal convertion
-        bytes memory converted = new bytes(data.length * 2);
-
-        bytes memory _base = "0123456789abcdef";
-
-        for (uint256 i = 0; i < data.length; i++) {
-            converted[i * 2] = _base[uint8(data[i]) / _base.length];
-            converted[i * 2 + 1] = _base[uint8(data[i]) % _base.length];
-        }
-
-        return string(abi.encodePacked("0x", converted));
-    }
-
-    /*
-     * @dev Internal function to execute a mutation on a table.
-     * @param {uint256} tableId - Table ID.
-     * @param {string} statement - Mutation statement.
-     */
-    function mutate(uint256 tableId, string memory statement) internal {
-        tablelandContract.mutate(address(this), tableId, statement);
     }
 }

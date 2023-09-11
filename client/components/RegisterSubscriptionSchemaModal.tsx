@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Input, Typography, Tooltip } from "@material-tailwind/react";
 import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
@@ -6,8 +6,12 @@ import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
 // @ts-ignore
 import TagsInput from "react-tagsinput";
-// import 'react-tagsinput/react-tagsinput.css'
-// import "@/styles/globals.css"
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId
+} from "wagmi";
+import { CONTRACTS } from "@/constants/contracts";
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -20,6 +24,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   onClose,
   onCreate,
 }) => {
+  const chainID = useChainId()
   const [schemaName, setSchemaName] = useState("");
   const [schemaDescription, setSchemaDescription] = useState("");
   const [isRevocable, setIsRevocable] = useState(false);
@@ -31,6 +36,27 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const [attributes, setAttributes] = useState([
     { address: "creator address", shares: 0 },
   ]);
+  const [creators, setCreators] = useState([])
+  const [shares, setShares] = useState([])
+
+  const { config } = usePrepareContractWrite({
+    address: CONTRACTS.SubscriptionResolver[chainID].contract,
+    abi: CONTRACTS.SubscriptionResolver[chainID].abi,
+    functionName: "registerSubscriptionSchema",
+    args: [creators, shares, monthlySubscriptionPrice, schemaName, schemaDescription," "],
+  });
+  const { write } = useContractWrite(config);
+
+  useEffect(() => {
+    let creatorsList = []
+    let sharesList = []
+    for(const attr of attributes){
+      creatorsList.push(attr.address)
+      sharesList.push(attr.shares)
+    }
+    setCreators(creatorsList)
+    setShares(sharesList)
+  }, [attributes, creators, shares]);
 
   const handleTagChange = (tags) => {
     setCategories({ tags });
@@ -70,10 +96,16 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
         shares: attr.shares,
       })),
     };
-
-    console.log(JSON.stringify(schemaData, null, 2));
+    let creatorsList = []
+    let sharesList = []
+    for(const attr in schemaData.attributes){
+      creatorsList.push(attr.address)
+      sharesList.push(attr.shares)
+    }
+    setCreators(creatorsList)
+    setShares(sharesList)
     onCreate(schemaData);
-    onClose();
+
   };
 
   return (
@@ -247,7 +279,8 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={handleSubmit}
+              // @ts-ignore
+              onClick={write}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit

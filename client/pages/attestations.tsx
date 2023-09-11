@@ -8,15 +8,18 @@ import EthereumAddress from "@/components/EthereumAddress";
 import { getAttestations } from "@/lib/tableland";
 import Loading from "@/components/Loading/Loading";
 import TimeCreated from "@/components/TimeCreated";
+import { useChainId } from "wagmi";
 
 const Attestations = () => {
+  const chainID  = useChainId()
+
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     async function fetch() {
       const attestationTableInfo = [];
-      let attestations = await getAttestations();
+      let attestations = await getAttestations(chainID);
 
       attestations.forEach((inputObject, index) => {
         // Create a tableData entry
@@ -38,10 +41,10 @@ const Attestations = () => {
 
       setTableData(attestationTableInfo);
     }
-    if (!taken) {
+    if (!taken && chainID) {
       fetch();
     }
-  }, []);
+  }, [chainID]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>

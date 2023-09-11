@@ -45,7 +45,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData }) => {
     setIsAttestModalOpen(false);
   };
   function createAttestation(schemaData: any): void {}
-  const formattedDescription = formatDescription("Test");
+  const formattedDescription = formatDescription(schemaData.description);
 
   return (
     <div className={`flex-grow mx-auto `}>
@@ -58,7 +58,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData }) => {
               label="SchemaUID"
               value={<EthereumAddress address={schemaData.schemaUID} />}
             />
-            <Field label="Name" value={"Name"} />
+            <Field label="Name" value={schemaData.name} />
           </div>
           <div className="w-2/4  text-center border rounded-xl p-4 mx-auto">
             <Field label="Description" value={""} />
@@ -80,7 +80,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData }) => {
 
         <div className="flex justify-between  ">
           {/* Left Box */}
-          <div className="w-2/4  border rounded-xl p-4 mx-auto">
+          <div className="w-2/4  border rounded-xl p-4 mx-auto overflow-x-auto">
             <Field
               label="Created"
               value={<TimeCreated createdAt={schemaData.created} />}
@@ -146,7 +146,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData }) => {
 export default SchemaProfile;
 
 function formatDescription(description) {
-  const maxLength = 50; // Maximum characters per line
+  const maxLength = 32; // Maximum characters per line
   const words = description.split(" "); // Split the text into words
 
   let currentLine = "";

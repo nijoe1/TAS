@@ -36,6 +36,7 @@
         "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
         "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
         "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+        "@nomicfoundation/hardhat-verify": "^1.1.1",
         "@nomiclabs/hardhat-ethers": "^2.2.3",
         "@openzeppelin/contracts": "^4.9.3",
         "@openzeppelin/contracts-upgradeable": "^4.8.3",

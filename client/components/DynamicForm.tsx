@@ -3,9 +3,19 @@ import { Card, Input, Button, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { validateInput, transformFormData } from "@/lib/utils";
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
-
+import { useAccount } from "wagmi";
+import { signMessage } from "@wagmi/core";
+import lighthouse from "@lighthouse-web3/sdk";
+import axios from "axios"
+import {
+  uploadFile,
+  decrypt,
+  uploadFileEncrypted,
+  applyAccessConditions,
+  generateLighthouseJWT
+} from "@/lib/lighthouse";
 type DynamicFormModalProps = {
   schema: string;
   schemaUID?: string;
@@ -21,6 +31,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   onClose,
   onCreate,
 }) => {
+  const chainID = useChainId();
   const encoder = new SchemaEncoder(schema);
   const schemaArray = schema.split(",").map((item) => {
     const [type, name] = item.trim().split(" ");
@@ -40,16 +51,127 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   );
 
   const { config } = usePrepareContractWrite({
-    address: CONTRACTS.TAS[5].contract,
-    abi: CONTRACTS.TAS[5].abi,
+    address: CONTRACTS.TAS[chainID].contract,
+    abi: CONTRACTS.TAS[chainID].abi,
     functionName: "attest",
-    args: [[schemaUID, [recipient, 0, true, referencedAttestation, data, 0]]],
+    args: [[schemaUID, [recipient, 0, false, referencedAttestation, data, 0]]],
     value: BigInt(0),
   });
   const { write, isLoading, isSuccess, isError } = useContractWrite(config);
 
-  useEffect(() => {
+  const { address } = useAccount();
+  const [formDataJson, setFormDataJson] = useState({
+    name: "",
+    description: "",
+    fileType: "image",
+  });
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormDataJson({
+      ...formDataJson,
+      [name]: value,
+    });
+  };
+
+  function getAcceptedFileTypes(fileType) {
+    const allowedFileTypes = {
+      image: "image/jpeg, image/png, image/gif",
+      video: "video/mp4, video/webm, video/ogg",
+      pdf: "application/pdf",
+      csv: "text/csv",
+    };
+
+    return allowedFileTypes[fileType] || "";
+  }
+
+  const handleFileUpload = async (file) => {
+    let key = localStorage.getItem("API_KEY");
+
+    if (!key) {
+      const signed = await sign();
+      const API_KEY = await lighthouse.getApiKey(address, signed);
+      localStorage.setItem("API_KEY", API_KEY.data.apiKey);
+      key = API_KEY.data.apiKey;
+    }
+
+    // Upload file and get encrypted CID
+    const CID = await uploadFile(file, key);
+
+    // Create JSON object
+    const json = {
+      name: formDataJson.name,
+      description: formDataJson.description,
+      file: {
+        name: CID.Name,
+        type: file[0].type,
+        CID: CID.Hash,
+      },
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(json)], {
+      type: "application/json",
+    });
+
+    // Create a File object from the Blob
+    const jsonFile = new File([jsonBlob], `${formDataJson.name}.json`, {
+      type: "application/json",
+    });
+    // Upload JSON
+    let jsonCID = await uploadFileEncrypted(
+      [jsonFile],
+      key,
+      address,
+      await signEncryption()
+    );
+    console.log(jsonCID[0].Hash);
+    // Update state
+    // setFileURL(await decrypt(encryptedCID, address, signedEncryption));
+    handleInputChange(jsonCID[0].Hash, "jsonCID", "string");
+
+    console.log(await decrypt("QmSY42rSGX5iBSkC5pjQ5Bn1SbFZTcugS9ccMBFYvo4Ytx", address, await signEncryption()));
+  };
+
+  const signEncryption = async () => {
+    let key = localStorage.getItem(`lighthouse-jwt-${address}`);
+    if(key){
+      return key
+    }else{
+      try {
+        const response = await lighthouse.getAuthMessage(address);
+  
+        if (response && response.data && response.data.message) {
+          return await generateLighthouseJWT(address, await signMessage({
+            message: response.data.message,
+          }));
+        } else {
+          console.error("Error: Unable to retrieve authentication message.");
+          // Handle the error or return a default value as needed.
+          return null;
+        }
+      } catch (error) {
+        console.error("Error while getting authentication message:", error);
+        // Handle the error or return a default value as needed.
+        return null;
+      }
+    }
+  };
+
+  const sign = async () => {
+    const verificationMessage = (
+      await axios.get(
+        `https://api.lighthouse.storage/api/auth/get_message?publicKey=${address}`
+      )
+    ).data;
+    const signed = await signMessage({
+      message: verificationMessage,
+    });
+    return signed;
+  };
+
+  useEffect(() => {
     try {
       prepareData();
     } catch {
@@ -67,8 +189,12 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         // For array attributes, update the attribute directly within the array
         updatedFormData[attributeName] = newValue;
       } else {
-        // For non-array attributes, update as before
-        updatedFormData[attributeName] = newValue.target.value;
+        if (attributeName == "jsonCID") {
+          updatedFormData[attributeName] = newValue;
+        } else {
+          // For non-array attributes, update as before
+          updatedFormData[attributeName] = newValue.target.value;
+        }
       }
 
       return updatedFormData;
@@ -77,8 +203,8 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     setFormData(newFormData);
     try {
       prepareData();
-    } catch {  };
-  }
+    } catch {}
+  };
 
   const prepareData = () => {
     const errors = {};
@@ -145,6 +271,56 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                     setFormErrors={setFormErrors}
                     attributeType={attribute.type}
                   />
+                ) : attribute.name == "jsonCID" ? (
+                  <div className=" mx-auto p-4 border rounded-lg bg-white shadow-lg flex flex-col">
+                    <label className="flex flex-col text-center">
+                      Name
+                      <input
+                        className="ml-2 border rounded-full"
+                        type="text"
+                        name="name"
+                        value={formDataJson.name}
+                        onChange={handleChange}
+                      />
+                    </label>
+                    <br />
+                    <label className="flex flex-col text-center">
+                      Description:
+                      <input
+                        className="ml-2 border rounded-full"
+                        type="text"
+                        name="description"
+                        value={formDataJson.description}
+                        onChange={handleChange}
+                      />
+                    </label>
+                    <br />
+                    <label className="flex flex-col text-center mx-auto">
+                      File Type:
+                      <select
+                        className="ml-2  rounded-lg text-center"
+                        name="fileType"
+                        value={formDataJson.fileType}
+                        onChange={handleChange}
+                      >
+                        <option value="image">Image</option>
+                        <option value="video">Video</option>
+                        <option value="pdf">PDF</option>
+                        <option value="csv">CSV</option>
+                      </select>
+                    </label>
+                    <br />
+                    <input
+                      className="rounded-lg"
+                      type="file"
+                      accept={getAcceptedFileTypes(formDataJson.fileType)}
+                      onChange={async (e) => {
+                        if (e.target.files) {
+                          handleFileUpload(e.target.files);
+                        }
+                      }}
+                    />
+                  </div>
                 ) : (
                   <Input
                     size="lg"
@@ -179,9 +355,11 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
           <div className="flex justify-end">
             <button
               type="button"
-              
               // @ts-ignore
-              onClick={()=> {write(); onClose() }}
+              onClick={() => {
+                write();
+                onClose();
+              }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit

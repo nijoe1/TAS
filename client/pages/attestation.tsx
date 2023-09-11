@@ -7,8 +7,11 @@ import AttestationProfile from "@/components/AttestationProfile";
 import { useRouter } from "next/router";
 import { getAttestation } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
+import { useChainId } from "wagmi";
 
 const attestation = () => {
+  const chainID  = useChainId()
+
   const [taken, setTaken] = useState(false);
   const [attestationData, setAttestationData] = useState();
   const router = useRouter();
@@ -32,7 +35,7 @@ const attestation = () => {
 
   useEffect(() => {
     async function fetch() {
-      let attestation = await getAttestation(uid);
+      let attestation = await getAttestation(chainID, uid);
 
       attestation = attestation[0];
 
@@ -61,10 +64,10 @@ const attestation = () => {
 
       console.log(attestationData);
     }
-    if (!taken && uid) {
+    if (!taken && uid && chainID) {
       fetch();
     }
-  }, [uid]);
+  }, [uid, chainID]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>

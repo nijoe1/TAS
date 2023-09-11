@@ -8,8 +8,10 @@ import DecodedSchema from "@/components/DecodedSchema";
 import EthereumAddress from "@/components/EthereumAddress";
 import { getAllSchemas } from "@/lib/tableland";
 import Loading from "@/components/Loading/Loading";
+import { useChainId } from "wagmi";
 
 const Schemas = () => {
+  const chainID  = useChainId()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -40,7 +42,7 @@ const Schemas = () => {
   useEffect(() => {
     async function fetch() {
       const tableData = [];
-      let schemas = await getAllSchemas();
+      let schemas = await getAllSchemas(chainID);
       console.log(schemas);
       schemas.forEach((inputObject, index) => {
         const schemaString = inputObject.schema;
@@ -62,10 +64,10 @@ const Schemas = () => {
       setTaken(!taken);
       setTableData(tableData);
     }
-    if (!taken) {
+    if (!taken && chainID) {
       fetch();
     }
-  }, []);
+  }, [chainID]);
 
   return (
     <div

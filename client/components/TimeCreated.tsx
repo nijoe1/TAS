@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useContractRead } from "wagmi";
+import { useContractRead ,useChainId} from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 
 function TimeCreated({ createdAt }) {
+  const chainID = useChainId()
   const [displayTime, setDisplayTime] = useState(null);
   const { data: currentTimestamp } = useContractRead({
-    address: CONTRACTS.TAS[5].contract,
-    abi: CONTRACTS.TAS[5].abi,
+    address: CONTRACTS.TAS[chainID].contract,
+    abi: CONTRACTS.TAS[chainID].abi,
     functionName: "getTime",
   });
 

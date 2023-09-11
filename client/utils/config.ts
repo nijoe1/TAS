@@ -9,7 +9,10 @@ import {
 } from 'wagmi/chains';
 
 export const ETH_CHAINS = [
-	polygonMumbai,
+	{...polygonMumbai, rpcUrls: {
+		public: { http: ['https://rpc.ankr.com/polygon_mumbai'] },
+		default: { http: ['https://rpc.ankr.com/polygon_mumbai'] },
+	  },},
 	// polygonZkEvmTestnet,
 	goerli,
 	optimismGoerli,
