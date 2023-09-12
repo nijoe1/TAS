@@ -229,7 +229,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
 
     function hasAccess(address sender, bytes32 schemaUID) external view returns (bool) {
-        return userSubscriptions[sender][schemaUID] > block.timestamp;
+        return userSubscriptions[sender][schemaUID] > block.timestamp || schemas[schemaUID].contentCreators.contains(sender);
     }
 
     function bytes32ToString(bytes32 data) public pure returns (string memory) {

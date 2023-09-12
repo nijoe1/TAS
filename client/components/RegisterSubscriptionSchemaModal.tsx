@@ -56,7 +56,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     }
     setCreators(creatorsList)
     setShares(sharesList)
-  }, [attributes, creators, shares]);
+  }, [attributes]);
 
   const handleTagChange = (tags) => {
     setCategories({ tags });
@@ -83,29 +83,6 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
-  };
-
-  const handleSubmit = () => {
-    const schemaData = {
-      schemaName,
-      schemaDescription,
-      isRevocable,
-      resolver,
-      attributes: attributes.map((attr) => ({
-        address: attr.address,
-        shares: attr.shares,
-      })),
-    };
-    let creatorsList = []
-    let sharesList = []
-    for(const attr in schemaData.attributes){
-      creatorsList.push(attr.address)
-      sharesList.push(attr.shares)
-    }
-    setCreators(creatorsList)
-    setShares(sharesList)
-    onCreate(schemaData);
-
   };
 
   return (
@@ -280,7 +257,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <button
               type="button"
               // @ts-ignore
-              onClick={write}
+              onClick={()=>{write()}}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit

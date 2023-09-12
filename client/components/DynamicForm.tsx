@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import { Card, Input, Progress, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { validateInput, transformFormData } from "@/lib/utils";
 import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import { useAccount } from "wagmi";
-import { signMessage } from "@wagmi/core";
-import lighthouse from "@lighthouse-web3/sdk";
-import axios from "axios"
 import {
-  uploadFile,
-  decrypt,
   uploadFileEncrypted,
   applyAccessConditions,
-  generateLighthouseJWT
+  uploadFile,
 } from "@/lib/lighthouse";
 type DynamicFormModalProps = {
   schema: string;
   schemaUID?: string;
+  isSubscription: boolean;
   isOpen: boolean;
   onClose: () => void;
   onCreate: (schemaData: any) => void; // Replace 'any' with the actual type of your event data
@@ -27,6 +23,7 @@ type DynamicFormModalProps = {
 const DynamicForm: React.FC<DynamicFormModalProps> = ({
   schema,
   schemaUID,
+  isSubscription,
   isOpen,
   onClose,
   onCreate,
@@ -49,7 +46,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   const [referencedAttestation, setReferencedAttestation] = useState(
     "0x0000000000000000000000000000000000000000000000000000000000000000"
   );
-
+  const [onProgress, setOnProgress] = useState(-1);
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.TAS[chainID].contract,
     abi: CONTRACTS.TAS[chainID].abi,
@@ -88,17 +85,16 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   }
 
   const handleFileUpload = async (file) => {
-    let key = localStorage.getItem("API_KEY");
-
-    if (!key) {
-      const signed = await sign();
-      const API_KEY = await lighthouse.getApiKey(address, signed);
-      localStorage.setItem("API_KEY", API_KEY.data.apiKey);
-      key = API_KEY.data.apiKey;
+    if (isSubscription) {
+      handleEncryptedUpload(file);
+    } else {
+      handleUpload(file);
     }
-
+  };
+  const handleUpload = async (file: any) => {
+    let key = localStorage.getItem(`API_KEY_${address}`);
     // Upload file and get encrypted CID
-    const CID = await uploadFile(file, key);
+    const CID = await uploadFile(file, key, setOnProgress);
 
     // Create JSON object
     const json = {
@@ -120,55 +116,59 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
       type: "application/json",
     });
     // Upload JSON
-    let jsonCID = await uploadFileEncrypted(
-      [jsonFile],
-      key,
-      address,
-      await signEncryption()
-    );
+    let data = await uploadFile([jsonFile], key, setOnProgress);
+    setOnProgress(100);
+    // Update state
+    // setFileURL(await decrypt(encryptedCID, address, signedEncryption));
+    handleInputChange(data.Hash, "jsonCID", "string");
+  };
+
+  const handleEncryptedUpload = async (file: any) => {
+    let key = localStorage.getItem(`API_KEY_${address}`);
+    let token = localStorage.getItem(`lighthouse-jwt-${address}`);
+    // Upload file and get encrypted CID
+    const CID = await uploadFileEncrypted(file, key, address, token);
+
+    // Create JSON object
+    const json = {
+      name: formDataJson.name,
+      description: formDataJson.description,
+      file: {
+        name: CID[0].Name,
+        type: file[0].type,
+        CID: CID[0].Hash,
+      },
+    };
+
+    const jsonBlob = new Blob([JSON.stringify(json)], {
+      type: "application/json",
+    });
+
+    // Create a File object from the Blob
+    const jsonFile = new File([jsonBlob], `${formDataJson.name}.json`, {
+      type: "application/json",
+    });
+    // Upload JSON
+    let jsonCID = await uploadFileEncrypted([jsonFile], key, address, token);
     console.log(jsonCID[0].Hash);
+
+    await applyAccessConditions(
+      jsonCID[0].Hash,
+      chainID,
+      schemaUID,
+      address,
+      token
+    );
+    let res = await applyAccessConditions(
+      CID[0].Hash,
+      chainID,
+      schemaUID,
+      address,
+      token
+    );
     // Update state
     // setFileURL(await decrypt(encryptedCID, address, signedEncryption));
     handleInputChange(jsonCID[0].Hash, "jsonCID", "string");
-
-    console.log(await decrypt("QmSY42rSGX5iBSkC5pjQ5Bn1SbFZTcugS9ccMBFYvo4Ytx", address, await signEncryption()));
-  };
-
-  const signEncryption = async () => {
-    let key = localStorage.getItem(`lighthouse-jwt-${address}`);
-    if(key){
-      return key
-    }else{
-      try {
-        const response = await lighthouse.getAuthMessage(address);
-  
-        if (response && response.data && response.data.message) {
-          return await generateLighthouseJWT(address, await signMessage({
-            message: response.data.message,
-          }));
-        } else {
-          console.error("Error: Unable to retrieve authentication message.");
-          // Handle the error or return a default value as needed.
-          return null;
-        }
-      } catch (error) {
-        console.error("Error while getting authentication message:", error);
-        // Handle the error or return a default value as needed.
-        return null;
-      }
-    }
-  };
-
-  const sign = async () => {
-    const verificationMessage = (
-      await axios.get(
-        `https://api.lighthouse.storage/api/auth/get_message?publicKey=${address}`
-      )
-    ).data;
-    const signed = await signMessage({
-      message: verificationMessage,
-    });
-    return signed;
   };
 
   useEffect(() => {
@@ -310,16 +310,22 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                       </select>
                     </label>
                     <br />
-                    <input
-                      className="rounded-lg"
-                      type="file"
-                      accept={getAcceptedFileTypes(formDataJson.fileType)}
-                      onChange={async (e) => {
-                        if (e.target.files) {
-                          handleFileUpload(e.target.files);
-                        }
-                      }}
-                    />
+                    {onProgress < 0 ? (
+                      <input
+                        className="rounded-lg"
+                        type="file"
+                        accept={getAcceptedFileTypes(formDataJson.fileType)}
+                        onChange={async (e) => {
+                          if (e.target.files) {
+                            handleFileUpload(e.target.files);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="items-center text-center">
+                        <Progress className="text-white bg-black rounded-lg"  value={onProgress} label="Completed" />
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <Input

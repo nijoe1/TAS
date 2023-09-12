@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Input, Typography, Tooltip } from "@material-tailwind/react";
 import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
@@ -43,6 +43,11 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     "bytes",
     "bytes32",
   ];
+
+  useEffect(() => {
+    // Your useEffect logic here
+    generateAttributeString();
+  }, [attributes]); // Add attributes as a dependency
 
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.SchemaRegistry[chainid].contract,

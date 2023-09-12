@@ -11,7 +11,7 @@ import Loading from "@/components/Loading/Loading";
 import { useChainId } from "wagmi";
 
 const Schemas = () => {
-  const chainID  = useChainId()
+  const chainID = useChainId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
@@ -76,36 +76,35 @@ const Schemas = () => {
       <Navbar />
       {taken ? (
         <>
-          <div
-            className={` mx-auto ${isModalOpen ? "filter blur-md" : ""}`}
-          >
-            <div className="px-4 py-4 bg-white rounded-xl">
-              <div className="flex flex-col items-center">
-                <Typography variant="h4" color="black">
-                  Schemas
-                </Typography>
-                <Typography color="black">
-                  Showing the most recent schemas.
-                </Typography>
-                <Typography color="black">Total Schemas:{"  "}</Typography>
-                <Typography className="ml-2" variant="h6" color="black">
-                  169
-                </Typography>
-                <Typography color="black">Unique Creators: {"  "}</Typography>
-                <Typography className="ml-2" variant="h6" color="black">
-                  5016
-                </Typography>
-                <Button
-                  type="button"
-                  className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black self-center mt-2"
-                  onClick={openModal}
-                >
-                  Create Schema
-                </Button>
+          <div className="flex flex-col items-center">
+            <div className={` mx-auto ${isModalOpen ? "filter blur-md" : ""}`}>
+              <div className="px-4 py-4 bg-white rounded-xl">
+                <div className="flex flex-col items-center">
+                  <Typography variant="h4" color="black">
+                    Schemas
+                  </Typography>
+                  <Typography color="black">
+                    Showing the most recent schemas.
+                  </Typography>
+                  <Typography color="black">Total Schemas:{"  "}</Typography>
+                  <Typography className="ml-2" variant="h6" color="black">
+                    169
+                  </Typography>
+                  <Typography color="black">Unique Creators: {"  "}</Typography>
+                  <Typography className="ml-2" variant="h6" color="black">
+                    5016
+                  </Typography>
+                  <Button
+                    type="button"
+                    className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black self-center mt-2"
+                    onClick={openModal}
+                  >
+                    Create Schema
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="mt-10 mx-[20%]">
+            <div className="mt-10 ">
               <div className="overflow-x-auto rounded-lg">
                 <table className="w-screen-md table-fixed border-b border-gray">
                   <thead className="bg-black">
@@ -168,6 +167,7 @@ const Schemas = () => {
                   </tbody>
                 </table>
               </div>
+            </div>
           </div>
         </>
       ) : (

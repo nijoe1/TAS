@@ -128,3 +128,35 @@ export const getAttestation = async (chainId, uid) => {
     return null;
   }
 };
+
+
+export const getAttestAccess = async (chainId, schemaUID,address) => {
+  const getSchemaQuery =
+    TablelandGateway +
+    `SELECT COUNT(${tables[chainId].content_admins}.attester) AS NUM FROM ${tables[chainId].content_admins} WHERE
+     ${tables[chainId].content_admins}.schemaUID='${schemaUID}' AND
+     ${tables[chainId].content_admins}.attester='${address.toLowerCase()}'`;
+  try {
+    const result = await axios.get(getSchemaQuery);
+    console.log(result.data);
+    return result.data[0].NUM > 0;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const getGroupPrice = async (chainId, schemaUID) => {
+  const getSchemaQuery =
+    TablelandGateway +
+    `SELECT ${tables[chainId].content_group}.monthlySubscriptionPrice AS Price FROM ${tables[chainId].content_group} WHERE
+     ${tables[chainId].content_group}.schemaUID='${schemaUID}'`;
+  try {
+    const result = await axios.get(getSchemaQuery);
+    console.log(result.data);
+    return result.data[0].Price;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};

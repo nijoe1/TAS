@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import EthereumAddress from "@/components/EthereumAddress";
 import DecodedData from "@/components/DecodedData";
 import TimeCreated from "./TimeCreated";
 import Field from "@/components/Field";
-
+import { Typography } from "@material-tailwind/react";
+import AccessBox from "./AccessBox";
 type AttestationProfileProps = {
   attestationData: {
     attestationUID: string;
@@ -24,80 +25,84 @@ type AttestationProfileProps = {
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
   attestationData,
 }) => {
+  const [accessInfo, setAccessInfo] = useState({
+    attestAccess: false,
+    revokeAccess: false,
+    viewAccess: false,
+  });
+
+  // Define a function to update the accessInfo state
+  const handleAccessInfoChange = (newAccessInfo) => {
+    setAccessInfo(newAccessInfo);
+  };
+
   return (
     <div className={`flex-grow mx-auto`}>
-      <Field label={"Attestation Details"} value="" />
       <div className="bg-white rounded-xl p-4">
+        <Typography variant="h6">attestation Details</Typography>
+
+        <div className="items-center flex flex-col text-center border rounded-lg mx-auto">
+          <Typography variant="h4">attestationUID</Typography>
+          <EthereumAddress address={attestationData.attestationUID} />
+        </div>
         <div className="flex justify-between">
           {/* Header */}
-          <div className="mb-4 mt-3 w-3/4 flex-col flex">
+          <div className="mb-4 mt-3 w-4/6 flex-col flex border rounded-lg items-center text-center">
             <Field
-              label="ATTESTATIONUID"
-              value={
-                <EthereumAddress address={attestationData.attestationUID} />
-              }
-            />
-            <Field
-              label="SCHEMAUID"
+              label="schemaUID"
               value={<EthereumAddress address={attestationData.schemaUID} />}
             />
             <Field
-              label="FROM"
+              label="attester"
               value={<EthereumAddress address={attestationData.from} />}
             />
             <Field
-              label="TO"
+              label="recipient"
               value={<EthereumAddress address={attestationData.to} />}
             />
-          </div>
-          <div className="w-1/4  border rounded-xl p-4">
-            <Field label="CREATED" value={<TimeCreated createdAt={attestationData.created}/>} />
-            <Field label="EXPIRATION" value={attestationData.expiration} />
             <Field
-              label="REVOKED"
-              value={attestationData.revoked ? "Yes" : "No"}
-            />
-            <Field
-              label="REVOCABLE"
-              value={attestationData.revocable ? "Yes" : "No"}
-            />
-            <Field
-              label="Resolver"
+              label="resolver"
               value={<EthereumAddress address={attestationData.resolver} />}
             />
           </div>
-        </div>
-
-        <div className="flex justify-between">
-          {/* Left Box */}
-          <div className="w-3/4 flex flex-col">
+          <div className="w-2/6 mb-4 mt-3 items-center text-center border rounded-xl p-4">
             <Field
-              label="Referencing Attestations"
-              value={attestationData.referencingAttestations.toString()}
+              label="created"
+              value={<TimeCreated createdAt={attestationData.created} />}
+            />
+            <Field label="expiration" value={attestationData.expiration} />
+            <Field
+              label="revoked"
+              value={attestationData.revoked ? "Yes" : "No"}
             />
             <Field
-              label="Referenced Attestation"
-              value={attestationData.referencedAttestation}
-            />
-          </div>
-
-          {/* Right Box */}
-          <div className="w-1/4  text-center border rounded-xl p-4">
-            <Field
-              label="AttestAccess"
-              value={"YES"}
-            />
-            <Field
-              label="RevokeAccess"
-              value={"YES"}
-            />
-                        <Field
-              label="ViewAccess"
-              value={"YES"}
+              label="revocable"
+              value={attestationData.revocable ? "Yes" : "No"}
             />
           </div>
         </div>
-        <div className="w-full  border rounded-xl p-4">
+
+        {/* Left Box */}
+        <div className="items-center rounded-lg border mx-auto text-center flex flex-col">
+          <Field
+            label="Referencing Attestations"
+            value={attestationData.referencingAttestations.toString()}
+          />
+          <Field
+            label="Referenced Attestation"
+            value={attestationData.referencedAttestation}
+          />
+        </div>
+
+        {/* Right Box */}
+        <AccessBox
+          uid={attestationData.schemaUID}
+          isSchema={false}
+          isRevocable={attestationData.revocable}
+          onAccessInfoChange={handleAccessInfoChange}
+          resolverContract={attestationData.resolver}
+        />
+        <div className="mx-auto text-center items-center border rounded-xl p-4">
           <div className="text-xl font-semibold">Decoded Data</div>
           <DecodedData decodedData={attestationData.decodedData} />
         </div>

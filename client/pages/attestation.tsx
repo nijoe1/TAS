@@ -10,7 +10,7 @@ import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { useChainId } from "wagmi";
 
 const attestation = () => {
-  const chainID  = useChainId()
+  const chainID = useChainId();
 
   const [taken, setTaken] = useState(false);
   const [attestationData, setAttestationData] = useState();
@@ -74,8 +74,10 @@ const attestation = () => {
       <Navbar />
       {taken ? (
         <>
-          <div className="mx-auto">
-            <AttestationProfile attestationData={attestationData} />
+          <div className="flex flex-col items-center">
+            <div className="mx-auto">
+              <AttestationProfile attestationData={attestationData} />
+            </div>
           </div>
         </>
       ) : (
