@@ -3,12 +3,12 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import { MdDoNotDisturbAlt } from "react-icons/md";
 import { useChainId, useAccount, useContractRead } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts/index";
-import {getAttestAccess} from "@/lib/tableland"
+import { getAttestAccess } from "@/lib/tableland";
 
 type AccessBoxProps = {
   uid: string;
   isSchema: boolean;
-  isRevocable:boolean;
+  isRevocable: boolean;
   onAccessInfoChange: (accessData: {
     attestAccess: boolean; // Replace with your actual data
     revokeAccess: boolean; // Replace with your actual data
@@ -29,13 +29,15 @@ const AccessBox: React.FC<AccessBoxProps> = ({
   const [viewAccess, setViewAccess] = useState(false);
   const { address } = useAccount();
   const chainid = useChainId();
-  const [fetched,setFetched] = useState(false)
+  const [fetched, setFetched] = useState(false);
 
   const { data: hasViewAccess } = useContractRead({
+    // @ts-ignore
     address: CONTRACTS.SubscriptionResolver[chainid].contract,
+    // @ts-ignore
     abi: CONTRACTS.SubscriptionResolver[chainid].abi,
     functionName: "hasAccess",
-    args:[address, uid]
+    args: [address, uid],
   });
 
   // Simulated API call to fetch access information
@@ -46,16 +48,21 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         revokeAccess: false, // Replace with your actual data
         viewAccess: true, // Replace with your actual data
       };
-      if(resolverContract === "0xe10b47d077df0f7b60d95e3bbda60b6b7fc32b95"){
-        accessData.revokeAccess = false
-        accessData.attestAccess = await getAttestAccess(chainid, uid, address)as unknown as boolean
-        accessData.viewAccess = hasViewAccess as unknown as boolean || accessData.attestAccess
-      }else if(false){
+      if (resolverContract == "0x6d586fcdd18da8f39783daa09551682df2eb76cc") {
+        accessData.revokeAccess = false;
+        accessData.attestAccess = (await getAttestAccess(
+          chainid,
+          uid,
+          address
+        )) as unknown as boolean;
+        accessData.viewAccess = (Number(hasViewAccess) >
+          0) as unknown as boolean;
+      } else if (false) {
         // ADD ACRESOLVER CHECK
-      }else{
-        accessData.revokeAccess = isRevocable
-        accessData.attestAccess = true
-        accessData.viewAccess = true
+      } else {
+        accessData.revokeAccess = isRevocable;
+        accessData.attestAccess = true;
+        accessData.viewAccess = true;
       }
       onAccessInfoChange(accessData);
 
@@ -63,12 +70,12 @@ const AccessBox: React.FC<AccessBoxProps> = ({
       setAttestAccess(accessData.attestAccess);
       setRevokeAccess(accessData.revokeAccess);
       setViewAccess(accessData.viewAccess);
-      setFetched(!fetched)
+      setFetched(!fetched);
     };
-    if(chainid && !fetched){
-      fetch()
+    if (chainid && !fetched) {
+      fetch();
     }
-  }, [chainid,address]);
+  }, [chainid, address]);
 
   return (
     <div className="border flex items-center mx-auto rounded-lg">

@@ -11,13 +11,13 @@ import {
   applyAccessConditions,
   uploadFile,
 } from "@/lib/lighthouse";
+import FileUploadForm from "./FileUploadForm";
 type DynamicFormModalProps = {
   schema: string;
   schemaUID?: string;
   isSubscription: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (schemaData: any) => void; // Replace 'any' with the actual type of your event data
 };
 
 const DynamicForm: React.FC<DynamicFormModalProps> = ({
@@ -26,7 +26,6 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   isSubscription,
   isOpen,
   onClose,
-  onCreate,
 }) => {
   const chainID = useChainId();
   const encoder = new SchemaEncoder(schema);
@@ -46,130 +45,16 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   const [referencedAttestation, setReferencedAttestation] = useState(
     "0x0000000000000000000000000000000000000000000000000000000000000000"
   );
-  const [onProgress, setOnProgress] = useState(-1);
   const { config } = usePrepareContractWrite({
+    // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
+    // @ts-ignore
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "attest",
     args: [[schemaUID, [recipient, 0, false, referencedAttestation, data, 0]]],
     value: BigInt(0),
   });
   const { write, isLoading, isSuccess, isError } = useContractWrite(config);
-
-  const { address } = useAccount();
-  const [formDataJson, setFormDataJson] = useState({
-    name: "",
-    description: "",
-    fileType: "image",
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormDataJson({
-      ...formDataJson,
-      [name]: value,
-    });
-  };
-
-  function getAcceptedFileTypes(fileType) {
-    const allowedFileTypes = {
-      image: "image/jpeg, image/png, image/gif",
-      video: "video/mp4, video/webm, video/ogg",
-      pdf: "application/pdf",
-      csv: "text/csv",
-    };
-
-    return allowedFileTypes[fileType] || "";
-  }
-
-  const handleFileUpload = async (file) => {
-    if (isSubscription) {
-      handleEncryptedUpload(file);
-    } else {
-      handleUpload(file);
-    }
-  };
-  const handleUpload = async (file: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
-    // Upload file and get encrypted CID
-    const CID = await uploadFile(file, key, setOnProgress);
-
-    // Create JSON object
-    const json = {
-      name: formDataJson.name,
-      description: formDataJson.description,
-      file: {
-        name: CID.Name,
-        type: file[0].type,
-        CID: CID.Hash,
-      },
-    };
-
-    const jsonBlob = new Blob([JSON.stringify(json)], {
-      type: "application/json",
-    });
-
-    // Create a File object from the Blob
-    const jsonFile = new File([jsonBlob], `${formDataJson.name}.json`, {
-      type: "application/json",
-    });
-    // Upload JSON
-    let data = await uploadFile([jsonFile], key, setOnProgress);
-    setOnProgress(100);
-    // Update state
-    // setFileURL(await decrypt(encryptedCID, address, signedEncryption));
-    handleInputChange(data.Hash, "jsonCID", "string");
-  };
-
-  const handleEncryptedUpload = async (file: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
-    let token = localStorage.getItem(`lighthouse-jwt-${address}`);
-    // Upload file and get encrypted CID
-    const CID = await uploadFileEncrypted(file, key, address, token);
-
-    // Create JSON object
-    const json = {
-      name: formDataJson.name,
-      description: formDataJson.description,
-      file: {
-        name: CID[0].Name,
-        type: file[0].type,
-        CID: CID[0].Hash,
-      },
-    };
-
-    const jsonBlob = new Blob([JSON.stringify(json)], {
-      type: "application/json",
-    });
-
-    // Create a File object from the Blob
-    const jsonFile = new File([jsonBlob], `${formDataJson.name}.json`, {
-      type: "application/json",
-    });
-    // Upload JSON
-    let jsonCID = await uploadFileEncrypted([jsonFile], key, address, token);
-    console.log(jsonCID[0].Hash);
-
-    await applyAccessConditions(
-      jsonCID[0].Hash,
-      chainID,
-      schemaUID,
-      address,
-      token
-    );
-    let res = await applyAccessConditions(
-      CID[0].Hash,
-      chainID,
-      schemaUID,
-      address,
-      token
-    );
-    // Update state
-    // setFileURL(await decrypt(encryptedCID, address, signedEncryption));
-    handleInputChange(jsonCID[0].Hash, "jsonCID", "string");
-  };
 
   useEffect(() => {
     try {
@@ -179,7 +64,11 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     }
   }, [formData]);
 
-  const handleInputChange = (newValue, attributeName, attributeType) => {
+  const handleInputChange = (
+    newValue: any,
+    attributeName: any,
+    attributeType: any
+  ) => {
     let newFormData = (prevData: any) => {
       // Create a copy of the existing formData
       const updatedFormData = { ...prevData };
@@ -189,7 +78,11 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         // For array attributes, update the attribute directly within the array
         updatedFormData[attributeName] = newValue;
       } else {
-        if (attributeName == "jsonCID") {
+        if (
+          attributeName == "jsonCID" ||
+          attributeName == "videoCID" ||
+          attributeName == "imageCID"
+        ) {
           updatedFormData[attributeName] = newValue;
         } else {
           // For non-array attributes, update as before
@@ -210,11 +103,14 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     const errors = {};
     let empty;
     schemaArray.forEach((attribute) => {
+      // @ts-ignore
       const error = validateInput(formData[attribute.name], attribute.type);
       console.log(error, formData);
       if (error) {
+        // @ts-ignore
         errors[attribute.name] = error;
       }
+      // @ts-ignore
       if (formData[attribute.name] === undefined) {
         empty = true;
       }
@@ -230,7 +126,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 ${
+      className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center z-50 overflow-y-auto ${
         open ? "block" : "hidden"
       }`}
     >
@@ -246,21 +142,25 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
           <div className="mb-4 flex flex-col gap-6">
             {schemaArray.map((attribute, index) => (
               <div key={index}>
+                {/*  @ts-ignore */}
                 {formErrors[attribute.name] && (
                   <Typography color="red" className="mt-1">
+                    {/*  @ts-ignore */}
                     {formErrors[attribute.name]}
                   </Typography>
                 )}
                 {attribute.type.endsWith("[]") ? (
                   <TagSelect
                     name={attribute.name}
-                    onChange={(tags) => {
+                    onChange={(tags: any) => {
                       // Handle array inputs directly with an array of tags
                       handleInputChange(tags, attribute.name, attribute.type);
                     }}
+                    // @ts-ignore
                     placeholder={`Enter ${attribute.name} tags`}
+                    // @ts-ignore
                     tags={formData[attribute.name] || []}
-                    setTags={(tags) => {
+                    setTags={(tags: any) => {
                       // Update tags directly with the array
                       setFormData((prevData) => ({
                         ...prevData,
@@ -271,104 +171,84 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                     setFormErrors={setFormErrors}
                     attributeType={attribute.type}
                   />
-                ) : attribute.name == "jsonCID" ? (
-                  <div className=" mx-auto p-4 border rounded-lg bg-white shadow-lg flex flex-col">
-                    <label className="flex flex-col text-center">
-                      Name
-                      <input
-                        className="ml-2 border rounded-full"
-                        type="text"
-                        name="name"
-                        value={formDataJson.name}
-                        onChange={handleChange}
-                      />
-                    </label>
-                    <br />
-                    <label className="flex flex-col text-center">
-                      Description:
-                      <input
-                        className="ml-2 border rounded-full"
-                        type="text"
-                        name="description"
-                        value={formDataJson.description}
-                        onChange={handleChange}
-                      />
-                    </label>
-                    <br />
-                    <label className="flex flex-col text-center mx-auto">
-                      File Type:
-                      <select
-                        className="ml-2  rounded-lg text-center"
-                        name="fileType"
-                        value={formDataJson.fileType}
-                        onChange={handleChange}
-                      >
-                        <option value="image">Image</option>
-                        <option value="video">Video</option>
-                        <option value="pdf">PDF</option>
-                        <option value="csv">CSV</option>
-                      </select>
-                    </label>
-                    <br />
-                    {onProgress < 0 ? (
-                      <input
-                        className="rounded-lg"
-                        type="file"
-                        accept={getAcceptedFileTypes(formDataJson.fileType)}
-                        onChange={async (e) => {
-                          if (e.target.files) {
-                            handleFileUpload(e.target.files);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="items-center text-center">
-                        <Progress className="text-white bg-black rounded-lg"  value={onProgress} label="Completed" />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Input
-                    size="lg"
-                    placeholder={`${attribute.name} (${attribute.type})`}
-                    name={attribute.name}
-                    value={formData[attribute.name] || ""}
-                    onChange={(e) =>
-                      handleInputChange(e, attribute.name, attribute.type)
-                    }
-                    error={formErrors[attribute.name]}
+                ) : attribute.name == "jsonCID" ||
+                  attribute.name == "imageCID" ||
+                  attribute.name == "videoCID" ? (
+                  <FileUploadForm
+                    isSubscription={isSubscription}
+                    chainID={chainID}
+                    // @ts-ignore
+                    schemaUID={schemaUID}
+                    type={attribute.name}
+                    handleInputChange={handleInputChange}
                   />
+                ) : (
+                  <div className="flex flex-col">
+                    <label htmlFor={attribute.name} className="mb-1">
+                      {attribute.name}
+                    </label>
+                    <Input
+                      size="lg"
+                      placeholder={`${attribute.name} (${attribute.type})`}
+                      name={attribute.name}
+                      // @ts-ignore
+                      value={formData[attribute.name] || ""}
+                      onChange={(e) =>
+                        handleInputChange(e, attribute.name, attribute.type)
+                      }
+                      /*  @ts-ignore */
+                      error={formErrors[attribute.name]}
+                    />
+                  </div>
                 )}
               </div>
             ))}
-            <Input
-              size="lg"
-              placeholder={`${"recipient"} (${"address"})`}
-              name={"recipient"}
-              value={recipient || ""}
-              onChange={() => setRecipient(recipient)}
-              error={formErrors["recipient"]}
-            />
-            <Input
-              size="lg"
-              placeholder={`${"ReferencedAttestation"} (${"bytes32"})`}
-              name={"ReferencedAttestation"}
-              value={referencedAttestation || ""}
-              onChange={() => setReferencedAttestation(referencedAttestation)}
-              error={formErrors["ReferencedAttestation"]}
-            />
+            <div className="flex flex-col">
+              <label
+                htmlFor={"Attestation Recipient (Optional)"}
+                className="mb-1"
+              >
+                {"Attestation Recipient (Optional)"}
+              </label>
+              <Input
+                size="lg"
+                placeholder={`${"recipient"} (${"address"})`}
+                name={"recipient"}
+                value={recipient || ""}
+                onChange={(e) => setRecipient(e.target.value)}
+                //  @ts-ignore
+                error={formErrors["recipient"]}
+              />
+            </div>
+            <div className="flex flex-col">
+              <label
+                htmlFor={"Attestation Recipient (Optional)"}
+                className="mb-1"
+              >
+                {"Reference Attestation (Optional)"}
+              </label>
+              <Input
+                size="lg"
+                placeholder={`${"ReferencedAttestation"} (${"bytes32"})`}
+                name={"ReferencedAttestation"}
+                value={referencedAttestation || ""}
+                onChange={(e) => setReferencedAttestation(e.target.value)}
+                // @ts-ignore
+                error={formErrors["ReferencedAttestation"]}
+              />
+            </div>
           </div>
           <div className="flex justify-end">
             <button
               type="button"
-              // @ts-ignore
               onClick={() => {
+                // @ts-ignore
                 write();
                 onClose();
               }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
-              Submit
+              Attest
             </button>
             <button
               type="button"

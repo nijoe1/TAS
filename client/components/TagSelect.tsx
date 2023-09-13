@@ -12,7 +12,7 @@ interface TagSelectProps {
   setTags: (tags: (string | number)[]) => void;
 }
 
-function TagSelect({
+const TagSelect: React.FC<TagSelectProps> = ({
   name,
   onChange,
   tags,
@@ -20,7 +20,7 @@ function TagSelect({
   setTags,
   formErrors,
   setFormErrors,
-}) {
+}) => {
   const [textInput, setTextInput] = useState("");
 
   const addTag = () => {
@@ -34,21 +34,25 @@ function TagSelect({
     if (!tags) {
       const newTags = [name];
       setTags(newTags);
+      // @ts-ignore
       onChange(newTags); // Pass the array of tags directly
       setTextInput("");
-    }else if(!tags.includes(textInput)) {
+    } else if (!tags.includes(textInput)) {
       setTextInput("");
       const newTags = [...tags, textInput];
       setTags(newTags);
+      // @ts-ignore
+
       onChange(newTags); // Pass the array of tags directly
     } else {
       setFormErrors({ ...formErrors, [name]: "Tag already exists." });
     }
   };
 
-  const removeTag = (tagToRemove) => {
+  const removeTag = (tagToRemove: any) => {
     const updatedTags = tags.filter((tag) => tag !== tagToRemove);
     setTags(updatedTags);
+    // @ts-ignore
     onChange(updatedTags); // Pass the array of tags directly
   };
 
@@ -113,13 +117,13 @@ function TagSelect({
               onClick={addTag}
               className="block py-1 px-5 cursor-pointer hover:bg-indigo-600 hover:text-white"
             >
-              Add tag "<span className="font-semibold">{textInput}</span>"
+              Add tag <span className="font-semibold">{textInput}</span>
             </a>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default TagSelect;

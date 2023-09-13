@@ -14,8 +14,8 @@ import { CONTRACTS } from "@/constants/contracts";
 import SubscriptionItem from "@/components/SubscriptionItem";
 import { useAccount } from "wagmi";
 
-const schema = () => {
-  const chainID = useChainId();
+const Schema = () => {
+  const useChainID = useChainId();
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [schemaData, setSchemaData] = useState({
@@ -47,13 +47,15 @@ const schema = () => {
 
     // Continue with your existing code to split and decode the schema
     const fieldStrings = rawSchema.split(",").map((field) => field.trim());
+    // @ts-ignore
     const decodedSchema = [];
     fieldStrings.forEach((fieldString) => {
       const [type, name] = fieldString.split(" ");
       decodedSchema.push({ type, name });
     });
+    // @ts-ignore
     console.log(decodedSchema);
-
+    // @ts-ignore
     return decodedSchema;
   }
   const [accessInfo, setAccessInfo] = useState({
@@ -63,7 +65,7 @@ const schema = () => {
   });
 
   // Define a function to update the accessInfo state
-  const handleAccessInfoChange = (newAccessInfo) => {
+  const handleAccessInfoChange = (newAccessInfo: any) => {
     setAccessInfo(newAccessInfo);
     console.log(newAccessInfo);
   };
@@ -71,12 +73,13 @@ const schema = () => {
   useEffect(() => {
     async function fetch() {
       if (schemaUID) {
+        // @ts-ignore
         const attestationTableInfo = [];
-        let attestations = await getSchemaAttestations(chainID, schemaUID);
-        let schema = await getSchema(chainID, schemaUID);
+        let attestations = await getSchemaAttestations(useChainID, schemaUID);
+        let schema = await getSchema(useChainID, schemaUID);
         schema = schema[0];
         let schemaInfo = schemaData;
-        attestations.forEach((inputObject, index) => {
+        attestations.forEach((inputObject: any, index: any) => {
           // Create a tableData entry
           const entry = {
             uid: inputObject.uid,
@@ -105,18 +108,19 @@ const schema = () => {
         schemaInfo.created = schema.creationTimestamp;
         setTaken(!taken);
         setSubscriptionResolver(
-          CONTRACTS.SubscriptionResolver[chainID].contract
+          // @ts-ignore
+          CONTRACTS.SubscriptionResolver[useChainID].contract
         );
-
+        // @ts-ignore
         setTableData(attestationTableInfo);
         setSchemaData(schemaInfo);
         console.log(schemaData);
       }
     }
-    if (!taken && schemaUID && chainID) {
+    if (!taken && schemaUID && useChainID) {
       fetch();
     }
-  }, [schemaUID, chainID]);
+  }, [schemaUID, useChainID, address]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
@@ -130,7 +134,7 @@ const schema = () => {
             ></SchemaProfile>
 
             {tableData.length > 0 &&
-            "0xe10b47d077df0f7b60d95e3bbda60b6b7fc32b95" !=
+            "0x6d586fcdd18da8f39783daa09551682df2eb76cc" !==
               schemaData.resolverContract ? (
               <div className="mt-10 mx-[25%]">
                 <div className="overflow-x-auto rounded-lg">
@@ -160,24 +164,29 @@ const schema = () => {
                           <td className="py-2 border-r border-gray border-b border-gray">
                             <div className="flex items-center justify-center">
                               <EthereumAddress
+                                // @ts-ignore
                                 link={`/attestation?uid=${row.uid}`}
+                                // @ts-ignore
                                 address={row.uid}
                               />
                             </div>
                           </td>
                           <td className="py-2 border-r border-gray border-b border-gray">
                             <div className="flex items-center justify-center">
+                              {/* @ts-ignore */}
                               <EthereumAddress address={row.fromAddress} />
                             </div>
                           </td>
                           <td className="py-2 border-r border-gray border-b border-gray">
                             <div className="flex items-center justify-center">
+                              {/* @ts-ignore */}
                               <EthereumAddress address={row.toAddress} />
                             </div>
                           </td>
                           <td className="py-2 border-b border-gray">
                             <div className="flex items-center justify-center">
                               <p className="px-2 py-2">
+                                {/* @ts-ignore */}
                                 {<TimeCreated createdAt={row.age} />}
                               </p>
                             </div>
@@ -195,6 +204,7 @@ const schema = () => {
                 {tableData.map((item, index) => (
                   <SubscriptionItem
                     key={index}
+                    // @ts-ignore
                     itemData={{ address: address, data: item.data }}
                   />
                 ))}
@@ -214,4 +224,4 @@ const schema = () => {
   );
 };
 
-export default schema;
+export default Schema;

@@ -18,10 +18,11 @@ const Attestations = () => {
 
   useEffect(() => {
     async function fetch() {
+      // @ts-ignore
       const attestationTableInfo = [];
       let attestations = await getAttestations(chainID);
 
-      attestations.forEach((inputObject, index) => {
+      attestations.forEach((inputObject: any, index: any) => {
         // Create a tableData entry
         const entry = {
           uid: inputObject.uid,
@@ -38,7 +39,7 @@ const Attestations = () => {
       });
 
       setTaken(!taken);
-
+      // @ts-ignore
       setTableData(attestationTableInfo);
     }
     if (!taken && chainID) {
@@ -81,16 +82,16 @@ const Attestations = () => {
                   <thead className="bg-black">
                     <tr>
                       <th className="w-3/12 py-2 text-white border-r border-gray">
-                        UID
+                        attestationUID
                       </th>
                       <th className="w-3/12 py-2 text-white border-r border-gray">
-                        SchemaUID
+                        schemaUID
                       </th>
                       <th className="w-2/12 py-2 text-white border-r border-gray">
-                        From Address
+                        from Address
                       </th>
                       <th className="w-2/12 py-2 text-white border-r border-gray">
-                        To Address
+                        to Address
                       </th>
                       <th className="w-2/12 py-2 text-white">createdAt</th>
                     </tr>
@@ -106,7 +107,9 @@ const Attestations = () => {
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
                             <EthereumAddress
+                              // @ts-ignore
                               link={`/attestation?uid=${row.uid}`}
+                              // @ts-ignore
                               address={row.uid}
                             />
                           </div>
@@ -114,24 +117,29 @@ const Attestations = () => {
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
                             <EthereumAddress
+                              // @ts-ignore
                               link={`/schema?schemaUID=${row.schemaUid}`}
+                              // @ts-ignore
                               address={row.schemaUid}
                             />
                           </div>
                         </td>
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
+                            {/* @ts-ignore */}
                             <EthereumAddress address={row.fromAddress} />
                           </div>
                         </td>
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
+                            {/* @ts-ignore */}
                             <EthereumAddress address={row.toAddress} />
                           </div>
                         </td>
                         <td className="py-2 border-b border-gray">
                           <div className="flex items-center justify-center">
                             <p className="px-2 py-2">
+                              {/* @ts-ignore */}
                               {<TimeCreated createdAt={row.age} />}
                             </p>
                           </div>

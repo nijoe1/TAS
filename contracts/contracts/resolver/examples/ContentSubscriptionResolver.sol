@@ -82,8 +82,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         uint256[] memory creatorsShares,
         uint256 monthlySubscriptionPrice,
         string memory schemaName,
-        string memory schemaDescription,
-        string memory jsonSchema
+        string memory schemaDescription
     )external{
         // Register the schema and get its UID
         bytes32 schemaUID = registerSchema(schemaName, schemaDescription);
@@ -100,7 +99,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
         Schema.multisig = msg.sender;
 
-        tableland.SchemaInfoInserted(schemaUID, jsonSchema,  monthlySubscriptionPrice, Schema.splitterContract);
+        tableland.SchemaInfoInserted(schemaUID,  monthlySubscriptionPrice, Schema.splitterContract);
 
         tableland.SchemaAdminsInserted(schemaUID, contentCreators, creatorsShares);
 
@@ -228,8 +227,8 @@ contract ContentSubscriptionResolver is SchemaResolver {
     }
 
 
-    function hasAccess(address sender, bytes32 schemaUID) external view returns (bool) {
-        return userSubscriptions[sender][schemaUID] > block.timestamp || schemas[schemaUID].contentCreators.contains(sender);
+    function hasAccess(address sender, bytes32 schemaUID) external view returns (uint256) {
+        return (userSubscriptions[sender][schemaUID] > block.timestamp || schemas[schemaUID].contentCreators.contains(sender))?1:0;
     }
 
     function bytes32ToString(bytes32 data) public pure returns (string memory) {

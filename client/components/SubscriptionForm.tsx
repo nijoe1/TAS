@@ -40,7 +40,9 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
   const [open, setOpen] = useState(isOpen);
 
   const { config } = usePrepareContractWrite({
+    // @ts-ignore
     address: CONTRACTS.SubscriptionResolver[chainID].contract,
+    // @ts-ignore
     abi: CONTRACTS.SubscriptionResolver[chainID].abi,
     functionName: "subscribe",
     args: [schemaUID, months],
@@ -82,6 +84,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
               placeholder="Subscribe for x months"
               name={"Months"}
               value={months}
+              // @ts-ignore
               onChange={(e) => setMonths(e.target.value)}
             />
           </div>

@@ -50,37 +50,43 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   }, [attributes]); // Add attributes as a dependency
 
   const { config } = usePrepareContractWrite({
+    // @ts-ignore
     address: CONTRACTS.SchemaRegistry[chainid].contract,
+    // @ts-ignore
     abi: CONTRACTS.SchemaRegistry[chainid].abi,
     functionName: "register",
     args: [rawSchema, schemaName, schemaDescription, resolver, isRevocable],
   });
   const { write } = useContractWrite(config);
 
-  const handleAttributeChange = (index, key, value) => {
+  const handleAttributeChange = (index:any, key:any, value:any) => {
     const updatedAttributes = [...attributes];
+    // @ts-ignore
     updatedAttributes[index][key] = value;
 
     if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
       updatedAttributes[index]["type"] = "string";
       updatedAttributes[index]["name"] = value;
+      // @ts-ignore
       updatedAttributes[index]["readonly"] = true;
     } else {
       updatedAttributes[index]["type"] = value;
       updatedAttributes[index]["name"] = "";
+      // @ts-ignore
       updatedAttributes[index]["readonly"] = false;
     }
 
     setAttributes(updatedAttributes);
   };
 
-  const handleAttributeNameChange = (index, key, value) => {
+  const handleAttributeNameChange = (index:any, key:any, value:any) => {
     const updatedAttributes = [...attributes];
+    // @ts-ignore
     updatedAttributes[index][key] = value;
     setAttributes(updatedAttributes);
   };
 
-  const handleCheckboxChange = (index) => {
+  const handleCheckboxChange = (index:any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes[index]["isArray"] = !updatedAttributes[index]["isArray"];
     setAttributes(updatedAttributes);
@@ -95,7 +101,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     generateAttributeString();
   };
 
-  const removeAttribute = (index) => {
+  const removeAttribute = (index:any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
@@ -104,8 +110,9 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
   const generateAttributeString = () => {
     setRawSchema(
+      // @ts-ignore
       attributes
-        .map((attr) => {
+        .map((attr:any) => {
           const type = attr.isArray ? `${attr.type}[]` : attr.type;
           return `${type} ${attr.name}`;
         })
@@ -247,6 +254,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                     handleAttributeNameChange(index, "name", e.target.value)
                   }
                   placeholder="field name"
+                  // @ts-ignore
                   readOnly={attr.readonly}
                   className="rounded-full px-4 py-2 border border-black"
                 />

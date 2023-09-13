@@ -77,6 +77,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 isOpen={open}
                 onClose={function (): void {
                   setOpen(!open);
+                  onClose()
                   setType("Select schema type")
                 }}
                 onCreate={function (schemaData: any): void {
@@ -89,6 +90,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 isOpen={open}
                 onClose={function (): void {
                   setOpen(!open);
+                  onClose()
                   setType("Select schema type")
                 }}
                 onCreate={function (schemaData: any): void {

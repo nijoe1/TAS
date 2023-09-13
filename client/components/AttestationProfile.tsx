@@ -32,7 +32,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
   });
 
   // Define a function to update the accessInfo state
-  const handleAccessInfoChange = (newAccessInfo) => {
+  const handleAccessInfoChange = (newAccessInfo:any) => {
     setAccessInfo(newAccessInfo);
   };
 

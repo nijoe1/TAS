@@ -6,15 +6,30 @@ import CreateSchemaModal from "@/components/CreateSchemaModal"; // Import the mo
 import Link from "next/link"; // Import Link from Next.js
 import DecodedSchema from "@/components/DecodedSchema";
 import EthereumAddress from "@/components/EthereumAddress";
+import TotalAttestations from "@/components/TotalAttestations";
+import ChatModal from "@/components/ChatModal";
+
 import { getAllSchemas } from "@/lib/tableland";
 import Loading from "@/components/Loading/Loading";
 import { useChainId } from "wagmi";
+import { VscFeedback } from "react-icons/vsc";
+import { PiChatDotsFill } from "react-icons/pi";
 
 const Schemas = () => {
   const chainID = useChainId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
+  const [context, setContext] = useState("");
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const openFeedbackModal = () => {
+    setModalIsOpen(true);
+  };
+
+  const closeFeedbackModal = () => {
+    setModalIsOpen(!modalIsOpen);
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -25,13 +40,13 @@ const Schemas = () => {
   };
 
   // Define a function to handle creating a schema
-  const createSchema = (schemaData) => {
+  const createSchema = (schemaData: any) => {
     // Handle schema creation logic here
     console.log("Schema Data:", schemaData);
   };
 
-  function parseInputString(inputString) {
-    const fields = inputString.split(",").map((field) => {
+  function parseInputString(inputString: any) {
+    const fields = inputString.split(",").map((field: any) => {
       const [type, name] = field.trim().split(" ");
       return { type, name };
     });
@@ -41,10 +56,11 @@ const Schemas = () => {
 
   useEffect(() => {
     async function fetch() {
+      // @ts-ignore
       const tableData = [];
       let schemas = await getAllSchemas(chainID);
       console.log(schemas);
-      schemas.forEach((inputObject, index) => {
+      schemas.forEach((inputObject: any, index: any) => {
         const schemaString = inputObject.schema;
         const schema = parseInputString(schemaString);
 
@@ -62,6 +78,7 @@ const Schemas = () => {
         tableData.push(entry);
       });
       setTaken(!taken);
+      // @ts-ignore
       setTableData(tableData);
     }
     if (!taken && chainID) {
@@ -104,24 +121,29 @@ const Schemas = () => {
                 </div>
               </div>
             </div>
-            <div className="mt-10 ">
+            <div className="mt-10 w-[90%] items-center flex flex-col">
               <div className="overflow-x-auto rounded-lg">
                 <table className="w-screen-md table-fixed border-b border-gray">
                   <thead className="bg-black">
                     <tr>
-                      <th className="w-1/12 py-2 text-white border-r border-gray">
+                      <th className="w-1/24 py-2 text-white border-r border-gray">
                         #
                       </th>
                       <th className="w-3/12 py-2 text-white border-r border-gray">
                         SchemaUID
                       </th>
-                      <th className="w-5/12 py-2 text-white border-r border-gray">
+                      <th className="w-4/12 py-2 text-white border-r border-gray">
                         Schema
                       </th>
                       <th className="w-2/12 py-2 text-white border-r border-gray">
                         Resolver Address
                       </th>
-                      <th className="w-1/12 py-2 text-white">Attestations</th>
+                      <th className="w-4/24 py-2 text-white border-r border-gray mx-4">
+                        Attestations
+                      </th>
+                      <th className="w-2/24 py-2 text-white mx-4">
+                        <VscFeedback />
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -134,32 +156,60 @@ const Schemas = () => {
                       >
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
+                            {/* @ts-ignore */}
                             <p className="px-1 py-2">{row.id}</p>
                           </div>
                         </td>
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
                             <EthereumAddress
+                              // @ts-ignore
                               address={row.uid}
+                              // @ts-ignore
                               link={`/schema?schemaUID=${row.uid}`}
                             ></EthereumAddress>
                           </div>
                         </td>
                         <td className="flex flex-col py-2 border-r border-gray border-b border-gray">
                           <div className="flex flex-col  ">
+                            {/* @ts-ignore */}
                             <DecodedSchema schema={row.schema.fields} />
                           </div>
                         </td>
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
                             <EthereumAddress
+                              // @ts-ignore
                               address={row.resolverAddress}
                             ></EthereumAddress>
                           </div>
                         </td>
+                        <td className="py-2 border-r border-gray border-b border-gray">
+                          <div className="flex items-center justify-center">
+                            {/* @ts-ignore */}
+                            <TotalAttestations
+                              // @ts-ignore
+                              schemaUID={row.uid}
+                              chainID={chainID}
+                            />
+                          </div>
+                        </td>
                         <td className="py-2 border-b border-gray">
                           <div className="flex items-center justify-center">
-                            <p className="px-2 py-2">{1}</p>
+                            <PiChatDotsFill
+                            className="bolder"
+                              onClick={() => {
+                                // @ts-ignore
+                                setContext(row.uid);
+                                openFeedbackModal();
+                              }}
+                            />
+                            <ChatModal
+                              // @ts-ignore
+                              context={context}
+                              isOpen={modalIsOpen}
+                              closeModal={closeFeedbackModal}
+                            />
                           </div>
                         </td>
                       </tr>

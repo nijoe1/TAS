@@ -30,7 +30,7 @@ contract TablelandSubscriptionsIndexer is  IERC721Receiver, Ownable {
 
     string private constant GROUP_TABLE_PREFIX = "group";
 
-    string private constant GROUP_SCHEMA = "schemaUID text primary key, jsonSchema text, monthlySubscriptionPrice text, splitterContract text";
+    string private constant GROUP_SCHEMA = "schemaUID text primary key, monthlySubscriptionPrice text, splitterContract text";
 
     string private constant CREATOR_TABLE_PREFIX = "creator";
 
@@ -79,7 +79,6 @@ tablelandContract = TablelandDeployments.get();
 
     function SchemaInfoInserted(
         bytes32 schemaUID,
-        string memory jsonSchema,
         uint256 monthlySubscriptionPrice,
         address splitterContract
     ) public onlyOwner {
@@ -92,11 +91,9 @@ tablelandContract = TablelandDeployments.get();
             SQLHelpers.toInsert(
                 GROUP_TABLE_PREFIX,
                 tableIDs[0],
-                "schemaUID, jsonSchema, monthlySubscriptionPrice, splitterContract",
+                "schemaUID, monthlySubscriptionPrice, splitterContract",
                 string.concat(
                     SQLHelpers.quote(bytes32ToString(schemaUID)),
-                    ",",
-                    SQLHelpers.quote(jsonSchema),
                     ",",
                     SQLHelpers.quote((Strings.toString(monthlySubscriptionPrice))),
                     ",",

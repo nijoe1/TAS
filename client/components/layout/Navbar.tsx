@@ -5,34 +5,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
 import { useAccount, useChainId } from "wagmi";
-import { Orbis } from "@orbisclub/orbis-sdk";
-import { signMessage } from "@wagmi/core";
-import lighthouse from "@lighthouse-web3/sdk";
-import axios from "axios";
-import { generateLighthouseJWT } from "@/lib/lighthouse";
-const orbis = new Orbis();
-
-async function isConnected() {
-  const connected = await orbis.isConnected();
-
-  if (connected.status == 200) {
-    localStorage.setItem("userdid", connected.did);
-  } else {
-    await connect();
-  }
-}
-
-async function connect() {
-  const res = await orbis.connect_v2({ chain: "ethereum", lit: false });
-
-  /** Check if the connection is successful or not */
-  if (res.status == 200) {
-    localStorage.setItem("userdid", res.did);
-  } else {
-    console.log("Error connecting to Ceramic: ", res);
-    alert("Error connecting to Ceramic.");
-  }
-}
+import StepperForm from "@/components/StepperForm";
 
 const navLinks = [
   { text: "Attestations", href: "/attestations" },
@@ -48,44 +21,18 @@ const CustomNavbar = () => {
 
   const chainID = useChainId();
   const [currentChainID, setCurrentChainID] = useState(chainID);
-  const generateLighthouseApiKey = async (address: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
-    localStorage.removeItem(`API_KEY_${currentAddress}`);
 
-    if (!key) {
-      const verificationMessage = (
-        await axios.get(
-          `https://api.lighthouse.storage/api/auth/get_message?publicKey=${address}`
-        )
-      ).data;
-      const signed = await signMessage({
-        message: verificationMessage,
-      });
-      const API_KEY = await lighthouse.getApiKey(address, signed);
-      localStorage.setItem(`API_KEY_${address}`, API_KEY.data.apiKey);
-    }
-  };
-  const generateLighthouseJWToken = async (address: string) => {
-    let key = localStorage.getItem(`lighthouse-jwt-${address}`);
-    localStorage.removeItem(`lighthouse-jwt-${currentAddress}`);
-    if (!key) {
-      const response = await lighthouse.getAuthMessage(address);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-      if (response && response.data && response.data.message) {
-        let res = await generateLighthouseJWT(
-          address,
-          await signMessage({
-            message: response.data.message,
-          })
-        );
-        if (res) {
-          localStorage.setItem(`lighthouse-jwt-${address}`, res);
-        }
-      }
-    }
+  const openModal = () => {
+    setIsModalOpen(true);
   };
 
-  const handleLinkClick = (href) => {
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleLinkClick = (href: any) => {
     router.push(href);
   };
 
@@ -93,11 +40,8 @@ const CustomNavbar = () => {
     const check = async () => {
       if (currentAddress != address && address) {
         localStorage.removeItem("ceramic-session");
-        await isConnected();
-        await generateLighthouseApiKey(address);
-        await generateLighthouseJWToken(address);
+        openModal();
         setCurrentAddress(address);
-        window.location.reload();
       }
       if (currentChainID != chainID && chainID) {
         window.location.reload();
@@ -136,6 +80,12 @@ const CustomNavbar = () => {
           <ConnectButton />
         </div>
       </div>
+      <StepperForm
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        currentAddress={currentAddress}
+        address={address}
+      />
     </div>
   );
 };

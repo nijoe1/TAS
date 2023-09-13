@@ -1,4 +1,3 @@
-import { Address } from "viem";
 import TAS from "../../../contracts/deployments/goerli/TAS.json";
 import SubscriptionResolver from "../../../contracts/deployments/goerli/ContentSubscriptionResolver.json";
 import SchemaRegistry from "../../../contracts/deployments/goerli/SchemaRegistry.json";
@@ -10,31 +9,31 @@ import SchemaRegistry_m from "../../../contracts/deployments/mumbai/SchemaRegist
 export const CONTRACTS = {
   TAS: {
     5: {
-      contract: TAS.address as Address,
+      contract: TAS.address,
       abi: TAS.abi,
     },
     80001:{
-      contract: TAS_m.address as Address,
+      contract: TAS_m.address,
       abi: TAS_m.abi,
     }
   },
   SubscriptionResolver:{
     5: {
-      contract: SubscriptionResolver.address as Address,
+      contract: SubscriptionResolver.address,
       abi: SubscriptionResolver.abi
     },
     80001:{
-      contract: SubscriptionResolver_m.address as Address,
+      contract: SubscriptionResolver_m.address,
       abi: SubscriptionResolver_m.abi
     },
   },
   SchemaRegistry:{
     5: {
-      contract: SchemaRegistry.address as Address,
+      contract: SchemaRegistry.address,
       abi: SchemaRegistry.abi
     },
     80001:{
-      contract: SchemaRegistry_m.address as Address,
+      contract: SchemaRegistry_m.address,
       abi: SchemaRegistry_m.abi
     }
   },

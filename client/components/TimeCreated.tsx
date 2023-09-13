@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useContractRead ,useChainId} from "wagmi";
+import { useContractRead, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 
-function TimeCreated({ createdAt }) {
-  const chainID = useChainId()
+interface TimeCreatedProps {
+  createdAt: any;
+}
+
+const TimeCreated: React.FC<TimeCreatedProps> = ({ createdAt }) => {
+  const chainID = useChainId();
   const [displayTime, setDisplayTime] = useState(null);
   const { data: currentTimestamp } = useContractRead({
+    // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
+    // @ts-ignore
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "getTime",
   });
@@ -17,7 +23,9 @@ function TimeCreated({ createdAt }) {
       const createdAtNumber = parseInt(createdAt, 10); // Parse the createdAt string to a number
 
       // Calculate the elapsed seconds
-      const secondsElapsed = Math.floor(currentTimestampNumber - createdAtNumber); // Convert milliseconds to seconds
+      const secondsElapsed = Math.floor(
+        currentTimestampNumber - createdAtNumber
+      ); // Convert milliseconds to seconds
       // Create a new Date by subtracting the elapsed seconds
       const createdDate = new Date();
       createdDate.setSeconds(createdDate.getSeconds() - secondsElapsed);
@@ -31,20 +39,14 @@ function TimeCreated({ createdAt }) {
         minute: "numeric",
         hour12: true, // Use 12-hour format
       });
+      // @ts-ignore
       setDisplayTime(displayText);
     }
-
   }, [currentTimestamp, createdAt]);
 
   return (
-    <div>
-      {displayTime !== null ? (
-        <p>{displayTime}</p>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
+    <div>{displayTime !== null ? <p>{displayTime}</p> : <p>Loading...</p>}</div>
   );
-}
+};
 
 export default TimeCreated;

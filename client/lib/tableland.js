@@ -18,21 +18,21 @@ const tables = {
   },
   80001: {
     // SchemaRegistry
-    schema: "schema_80001_7313",
+    schema: "schema_80001_7364",
     // Tableland Attestation Service
-    attestation: "attestation_80001_7315",
-    revocation: "revocation_80001_7316",
+    attestation: "attestation_80001_7365",
+    revocation: "revocation_80001_7366",
     // ContentSubscriptionsResolver
-    content_group: "group_80001_7347",
-    content_admins: "creator_80001_7348",
-    content_subscription: "subscription_80001_7349",
-    group_revenue: "revenue_80001_7350",
+    content_group: "group_80001_7379",
+    content_admins: "creator_80001_7380",
+    content_subscription: "subscription_80001_7381",
+    group_revenue: "revenue_80001_7382",
     // ACResolver
     attesters: "schema_attesters_80001_7251",
     revokers: "schema_revokers_80001_7252",
 
-    offChainTimestamp : "offChain_timestamp_80001_7249",
-    offChainRevocation: "offChain_revocation_80001_7250"
+    offChainTimestamp: "offChain_timestamp_80001_7367",
+    offChainRevocation: "offChain_revocation_80001_7368",
   },
 };
 
@@ -105,6 +105,20 @@ export const getSchemaAttestations = async (chainId, schemaUID) => {
   }
 };
 
+export const getTotalAttestations = async (chainId, schemaUID) => {
+  const getAllSchemaAttestationsQuery =
+    TablelandGateway +
+    `SELECT COUNT(${tables[chainId].attestation}.uid) AS total
+    FROM ${tables[chainId].attestation}
+    WHERE ${tables[chainId].attestation}.schemaUID='${schemaUID}'`;
+  try {
+    const result = await axios.get(getAllSchemaAttestationsQuery);
+    return result.data[0].total;
+  } catch (err) {
+    return null;
+  }
+};
+
 export const getAttestation = async (chainId, uid) => {
   const getAttestationDataQuery =
     TablelandGateway +
@@ -129,11 +143,12 @@ export const getAttestation = async (chainId, uid) => {
   }
 };
 
-
-export const getAttestAccess = async (chainId, schemaUID,address) => {
+export const getAttestAccess = async (chainId, schemaUID, address) => {
   const getSchemaQuery =
     TablelandGateway +
-    `SELECT COUNT(${tables[chainId].content_admins}.attester) AS NUM FROM ${tables[chainId].content_admins} WHERE
+    `SELECT COUNT(${tables[chainId].content_admins}.attester) AS NUM FROM ${
+      tables[chainId].content_admins
+    } WHERE
      ${tables[chainId].content_admins}.schemaUID='${schemaUID}' AND
      ${tables[chainId].content_admins}.attester='${address.toLowerCase()}'`;
   try {

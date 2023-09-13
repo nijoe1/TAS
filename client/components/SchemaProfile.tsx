@@ -60,12 +60,11 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
   const closeAttestModal = () => {
     setIsAttestModalOpen(false);
   };
-  function createAttestation(schemaData: any): void {}
   function subscribe(): void {}
 
   const formattedDescription = formatDescription(schemaData.description);
 
-  function splitTextIntoChunks(text, chunkSize) {
+  function splitTextIntoChunks(text:any, chunkSize:any) {
     const regex = new RegExp(`.{1,${chunkSize}}`, "g");
     return text.match(regex) || [];
   }
@@ -77,7 +76,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
   });
 
   // Define a function to update the accessInfo state
-  const handleAccessInfoChange = (newAccessInfo) => {
+  const handleAccessInfoChange = (newAccessInfo:any) => {
     setAccessInfo(newAccessInfo);
     onAccessInfoChange(newAccessInfo);
   };
@@ -105,7 +104,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
             </Typography>
             <div className="text-center">
               {splitTextIntoChunks(schemaData.description, 50).map(
-                (chunk, index) => (
+                (chunk:any, index:any) => (
                   <React.Fragment key={index}>
                     {chunk}
                     <br />
@@ -186,10 +185,9 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
             <DynamicForm
               schema={schemaData.rawSchema}
               schemaUID={schemaData.schemaUID}
-              isSubscription={schemaData.resolverContract=="0xe10b47d077df0f7b60d95e3bbda60b6b7fc32b95"?true:false}
+              isSubscription={schemaData.resolverContract=="0x6d586fcdd18da8f39783daa09551682df2eb76cc"?true:false}
               isOpen={isAttestModalOpen}
               onClose={closeAttestModal}
-              onCreate={createAttestation}
             />
           )}
           {isSubscribeModalOpen && (

@@ -6,11 +6,7 @@ import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
 // @ts-ignore
 import TagsInput from "react-tagsinput";
-import {
-  useContractWrite,
-  usePrepareContractWrite,
-  useChainId
-} from "wagmi";
+import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 type RegisterSchemaModalProps = {
   isOpen: boolean;
@@ -18,13 +14,12 @@ type RegisterSchemaModalProps = {
   onCreate: (schemaData: any) => void; // Replace 'any' with the actual address of your event data
 };
 
-
 const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   isOpen,
   onClose,
   onCreate,
 }) => {
-  const chainID = useChainId()
+  const chainID = useChainId();
   const [schemaName, setSchemaName] = useState("");
   const [schemaDescription, setSchemaDescription] = useState("");
   const [isRevocable, setIsRevocable] = useState(false);
@@ -36,41 +31,53 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const [attributes, setAttributes] = useState([
     { address: "creator address", shares: 0 },
   ]);
-  const [creators, setCreators] = useState([])
-  const [shares, setShares] = useState([])
+  const [creators, setCreators] = useState([]);
+  const [shares, setShares] = useState([]);
 
   const { config } = usePrepareContractWrite({
+    // @ts-ignore
     address: CONTRACTS.SubscriptionResolver[chainID].contract,
+    // @ts-ignore
     abi: CONTRACTS.SubscriptionResolver[chainID].abi,
     functionName: "registerSubscriptionSchema",
-    args: [creators, shares, monthlySubscriptionPrice, schemaName, schemaDescription," "],
+    args: [
+      creators,
+      shares,
+      monthlySubscriptionPrice,
+      schemaName,
+      schemaDescription,
+    ],
   });
   const { write } = useContractWrite(config);
 
   useEffect(() => {
-    let creatorsList = []
-    let sharesList = []
-    for(const attr of attributes){
-      creatorsList.push(attr.address)
-      sharesList.push(attr.shares)
+    let creatorsList = [];
+    let sharesList = [];
+    for (const attr of attributes) {
+      creatorsList.push(attr.address);
+      sharesList.push(attr.shares);
     }
-    setCreators(creatorsList)
-    setShares(sharesList)
+    // @ts-ignore
+    setCreators(creatorsList);
+    // @ts-ignore
+    setShares(sharesList);
   }, [attributes]);
 
-  const handleTagChange = (tags) => {
+  const handleTagChange = (tags:any) => {
     setCategories({ tags });
     console.log(tags);
   };
 
-  const handleAttributeChange = (index, key, value) => {
+  const handleAttributeChange = (index:any, key:any, value:any) => {
     const updatedAttributes = [...attributes];
+    // @ts-ignore
     updatedAttributes[index][key] = value;
     setAttributes(updatedAttributes);
   };
 
-  const handleAttributeAddressChange = (index, key, value) => {
+  const handleAttributeAddressChange = (index:any, key:any, value:any) => {
     const updatedAttributes = [...attributes];
+    // @ts-ignore
     updatedAttributes[index][key] = value;
     setAttributes(updatedAttributes);
   };
@@ -79,7 +86,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setAttributes([...attributes, { address: "Select address", shares: 0 }]);
   };
 
-  const removeAttribute = (index) => {
+  const removeAttribute = (index:any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
@@ -156,7 +163,11 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
-              <TagsInput className="background-color-white" value={categories.tags} onChange={handleTagChange} />
+            <TagsInput
+              className="background-color-white"
+              value={categories.tags}
+              onChange={handleTagChange}
+            />
           </div>
           <div className="mb-4 items-center">
             <div className="mb-1 flex">
@@ -175,6 +186,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="number"
               value={monthlySubscriptionPrice}
+              // @ts-ignore
               onChange={(e) => setMonthlySubscriptionPrice(e.target.value)}
               placeholder="Monthly Subscription Price"
               className="rounded-full flex-grow px-4 py-2 border border-black"
@@ -204,6 +216,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <div className="w-4/7">
                 <Input
                   type="text"
+                  // @ts-ignore
                   value={attr.name}
                   onChange={(e) =>
                     handleAttributeAddressChange(
@@ -219,6 +232,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <div className="w-1/7">
                 <Input
                   type="number"
+                  // @ts-ignore
                   value={attr.name}
                   onChange={(e) =>
                     handleAttributeChange(index, "shares", e.target.value)
@@ -257,7 +271,10 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <button
               type="button"
               // @ts-ignore
-              onClick={()=>{write()}}
+              onClick={() => {
+                // @ts-ignore
+                write();
+              }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit

@@ -30,34 +30,6 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
   const [fileBlob, setFileBlob] = useState(null);
   const [fileType, setFileType] = useState("");
 
-  const signEncryption = async () => {
-    let key = localStorage.getItem(`lighthouse-jwt-${itemData.address}`);
-    if (key) {
-      return key;
-    } else {
-      try {
-        const response = await lighthouse.getAuthMessage(itemData.address);
-
-        if (response && response.data && response.data.message) {
-          return await generateLighthouseJWT(
-            itemData.address,
-            await signMessage({
-              message: response.data.message,
-            })
-          );
-        } else {
-          console.error("Error: Unable to retrieve authentication message.");
-          // Handle the error or return a default value as needed.
-          return null;
-        }
-      } catch (error) {
-        console.error("Error while getting authentication message:", error);
-        // Handle the error or return a default value as needed.
-        return null;
-      }
-    }
-  };
-
   async function parseBlobToJson(blob: any) {
     try {
       const response = await fetch(URL.createObjectURL(blob));
@@ -68,10 +40,11 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
     }
   }
 
-  function transformDecodedData(inputObject) {
+  function transformDecodedData(inputObject: any) {
+    // @ts-ignore
     const transformedArray = [];
 
-    inputObject.forEach((item) => {
+    inputObject.forEach((item:any) => {
       const transformedItem = {
         type: item.type,
         name: item.name,
@@ -80,7 +53,7 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
 
       transformedArray.push(transformedItem);
     });
-
+    // @ts-ignore
     return transformedArray;
   }
 
@@ -89,20 +62,14 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
       const encoder = new SchemaEncoder("string jsonCID");
       const ipfsCID = transformDecodedData(encoder.decodeData(itemData.data))[0]
         .value;
-      const blob = await decrypt(
-        ipfsCID,
-        itemData.address,
-        await signEncryption()
-      );
+      const jwt = localStorage.getItem(`lighthouse-jwt-${itemData.address}`);
+      console.log(ipfsCID);
+      const blob = await decrypt(ipfsCID, itemData.address, jwt);
       const json = await parseBlobToJson(blob);
       setName(json.name);
       setDescription(json.description);
 
-      const fileblob = await decrypt(
-        json.file.CID,
-        itemData.address,
-        await signEncryption()
-      );
+      const fileblob = await decrypt(json.file.CID, itemData.address, jwt);
       // Set the Blob and file type
       setFileBlob(fileblob);
       setFileType(json.file.type);
@@ -111,12 +78,12 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
     fetch();
   }, []);
 
-  function getFileExtension(mimeType) {
-    const parts = mimeType.split('/');
+  function getFileExtension(mimeType: any) {
+    const parts = mimeType.split("/");
     if (parts.length === 2) {
       return parts[1];
     }
-    return '';
+    return "";
   }
 
   return (
@@ -139,13 +106,19 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
                 <source src={URL.createObjectURL(fileBlob)} type={fileType} />
                 Your browser does not support the video tag.
               </video>
-              <a href={URL.createObjectURL(fileBlob)} download={`${name}.${getFileExtension(fileType)}`}>
+              <a
+                href={URL.createObjectURL(fileBlob)}
+                download={`${name}.${getFileExtension(fileType)}`}
+              >
                 Download File
               </a>
             </div>
           ) : (
             // Render as a link or provide appropriate handling for other file types
-            <a href={URL.createObjectURL(fileBlob)} download={`${name}.${getFileExtension(fileType)}`}>
+            <a
+              href={URL.createObjectURL(fileBlob)}
+              download={`${name}.${getFileExtension(fileType)}`}
+            >
               Download File
             </a>
           )

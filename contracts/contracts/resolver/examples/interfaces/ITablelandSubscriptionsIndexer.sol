@@ -7,7 +7,6 @@ interface ITablelandSubscriptionsIndexer {
 
     function SchemaInfoInserted(
         bytes32 schemaUID,
-        string memory jsonSchema,
         uint256 monthlySubscriptionPrice,
         address splitterContract
     ) external;
