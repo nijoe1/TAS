@@ -229,7 +229,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             />
             <Typography
               className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3"
-              variant="h8"
               color="black"
               onClick={() => setIsRevocable(!isRevocable)}
             >
@@ -287,7 +286,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 />
                 <Typography
                   className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  variant="h8"
                   color="black"
                   onClick={() => handleCheckboxChange(index)}
                 >
@@ -314,7 +312,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Typography
               onClick={addAttribute}
               className="cursor-pointer"
-              variant="h8"
               color="black"
             >
               add field

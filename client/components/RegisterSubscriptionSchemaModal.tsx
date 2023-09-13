@@ -261,7 +261,6 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Typography
               onClick={addAttribute}
               className="cursor-pointer"
-              variant="h8"
               color="black"
             >
               add creator

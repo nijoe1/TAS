@@ -12,29 +12,29 @@ export const CONTRACTS = {
       contract: TAS.address,
       abi: TAS.abi,
     },
-    80001:{
+    80001: {
       contract: TAS_m.address,
       abi: TAS_m.abi,
-    }
+    },
   },
-  SubscriptionResolver:{
+  SubscriptionResolver: {
     5: {
       contract: SubscriptionResolver.address,
-      abi: SubscriptionResolver.abi
+      abi: SubscriptionResolver.abi,
     },
-    80001:{
+    80001: {
       contract: SubscriptionResolver_m.address,
-      abi: SubscriptionResolver_m.abi
+      abi: SubscriptionResolver_m.abi,
     },
   },
-  SchemaRegistry:{
+  SchemaRegistry: {
     5: {
       contract: SchemaRegistry.address,
-      abi: SchemaRegistry.abi
+      abi: SchemaRegistry.abi,
     },
-    80001:{
+    80001: {
       contract: SchemaRegistry_m.address,
-      abi: SchemaRegistry_m.abi
-    }
+      abi: SchemaRegistry_m.abi,
+    },
   },
 };
