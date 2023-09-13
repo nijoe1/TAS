@@ -61,17 +61,17 @@ const Attestations = () => {
                 Showing the most recent attestations.
               </Typography>
               <Typography color="black">Total Attestations:{"  "}</Typography>
-              <Typography className="ml-2" variant="h9" color="black">
+              <Typography className="ml-2" variant="h6" color="black">
                 169
               </Typography>
               <Typography color="black">Unique Attestors: {"  "}</Typography>
-              <Typography className="ml-2" variant="h9" color="black">
+              <Typography className="ml-2" variant="h6" color="black">
                 5016
               </Typography>
               <Typography color="black">
                 Offchain Attestations: {"  "}
               </Typography>
-              <Typography className="ml-2 " variant="h9" color="black">
+              <Typography className="ml-2 " variant="h6" color="black">
                 16981
               </Typography>
             </div>
