@@ -83,8 +83,8 @@ const CustomNavbar = () => {
       <StepperForm
         isOpen={isModalOpen}
         onClose={closeModal}
-        currentAddress={currentAddress}
-        address={address}
+        currentAddress={currentAddress as `0x${string}`}
+        address={address as `0x${string}`}
       />
     </div>
   );
