@@ -1,10 +1,10 @@
-import TAS from "../../../contracts/deployments/goerli/TAS.json";
-import SubscriptionResolver from "../../../contracts/deployments/goerli/ContentSubscriptionResolver.json";
-import SchemaRegistry from "../../../contracts/deployments/goerli/SchemaRegistry.json";
+import TAS from "./deployments/goerli/TAS.json";
+import SubscriptionResolver from "./deployments/goerli/ContentSubscriptionResolver.json";
+import SchemaRegistry from "./deployments/goerli/SchemaRegistry.json";
 
-import TAS_m from "../../../contracts/deployments/mumbai/TAS.json";
-import SubscriptionResolver_m from "../../../contracts/deployments/mumbai/ContentSubscriptionResolver.json";
-import SchemaRegistry_m from "../../../contracts/deployments/mumbai/SchemaRegistry.json";
+import TAS_m from "./deployments/mumbai/TAS.json";
+import SubscriptionResolver_m from "./deployments/mumbai/ContentSubscriptionResolver.json";
+import SchemaRegistry_m from "./deployments/mumbai/SchemaRegistry.json";
 
 export const CONTRACTS = {
   TAS: {
