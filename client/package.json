@@ -1,5 +1,5 @@
 {
-	"name": "Tableland Attestation Service client",
+	"name": "tas",
 	"version": "0.1.0",
 	"license": "MIT",
 	"scripts": {
