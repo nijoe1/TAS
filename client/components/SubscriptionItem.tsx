@@ -7,15 +7,8 @@ import {
   Button,
 } from "@material-tailwind/react";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-
-import { signMessage } from "@wagmi/core";
-import lighthouse from "@lighthouse-web3/sdk";
 import {
-  uploadFile,
   decrypt,
-  uploadFileEncrypted,
-  applyAccessConditions,
-  generateLighthouseJWT,
 } from "@/lib/lighthouse";
 type SubscriptionItemProps = {
   itemData: {
@@ -63,7 +56,7 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
       const ipfsCID = transformDecodedData(encoder.decodeData(itemData.data))[0]
         .value;
       const jwt = localStorage.getItem(`lighthouse-jwt-${itemData.address}`);
-      console.log(ipfsCID);
+      console.log(itemData.address);
       const blob = await decrypt(ipfsCID, itemData.address, jwt);
       const json = await parseBlobToJson(blob);
       setName(json.name);

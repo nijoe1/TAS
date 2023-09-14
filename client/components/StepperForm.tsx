@@ -41,10 +41,6 @@ const StepperForm: React.FC<{
 
   const generateLighthouseApiKey = async (address: any) => {
     let key = localStorage.getItem(`API_KEY_${address}`);
-    if (currentAddress) {
-      localStorage.removeItem(`API_KEY_${currentAddress}`);
-    }
-
     if (!key) {
       const verificationMessage = (
         await axios.get(
@@ -67,9 +63,6 @@ const StepperForm: React.FC<{
   };
   const generateLighthouseJWToken = async (address: string) => {
     let key = localStorage.getItem(`lighthouse-jwt-${address}`);
-    if (currentAddress) {
-      localStorage.removeItem(`lighthouse-jwt-${currentAddress}`);
-    }
     if (!key) {
       const response = await lighthouse.getAuthMessage(address);
 
@@ -87,10 +80,15 @@ const StepperForm: React.FC<{
           setTokenClicked(!tokenClicked);
         }
       }
-    } else {
-      nextStep();
     }
   };
+
+  const closeIt = async()=>{
+    let jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
+    const connected = await orbis.isConnected();
+    let key = localStorage.getItem(`API_KEY_${address}`);
+    return (jwt && connected && key)
+  }
 
   const steps = [
     {
@@ -123,7 +121,8 @@ const StepperForm: React.FC<{
   };
 
   return (
-    <div
+    // @ts-ignore
+    {await  closeIt() == true && ( <div
       className={`${
         isOpen
           ? "fixed inset-0 flex flex-col items-center text-center mx-auto justify-center z-50"
@@ -177,7 +176,7 @@ const StepperForm: React.FC<{
           )}
         </div>
       </div>
-    </div>
+    </div>)}
   );
 };
 
