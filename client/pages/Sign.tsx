@@ -48,6 +48,7 @@ const Sign = () => {
 
   const { data, isError, isLoading, isSuccess, signTypedData } =
     useSignTypedData({
+      // @ts-ignore
       domain: domain,
       // @ts-ignore
       message: message,
@@ -60,6 +61,7 @@ const Sign = () => {
   const [address, setAddress] = useState("0x00");
   const recover = async (data:any) => {
     let res = await recoverTypedDataAddress({
+      // @ts-ignore
       domain: domain,
       // @ts-ignore
       message: message,
