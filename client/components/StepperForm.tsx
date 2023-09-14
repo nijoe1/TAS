@@ -83,12 +83,12 @@ const StepperForm: React.FC<{
     }
   };
 
-  const closeIt = async()=>{
-    let jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
-    const connected = await orbis.isConnected();
-    let key = localStorage.getItem(`API_KEY_${address}`);
-    return (jwt && connected && key)
-  }
+  // const closeIt = async()=>{
+  //   let jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
+  //   const connected = await orbis.isConnected();
+  //   let key = localStorage.getItem(`API_KEY_${address}`);
+  //   return(jwt && connected && key)
+  // }
 
   const steps = [
     {
@@ -121,8 +121,7 @@ const StepperForm: React.FC<{
   };
 
   return (
-    // @ts-ignore
-    {await  closeIt() == true && ( <div
+    <div
       className={`${
         isOpen
           ? "fixed inset-0 flex flex-col items-center text-center mx-auto justify-center z-50"
@@ -176,7 +175,7 @@ const StepperForm: React.FC<{
           )}
         </div>
       </div>
-    </div>)}
+    </div>
   );
 };
 
