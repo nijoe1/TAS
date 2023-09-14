@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
-import TagSelect from "@/components/TagSelect";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { validateInput, transformFormData } from "@/lib/utils";
 import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import { useAccount } from "wagmi";
-import { signMessage } from "@wagmi/core";
-import lighthouse, { applyAccessCondition } from "@lighthouse-web3/sdk";
-import axios from "axios";
-import {
-  uploadFile,
-  decrypt,
-  uploadFileEncrypted,
-  applyAccessConditions,
-  generateLighthouseJWT,
-} from "@/lib/lighthouse";
+import Notification from "./Notification";
+
 import { getGroupPrice } from "@/lib/tableland";
 type DynamicFormModalProps = {
   schemaUID?: string;
@@ -105,6 +94,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
               Cancel
             </button>
           </div>
+          <Notification isLoading={isLoading} isSuccess={isSuccess} isError={isError} />
         </form>
       </Card>
     </div>

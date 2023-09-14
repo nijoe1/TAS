@@ -23,6 +23,7 @@ const CustomNavbar = () => {
   const [currentChainID, setCurrentChainID] = useState(chainID);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [changeChain, setChangeChain] = useState(true);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -38,14 +39,23 @@ const CustomNavbar = () => {
 
   useEffect(() => {
     const check = async () => {
+      console.log(chainID);
       if (currentAddress != address && address) {
         localStorage.removeItem("ceramic-session");
         openModal();
         setCurrentAddress(address);
+        setChangeChain(false);
       }
-      if (currentChainID != chainID && chainID) {
+      if (
+        currentChainID != chainID &&
+        chainID &&
+        currentChainID &&
+        changeChain
+      ) {
+        setCurrentChainID(chainID);
         window.location.reload();
       }
+      setChangeChain(true);
     };
     check();
   }, [address, chainID]);

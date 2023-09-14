@@ -28,17 +28,22 @@ async function connect() {
     alert("Error connecting to Ceramic.");
   }
 }
-const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddress:string; address:string }> = ({
-  isOpen,
-  onClose,
-  currentAddress,
-  address
-}) => {
+const StepperForm: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  currentAddress: string;
+  address: string;
+}> = ({ isOpen, onClose, currentAddress, address }) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [ceramicClicked, setCeramicClicked] = useState(false);
+  const [apiClicked, setApiClicked] = useState(false);
+  const [tokenClicked, setTokenClicked] = useState(false);
 
   const generateLighthouseApiKey = async (address: any) => {
     let key = localStorage.getItem(`API_KEY_${address}`);
-    localStorage.removeItem(`API_KEY_${currentAddress}`);
+    if (currentAddress) {
+      localStorage.removeItem(`API_KEY_${currentAddress}`);
+    }
 
     if (!key) {
       const verificationMessage = (
@@ -50,12 +55,21 @@ const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddre
         message: verificationMessage,
       });
       const API_KEY = await lighthouse.getApiKey(address, signed);
-      localStorage.setItem(`API_KEY_${address}`, API_KEY.data.apiKey);
+      if (API_KEY.data.apiKey) {
+        localStorage.setItem(`API_KEY_${address}`, API_KEY.data.apiKey);
+        nextStep();
+      } else {
+        setApiClicked(!apiClicked);
+      }
+    } else {
+      nextStep();
     }
   };
   const generateLighthouseJWToken = async (address: string) => {
     let key = localStorage.getItem(`lighthouse-jwt-${address}`);
-    localStorage.removeItem(`lighthouse-jwt-${currentAddress}`);
+    if (currentAddress) {
+      localStorage.removeItem(`lighthouse-jwt-${currentAddress}`);
+    }
     if (!key) {
       const response = await lighthouse.getAuthMessage(address);
 
@@ -68,8 +82,13 @@ const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddre
         );
         if (res) {
           localStorage.setItem(`lighthouse-jwt-${address}`, res);
+          nextStep();
+        } else {
+          setTokenClicked(!tokenClicked);
         }
       }
+    } else {
+      nextStep();
     }
   };
 
@@ -106,7 +125,9 @@ const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddre
   return (
     <div
       className={`${
-        isOpen ? "fixed inset-0 flex flex-col items-center text-center mx-auto justify-center z-50" : "hidden"
+        isOpen
+          ? "fixed inset-0 flex flex-col items-center text-center mx-auto justify-center z-50"
+          : "hidden"
       }`}
     >
       <div className="fixed inset-0 bg-gray-700 opacity-70"></div>
@@ -118,7 +139,9 @@ const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddre
           <p className="mb-6">{steps[currentStep].description}</p>
           {currentStep === 0 && (
             <button
+              disabled={ceramicClicked}
               onClick={async () => {
+                setCeramicClicked(!ceramicClicked);
                 await isConnected();
                 nextStep();
               }}
@@ -129,9 +152,10 @@ const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddre
           )}
           {currentStep === 1 && (
             <button
+              disabled={apiClicked}
               onClick={async () => {
+                setApiClicked(!apiClicked);
                 await generateLighthouseApiKey(address);
-                nextStep();
               }}
               className="bg-black text-white py-2 px-4 rounded-lg mt-4"
             >
@@ -140,7 +164,9 @@ const StepperForm: React.FC<{ isOpen: boolean; onClose: () => void; currentAddre
           )}
           {currentStep === 2 && (
             <button
+              disabled={tokenClicked}
               onClick={async () => {
+                setTokenClicked(!tokenClicked);
                 await generateLighthouseJWToken(address);
                 closeModal();
               }}
