@@ -53,7 +53,7 @@ const Attestation = () => {
           attestation.revoker === "0x0000000000000000000000000000000000000000"
             ? false
             : true,
-        revocable: attestation.revocable === "true" ? true : false,
+        revocable: attestation.revocable == "true" ? true : false,
         resolver: attestation.resolver,
 
         schemaUID: attestation.schemaUID,

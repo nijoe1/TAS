@@ -3,81 +3,48 @@ import { useSignTypedData } from "wagmi";
 import React, { useEffect, useState } from "react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
-import { recoverTypedDataAddress, hashTypedData } from "viem";
+import { recoverTypedDataAddress, hexToSignature } from "viem";
+// @ts-ignore
+import { Orbis } from "@orbisclub/orbis-sdk";
 
-export const account = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+const orbis = new Orbis();
 
 const Sign = () => {
-  // const domain = {
-  //   name: "TAS",
-  //   version: "0.0.1",
-  //   chainId: 80001, // Ethereum chain ID
-  //   verifyingContract:
-  //     "0x7797761F5dF176c4Df8583f34B656E9f5AF6C740" as `0x${string}`, // Contract address
-  // };
+  const domain = {
+    name: "TAS",
+    version: "1",
+    chainId: 80001, // Ethereum chain ID
+    verifyingContract:
+      "0x7797761F5dF176c4Df8583f34B656E9f5AF6C740" as `0x${string}`, // Contract address
+  }as const;
 
-  // const message = {
-  //   version: 1, // Specify the version
-  //   schema:
-  //     "0xe038cd96af4cfe0ab2b4b2218a1f3fd3a7c67b65a5de538fa2cf445b9ceab681",
-  //   recipient: "0x84656be33Fa1B05eC62D7A059f75C0DE233F1530",
-  //   time: "1693961858", // Unix timestamp as a string
-  //   expirationTime: 0, // Specify the expiration time
-  //   revocable: true, // Specify whether it's revocable or not
-  //   refUID:
-  //     "0x0000000000000000000000000000000000000000000000000000000000000000",
-  //   data: "0xa8293d6629af621d040f5015426cfd80b2fb749092e0ac01f00908d4a8ee6d3900000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000001600000000000000000000000000000000000000000000000000000000000000007646973636f72640000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000077a616672616e6e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000077z",
-  // };
+  const message = {
+    version: 1, // Specify the version
+    schema:
+      "0xe038cd96af4cfe0ab2b4b2218a1f3fd3a7c67b65a5de538fa2cf445b9ceab681" as `0x${string}`,
+    recipient: "0x84656be33Fa1B05eC62D7A059f75C0DE233F1530" as `0x${string}`,
+    time: "1693961858", // Unix timestamp as a string
+    expirationTime: 0, // Specify the expiration time
+    revocable: true, // Specify whether it's revocable or not
+    refUID:
+      "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`,
+    data: "0x000012" as `0x${string}`,
+  }as const;
 
-  // const primaryType = "Attest"; // Specify the primary type
+  const primaryType = "Attest"; // Specify the primary type
 
-  // const types = {
-  //   Attest: [
-  //     { name: "version", type: "uint16" },
-  //     { name: "schema", type: "bytes32" },
-  //     { name: "recipient", type: "address" },
-  //     { name: "time", type: "uint64" },
-  //     { name: "expirationTime", type: "uint64" },
-  //     { name: "revocable", type: "bool" },
-  //     { name: "refUID", type: "bytes32" },
-  //     { name: "data", type: "bytes" },
-  //   ],
-  // };
-
-  // All properties on a domain are optional
-    const primaryType = "Mail"; // Specify the primary type
-
-const domain = {
-  name: 'Ether Mail',
-  version: '1',
-  chainId: 80001,
-  verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-} as const
- 
-// The named list of all type definitions
-const types = {
-  Person: [
-    { name: 'name', type: 'string' },
-    { name: 'wallet', type: 'address' },
-  ],
-  Mail: [
-    { name: 'from', type: 'Person' },
-    { name: 'to', type: 'Person' },
-    { name: 'contents', type: 'string' },
-  ],
-} as const
- 
-const message = {
-  from: {
-    name: 'Cow',
-    wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-  },
-  to: {
-    name: 'Bob',
-    wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-  },
-  contents: 'Hello, Bob!',
-} as const
+  const types = {
+    Attest: [
+      { name: "version", type: "uint16" },
+      { name: "schema", type: "bytes32" },
+      { name: "recipient", type: "address" },
+      { name: "time", type: "uint64" },
+      { name: "expirationTime", type: "uint64" },
+      { name: "revocable", type: "bool" },
+      { name: "refUID", type: "bytes32" },
+      { name: "data", type: "bytes" },
+    ],
+  }as const;
 
   const { data, isError, isLoading, isSuccess, signTypedData } =
     useSignTypedData({
@@ -100,6 +67,8 @@ const message = {
       signature: data as `0x${string}`,
     });
     console.log(res);
+    let ress = hexToSignature(data as `0x${string}`) 
+    console.log(ress)
   };
   return (
     <div

@@ -124,9 +124,9 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
         {attestationData.revocable && (
           <div className="items-center flex flex-col ">
             <button
-              disabled={attestationData.revoked || !attestationData.revocable}
+              disabled={attestationData.revoked}
               onClick={write}
-              className={`text-white rounded-lg px-6 py-2 ${!attestationData.revoked && attestationData.revocable ? "hover:bg-white hover:text-black border bg-black border-black":"bg-gray-600" } mt-3`}
+              className={`text-white rounded-lg px-6 py-2 ${!attestationData.revoked ? "hover:bg-white hover:text-black border bg-black border-black":"bg-gray-600" } mt-3`}
             >
               {attestationData.revoked? "already revoked":attestationData.revocable?"revoke":"nonRevocable"}
             </button>

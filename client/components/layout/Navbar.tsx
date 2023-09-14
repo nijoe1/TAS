@@ -72,13 +72,13 @@ const CustomNavbar = () => {
             className="rounded-lg "
           />
         </div>
-        <div className="w-8/10 flex flex-wrap rounded-xl mx-auto gap-2">
+        <div className="w-8/10 flex flex-wrap rounded-xl mx-auto gap-4">
           {/* Navigation Links */}
           {navLinks.map((item, index) => (
             <Link key={index} href={item.href}>
               <Button
                 onClick={() => handleLinkClick(item.href)}
-                size="md"
+                size="lg"
                 className="hover:bg-gray-200 hover:text-black hover:rounded-md w-full mx-1"
               >
                 {item.text}
