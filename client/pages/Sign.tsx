@@ -43,40 +43,41 @@ const Sign = () => {
   //     { name: "data", type: "bytes" },
   //   ],
   // };
-  const primaryType = "Mail";
 
   // All properties on a domain are optional
-  const domain = {
-    name: "Ether Mail",
-    version: "1",
-    chainId: 80001,
-    verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC",
-  } as const;
+    const primaryType = "Mail"; // Specify the primary type
 
-  // The named list of all type definitions
-  const types = {
-    Person: [
-      { name: "name", type: "string" },
-      { name: "wallet", type: "address" },
-    ],
-    Mail: [
-      { name: "from", type: "Person" },
-      { name: "to", type: "Person" },
-      { name: "contents", type: "string" },
-    ],
-  } as const;
-
-  const message = {
-    from: {
-      name: "Cow",
-      wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
-    },
-    to: {
-      name: "Bob",
-      wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
-    },
-    contents: "Hello, Bob!",
-  } as const;
+const domain = {
+  name: 'Ether Mail',
+  version: '1',
+  chainId: 80001,
+  verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+} as const
+ 
+// The named list of all type definitions
+const types = {
+  Person: [
+    { name: 'name', type: 'string' },
+    { name: 'wallet', type: 'address' },
+  ],
+  Mail: [
+    { name: 'from', type: 'Person' },
+    { name: 'to', type: 'Person' },
+    { name: 'contents', type: 'string' },
+  ],
+} as const
+ 
+const message = {
+  from: {
+    name: 'Cow',
+    wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
+  },
+  to: {
+    name: 'Bob',
+    wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+  },
+  contents: 'Hello, Bob!',
+} as const
 
   const { data, isError, isLoading, isSuccess, signTypedData } =
     useSignTypedData({
@@ -89,7 +90,7 @@ const Sign = () => {
     "0x50ede5188e5d19a1502d541b348536a0efa1d5999437e847d875b91705be44a473c1c1a6ab3fba8b7d79ec801b2f1454a06535d0ca386f5195086e368efce8861c" as `0x${string}`;
 
   const [address, setAddress] = useState("0x00");
-  const recover = async (data: any) => {
+  const recover = async (data:any) => {
     let res = await recoverTypedDataAddress({
       // @ts-ignore
       domain: domain,
