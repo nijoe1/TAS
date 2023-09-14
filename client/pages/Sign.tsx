@@ -16,7 +16,7 @@ const Sign = () => {
     chainId: 80001, // Ethereum chain ID
     verifyingContract:
       "0x7797761F5dF176c4Df8583f34B656E9f5AF6C740" as `0x${string}`, // Contract address
-  }as const;
+  } as const;
 
   const message = {
     version: 1, // Specify the version
@@ -29,7 +29,7 @@ const Sign = () => {
     refUID:
       "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`,
     data: "0x000012" as `0x${string}`,
-  }as const;
+  } as const;
 
   const primaryType = "Attest"; // Specify the primary type
 
@@ -44,7 +44,7 @@ const Sign = () => {
       { name: "refUID", type: "bytes32" },
       { name: "data", type: "bytes" },
     ],
-  }as const;
+  } as const;
 
   const { data, isError, isLoading, isSuccess, signTypedData } =
     useSignTypedData({
@@ -52,26 +52,31 @@ const Sign = () => {
       domain: domain,
       // @ts-ignore
       message: message,
+      // @ts-ignore
       primaryType: primaryType,
+      // @ts-ignore
       types: types,
     });
   const sig =
     "0x50ede5188e5d19a1502d541b348536a0efa1d5999437e847d875b91705be44a473c1c1a6ab3fba8b7d79ec801b2f1454a06535d0ca386f5195086e368efce8861c" as `0x${string}`;
 
   const [address, setAddress] = useState("0x00");
-  const recover = async (data:any) => {
+  const recover = async (data: any) => {
     let res = await recoverTypedDataAddress({
       // @ts-ignore
       domain: domain,
       // @ts-ignore
       message: message,
+      // @ts-ignore
       primaryType: primaryType,
+      // @ts-ignore
       types: types,
+      // @ts-ignore
       signature: data as `0x${string}`,
     });
     console.log(res);
-    let ress = hexToSignature(data as `0x${string}`) 
-    console.log(ress)
+    let ress = hexToSignature(data as `0x${string}`);
+    console.log(ress);
   };
   return (
     <div
