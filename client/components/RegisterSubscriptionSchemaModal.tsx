@@ -8,6 +8,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import TagsInput from "react-tagsinput";
 import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
+import Notification from "./Notification";
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -48,7 +49,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       schemaDescription,
     ],
   });
-  const { write } = useContractWrite(config);
+  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
 
   useEffect(() => {
     let creatorsList = [];
@@ -286,6 +287,8 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               Cancel
             </button>
           </div>
+          <Notification isLoading={isLoading} isSuccess={isSuccess} isError={isError} />
+
         </form>
       </Card>
     </div>

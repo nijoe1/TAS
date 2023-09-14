@@ -122,6 +122,49 @@ contract ContentSubscriptionResolver is SchemaResolver {
     }
 
     /**
+    * @dev Handles attestation by validating the attester and bond value.
+    * @param attestation The attestation data.
+    * @return Boolean indicating the success of the attestation.
+    */
+    function onAttest(
+        Attestation calldata attestation,
+        uint256 /* value */
+    ) internal override view returns (bool) {
+        address attester = attestation.attester;
+        bytes32 schemaUID = attestation.schema;
+        if (!schemas[schemaUID].contentCreators.contains(attester)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    * @dev Checks if an attestation can be revoked based on resolution status and time.
+    * @return Boolean indicating whether the attestation can be revoked.
+    */
+    function onRevoke(
+        Attestation calldata /*attestation*/,
+        uint256 /* value */
+    ) internal override pure returns (bool) {
+        return false;
+    }
+
+
+    function createSplitter(address[] memory admins, uint256[] memory shares)internal returns(address splitterInstance){
+        // Deploy a splitter contract using thirdWeb factory and implementation with the calculated data
+        bytes memory result = Address.functionCall(
+            splitterFactory,
+            abi.encodeWithSignature(
+                "createSplitter(address[],uint256[])",
+                admins,
+                shares
+            )
+        );
+
+        splitterInstance = abi.decode(result, (address));
+    }
+
+    /**
      * @dev Mint tokens for encrypted attestations.
      * @param schemaUID The UID of the schema for which tokens are being minted.
      */
@@ -151,71 +194,14 @@ contract ContentSubscriptionResolver is SchemaResolver {
             userSubscriptions[msg.sender][schemaUID] = time;
         }
 
-        schemas[schemaUID].subscriptionsPool += msg.value;
-
-        tableland.SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
-    }
-
-    /**
-    * @dev Handles attestation by validating the attester and bond value.
-    * @param attestation The attestation data.
-    * @return Boolean indicating the success of the attestation.
-    */
-    function onAttest(
-        Attestation calldata attestation,
-        uint256 /* value */
-    ) internal override view returns (bool) {
-        address attester = attestation.attester;
-        bytes32 schemaUID = attestation.schema;
-        if (!schemas[schemaUID].contentCreators.contains(attester)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-    * @dev Checks if an attestation can be revoked based on resolution status and time.
-    * @return Boolean indicating whether the attestation can be revoked.
-    */
-    function onRevoke(
-        Attestation calldata /*attestation*/,
-        uint256 /* value */
-    ) internal override pure returns (bool) {
-        return false;
-    }
-
-    /** 
-    * @dev Distributes minting funds among attesters using a splitter contract.
-    * This function calculates the distribution of funds based on attestation counts and shares,
-    * deploys a splitter contract, and sends the funds to it for distribution.
-    */
-    function splitSubscriptions(bytes32 schemaUID) external {
+        schemas[schemaUID].totalRevenue += msg.value;
 
         // Send the funds to the splitter contract for distribution
-        Address.sendValue(payable(schemas[schemaUID].splitterContract), schemas[schemaUID].subscriptionsPool);
+        Address.sendValue(payable(schemas[schemaUID].splitterContract), msg.value);
         // Distribute funds to valid attestors
         Address.functionCall(schemas[schemaUID].splitterContract, abi.encodeWithSignature("distribute()"));
 
-        schemas[schemaUID].totalRevenue += schemas[schemaUID].subscriptionsPool;
-
-        schemas[schemaUID].subscriptionsPool = 0;
-
-        tableland.SchemaRevenueUpdated(schemaUID, schemas[schemaUID].subscriptionsPool, schemas[schemaUID].totalRevenue);
-    }
-
-
-    function createSplitter(address[] memory admins, uint256[] memory shares)internal returns(address splitterInstance){
-        // Deploy a splitter contract using thirdWeb factory and implementation with the calculated data
-        bytes memory result = Address.functionCall(
-            splitterFactory,
-            abi.encodeWithSignature(
-                "createSplitter(address[],uint256[])",
-                admins,
-                shares
-            )
-        );
-
-        splitterInstance = abi.decode(result, (address));
+        tableland.SchemaRevenueUpdated(schemaUID, schemas[schemaUID].totalRevenue);
     }
 
     /**

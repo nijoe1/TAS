@@ -109,7 +109,7 @@ const Schema = () => {
         setTaken(!taken);
         setSubscriptionResolver(
           // @ts-ignore
-          CONTRACTS.SubscriptionResolver[useChainID].contract
+          CONTRACTS.SubscriptionResolver[useChainID].contract.toLowerCase()
         );
         // @ts-ignore
         setTableData(attestationTableInfo);
@@ -131,10 +131,12 @@ const Schema = () => {
             <SchemaProfile
               schemaData={schemaData}
               onAccessInfoChange={handleAccessInfoChange}
+              chainID={useChainID}
             ></SchemaProfile>
 
             {tableData.length > 0 &&
-            "0x6d586fcdd18da8f39783daa09551682df2eb76cc" !==
+            // @ts-ignore
+            CONTRACTS.SubscriptionResolver[useChainID].contract.toLowerCase() !==
               schemaData.resolverContract ? (
               <div className="mt-10 mx-[25%]">
                 <div className="overflow-x-auto rounded-lg">

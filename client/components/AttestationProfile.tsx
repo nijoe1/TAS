@@ -5,6 +5,9 @@ import TimeCreated from "./TimeCreated";
 import Field from "@/components/Field";
 import { Typography } from "@material-tailwind/react";
 import AccessBox from "./AccessBox";
+import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
+import { CONTRACTS } from "@/constants/contracts";
+import Notification from "./Notification";
 type AttestationProfileProps = {
   attestationData: {
     attestationUID: string;
@@ -32,9 +35,21 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
   });
 
   // Define a function to update the accessInfo state
-  const handleAccessInfoChange = (newAccessInfo:any) => {
+  const handleAccessInfoChange = (newAccessInfo: any) => {
     setAccessInfo(newAccessInfo);
   };
+  const chainID = useChainId();
+
+  const { config } = usePrepareContractWrite({
+    // @ts-ignore
+    address: CONTRACTS.TAS[chainID].contract,
+    // @ts-ignore
+    abi: CONTRACTS.TAS[chainID].abi,
+    functionName: "revoke",
+    args: [[attestationData.schemaUID, [attestationData.attestationUID, 0]]],
+    value: BigInt(0),
+  });
+  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
 
   return (
     <div className={`flex-grow mx-auto`}>
@@ -106,6 +121,22 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
           <div className="text-xl font-semibold">Decoded Data</div>
           <DecodedData decodedData={attestationData.decodedData} />
         </div>
+        {attestationData.revocable && (
+          <div className="items-center flex flex-col ">
+            <button
+              disabled={attestationData.revoked || !attestationData.revocable}
+              onClick={write}
+              className={`text-white rounded-lg px-6 py-2 ${!attestationData.revoked && attestationData.revocable ? "hover:bg-white hover:text-black border bg-black border-black":"bg-gray-600" } mt-3`}
+            >
+              {attestationData.revoked? "already revoked":attestationData.revocable?"revoke":"nonRevocable"}
+            </button>
+            <Notification
+              isLoading={isLoading}
+              isSuccess={isSuccess}
+              isError={isError}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

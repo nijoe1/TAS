@@ -16,9 +16,9 @@ module.exports = {
       },
     },
   },
-//   defaultNetwork: "goerli",
+  defaultNetwork: "goerli",
   // defaultNetwork: "optimism_goerli",
-  defaultNetwork: "mumbai",
+  // defaultNetwork: "mumbai",
 
   networks: {
     goerli: {
@@ -39,9 +39,9 @@ module.exports = {
   },
   etherscan: {
     // Goerli
-    // apiKey: "KNVT7KRT9B15Z5UTXZT8TG8HNMIJXWXRMY",
+    apiKey: "KNVT7KRT9B15Z5UTXZT8TG8HNMIJXWXRMY",
     // Mumbai
-    apiKey: "JYMKRTHHFUSX4X11I1NQRNW6X7K2FJFJUU",
+    // apiKey: "JYMKRTHHFUSX4X11I1NQRNW6X7K2FJFJUU",
 
     // apiKey: "293U4XQC3RSYF322F6B2J6EY6EWBB2DUWW",
     // apiKey: "MPZZXTM8AFBE965THC1C7JPUA4BUA348KD",

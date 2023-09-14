@@ -42,7 +42,7 @@ contract TablelandSubscriptionsIndexer is  IERC721Receiver, Ownable {
 
     string private constant GROUP_REVENUE_TABLE_PREFIX = "revenue";
 
-    string private constant GROUP_REVENUE_SCHEMA = "schemaUID text primary key, totalUnclaimed text, totalClaimed text";
+    string private constant GROUP_REVENUE_SCHEMA = "schemaUID text primary key, totalClaimed text";
 
 
     constructor() {
@@ -175,11 +175,9 @@ tablelandContract = TablelandDeployments.get();
             SQLHelpers.toInsert(
                 GROUP_REVENUE_TABLE_PREFIX,
                 tableIDs[3],
-                "schemaUID, totalUnclaimed, totalClaimed",
+                "schemaUID, totalClaimed",
                 string.concat(
                 SQLHelpers.quote(bytes32ToString(schemaUID)),
-                ",",
-                SQLHelpers.quote(Strings.toString(ZERO)),
                 ",",
                 SQLHelpers.quote(Strings.toString(ZERO))
                 )
@@ -189,7 +187,6 @@ tablelandContract = TablelandDeployments.get();
 
     function SchemaRevenueUpdated(
         bytes32 schemaUID,
-        uint256 totalUnclaimed,
         uint256 totalClaimed
     ) public onlyOwner {
         mutate(
@@ -197,7 +194,7 @@ tablelandContract = TablelandDeployments.get();
             SQLHelpers.toUpdate(
                 GROUP_REVENUE_TABLE_PREFIX,
                 tableIDs[3],
-                string.concat("totalUnclaimed=",SQLHelpers.quote(Strings.toString(totalUnclaimed))," , totalClaimed=",SQLHelpers.quote(Strings.toString(totalClaimed))),
+                string.concat("totalClaimed=",SQLHelpers.quote(Strings.toString(totalClaimed))),
                 string.concat("schemaUID=",SQLHelpers.quote(bytes32ToString(schemaUID)))
             )
         );

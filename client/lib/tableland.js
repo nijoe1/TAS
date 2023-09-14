@@ -3,36 +3,36 @@ import axios from "axios";
 const tables = {
   5: {
     // SchemaRegistry
-    schema: "schema_5_1650",
+    schema: "schema_5_1662",
     // Tableland Attestation Service
-    attestation: "attestation_5_1651",
-    revocation: "revocation_5_1652",
+    attestation: "attestation_5_1663",
+    revocation: "revocation_5_1664",
     // ContentSubscriptionsResolver
-    content_group: "group_5_1657",
-    content_admins: "creator_5_1658",
-    content_subscription: "subscription_5_1659",
-    group_revenue: "revenue_5_1660",
+    content_group: "group_5_1669",
+    content_admins: "creator_5_1670",
+    content_subscription: "subscription_5_1671",
+    group_revenue: "revenue_5_1672",
     // ACResolver
     attesters: "schema_attesters_5_1655",
     revokers: "schema_revokers_5_1656",
   },
   80001: {
     // SchemaRegistry
-    schema: "schema_80001_7364",
+    schema: "schema_80001_7384",
     // Tableland Attestation Service
-    attestation: "attestation_80001_7365",
-    revocation: "revocation_80001_7366",
+    attestation: "attestation_80001_7385",
+    revocation: "revocation_80001_7386",
     // ContentSubscriptionsResolver
-    content_group: "group_80001_7379",
-    content_admins: "creator_80001_7380",
-    content_subscription: "subscription_80001_7381",
-    group_revenue: "revenue_80001_7382",
+    content_group: "group_80001_7391",
+    content_admins: "creator_80001_7392",
+    content_subscription: "subscription_80001_7393",
+    group_revenue: "revenue_80001_7394",
     // ACResolver
     attesters: "schema_attesters_80001_7251",
     revokers: "schema_revokers_80001_7252",
 
-    offChainTimestamp: "offChain_timestamp_80001_7367",
-    offChainRevocation: "offChain_revocation_80001_7368",
+    offChainTimestamp: "offChain_timestamp_80001_7387",
+    offChainRevocation: "offChain_revocation_80001_7388",
   },
 };
 
@@ -48,7 +48,21 @@ export const getIpfsGatewayUri = (cidOrIpfsUri) => {
 
 export const getAllSchemas = async (chainId) => {
   const getAllSchemasQuery =
-    TablelandGateway + `SELECT * FROM ${tables[chainId].schema}`;
+    TablelandGateway +
+    `SELECT
+          ${tables[chainId].schema}.resolver,
+          ${tables[chainId].schema}.schema,
+          ${tables[chainId].schema}.schemaUID,
+          COUNT(${tables[chainId].attestation}.uid) AS total
+      FROM
+          ${tables[chainId].schema}
+      LEFT JOIN
+          ${tables[chainId].attestation}
+      ON
+          ${tables[chainId].schema}.schemaUID = ${tables[chainId].attestation}.schemaUID
+      GROUP BY
+          ${tables[chainId].schema}.schemaUID
+      ORDER BY ${tables[chainId].schema}.creationTimestamp DESC`;
 
   try {
     const result = await axios.get(getAllSchemasQuery);

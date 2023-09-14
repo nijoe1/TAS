@@ -6,6 +6,8 @@ import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
 import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
+import Notification from "./Notification";
+
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -57,7 +59,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     functionName: "register",
     args: [rawSchema, schemaName, schemaDescription, resolver, isRevocable],
   });
-  const { write } = useContractWrite(config);
+  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
 
   const handleAttributeChange = (index:any, key:any, value:any) => {
     const updatedAttributes = [...attributes];
@@ -340,6 +342,8 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               Cancel
             </button>
           </div>
+          <Notification isLoading={isLoading} isSuccess={isSuccess} isError={isError} />
+
         </form>
       </Card>
     </div>

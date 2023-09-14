@@ -6,7 +6,6 @@ import CreateSchemaModal from "@/components/CreateSchemaModal"; // Import the mo
 import Link from "next/link"; // Import Link from Next.js
 import DecodedSchema from "@/components/DecodedSchema";
 import EthereumAddress from "@/components/EthereumAddress";
-import TotalAttestations from "@/components/TotalAttestations";
 import ChatModal from "@/components/ChatModal";
 
 import { getAllSchemas } from "@/lib/tableland";
@@ -70,7 +69,7 @@ const Schemas = () => {
           uid: inputObject.schemaUID,
           schema,
           resolverAddress: inputObject.resolver,
-          attestations: 1,
+          attestations: inputObject.total,
           // Add other properties as needed from the inputObject
         };
 
@@ -187,17 +186,13 @@ const Schemas = () => {
                         <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
                             {/* @ts-ignore */}
-                            <TotalAttestations
-                              // @ts-ignore
-                              schemaUID={row.uid}
-                              chainID={chainID}
-                            />
+                            <p>{row.attestations}</p>
                           </div>
                         </td>
                         <td className="py-2 border-b border-gray">
                           <div className="flex items-center justify-center">
                             <PiChatDotsFill
-                            className="bolder"
+                              className="bolder"
                               onClick={() => {
                                 // @ts-ignore
                                 setContext(row.uid);

@@ -48,7 +48,8 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         revokeAccess: false, // Replace with your actual data
         viewAccess: true, // Replace with your actual data
       };
-      if (resolverContract == "0x6d586fcdd18da8f39783daa09551682df2eb76cc") {
+      // @ts-ignore
+      if (resolverContract == CONTRACTS.SubscriptionResolver[chainid].contract.toLowerCase()) {
         accessData.revokeAccess = false;
         accessData.attestAccess = (await getAttestAccess(
           chainid,

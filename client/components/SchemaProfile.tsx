@@ -9,6 +9,8 @@ import AccessBox from "./AccessBox";
 import { Card, CardBody, Typography } from "@material-tailwind/react";
 import { subscribe } from "diagnostics_channel";
 import SubscriptionForm from "./SubscriptionForm";
+import { CONTRACTS } from "@/constants/contracts";
+
 
 type SchemaDataProps = {
   schemaData: {
@@ -31,9 +33,10 @@ type SchemaDataProps = {
     revokeAccess: boolean; // Replace with your actual data
     viewAccess: boolean;
   }) => void;
+  chainID:number;
 };
 
-const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChange}) => {
+const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChange,chainID}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [subscribeModalIsOpen, setSubscribeModalIsOpen] = useState(false);
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
@@ -185,7 +188,8 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
             <DynamicForm
               schema={schemaData.rawSchema}
               schemaUID={schemaData.schemaUID}
-              isSubscription={schemaData.resolverContract=="0x6d586fcdd18da8f39783daa09551682df2eb76cc"?true:false}
+              // @ts-ignore
+              isSubscription={schemaData.resolverContract==CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()?true:false}
               isOpen={isAttestModalOpen}
               onClose={closeAttestModal}
             />

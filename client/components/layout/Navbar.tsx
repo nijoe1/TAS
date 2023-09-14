@@ -41,7 +41,7 @@ const CustomNavbar = () => {
     const check = async () => {
       console.log(chainID);
       if (currentAddress != address && address) {
-        // localStorage.removeItem("ceramic-session");
+        localStorage.removeItem("ceramic-session");
         openModal();
         setCurrentAddress(address);
         setChangeChain(false);

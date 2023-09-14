@@ -35,7 +35,6 @@ interface ITablelandSubscriptionsIndexer {
 
     function SchemaRevenueUpdated(
         bytes32 schemaUID,
-        uint256 totalUnclaimed,
         uint256 totalClaimed
     )external;
 }

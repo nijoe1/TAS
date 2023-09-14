@@ -150,10 +150,10 @@ export const applyAccessConditions = async (
   const conditions = [
     {
       id: 1,
-      chain: "Mumbai",
+      chain: LighthouseChains[chainID].name,
       method: "hasAccess",
       standardContractType: "Custom",
-      contractAddress: "0x6d586fcdd18da8f39783daa09551682df2eb76cc",
+      contractAddress: CONTRACTS.SubscriptionResolver[chainID].contract,
       returnValueTest: {
         comparator: "==",
         value: "1",
