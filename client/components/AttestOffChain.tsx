@@ -116,10 +116,13 @@ const AttestOffChain = ({
 
   const { data, isError, isLoading, isSuccess, signTypedData } =
     useSignTypedData({
+      // @ts-ignore
       domain: typedData?.domain,
       // @ts-ignore
       message: typedData?.message,
+      // @ts-ignore
       primaryType: primaryType,
+      // @ts-ignore
       types: types,
     });
 
