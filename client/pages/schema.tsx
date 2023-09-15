@@ -3,7 +3,6 @@ import { Typography, Button } from "@material-tailwind/react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
 import Loading from "@/components/Loading/Loading";
-import Link from "next/link"; // Import Link from Next.js
 import SchemaProfile from "@/components/SchemaProfile";
 import { useRouter } from "next/router";
 import { getSchemaAttestations, getSchema } from "@/lib/tableland";

@@ -59,3 +59,5 @@ const getTypeForAttribute = (attributeName, schemaArray) => {
 
   return schemaEntry.type;
 };
+
+

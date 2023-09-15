@@ -694,7 +694,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     /// @param attestation The input attestation.
     /// @param bump A bump value to use in case of a UID conflict.
     /// @return Attestation UID.
-    function _getUID(Attestation memory attestation, uint32 bump) private pure returns (bytes32) {
+    function _getUID(Attestation memory attestation, uint32 bump) public pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(

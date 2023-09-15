@@ -6,7 +6,7 @@ import { validateInput, transformFormData } from "@/lib/utils";
 import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
-
+import AttestOffChain from "./AttestOffChain";
 import FileUploadForm from "./FileUploadForm";
 type DynamicFormModalProps = {
   schema: string;
@@ -35,7 +35,9 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
   const [formErrors, setFormErrors] = useState({});
   const [open, setOpen] = useState(isOpen);
-  const [isRevocable, setIsRevocable] = useState(false)
+  const [isRevocable, setIsRevocable] = useState(false);
+  const [isOffChain, setIsOffChain] = useState(false);
+
   const [recipient, setRecipient] = useState(
     "0x0000000000000000000000000000000000000000"
   );
@@ -48,7 +50,9 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     // @ts-ignore
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "attest",
-    args: [[schemaUID, [recipient, 0, isRevocable, referencedAttestation, data, 0]]],
+    args: [
+      [schemaUID, [recipient, 0, isRevocable, referencedAttestation, data, 0]],
+    ],
     value: BigInt(0),
   });
   const { write, isError, isLoading, isSuccess } = useContractWrite(config);
@@ -202,7 +206,6 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
             ))}
             <div className="flex flex-col">
               <label
-                htmlFor={"Attestation Recipient (Optional)"}
                 className="mb-1"
               >
                 {"Attestation Recipient (Optional)"}
@@ -219,7 +222,6 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
             </div>
             <div className="flex flex-col">
               <label
-                htmlFor={"Attestation Recipient (Optional)"}
                 className="mb-1"
               >
                 {"Reference Attestation (Optional)"}
@@ -234,7 +236,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                 error={formErrors["ReferencedAttestation"]}
               />
             </div>
-            <div className="flex justify-center items-center gap-2 ">
+            <div className="flex  justify-center items-center gap-2 ">
               {" "}
               <input
                 type="checkbox"
@@ -249,20 +251,50 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               >
                 Revocable
               </Typography>
+              <input
+                type="checkbox"
+                checked={isOffChain}
+                onChange={() => setIsOffChain(!isOffChain)}
+                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3 cursor-pointer "
+              />
+              <Typography
+                className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3"
+                color="black"
+                onClick={() => setIsOffChain(!isOffChain)}
+              >
+                offChain
+              </Typography>
             </div>
           </div>
           <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                // @ts-ignore
-                write();
-                onClose;
-              }}
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
-            >
-              Attest
-            </button>
+            {!isOffChain ? (
+              <button
+                type="button"
+                onClick={() => {
+                  // @ts-ignore
+                  write();
+                  onClose;
+                }}
+                className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              >
+                Attest
+              </button>
+            ) : (
+              <AttestOffChain
+                version={"1"}
+                schema={schemaUID as `0x${string}`}
+                recipient={
+                  "0x0000000000000000000000000000000000000000" as `0x${string}`
+                }
+                time={0}
+                expirationTime={0}
+                revocable={isRevocable}
+                refUID={
+                  "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`
+                }
+                AttestationData={data as `0x${string}`}
+              />
+            )}
             <button
               type="button"
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"

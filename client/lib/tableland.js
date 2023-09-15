@@ -18,21 +18,21 @@ const tables = {
   },
   80001: {
     // SchemaRegistry
-    schema: "schema_80001_7384",
+    schema: "schema_80001_7403",
     // Tableland Attestation Service
-    attestation: "attestation_80001_7385",
-    revocation: "revocation_80001_7386",
+    attestation: "attestation_80001_7404",
+    revocation: "revocation_80001_7405",
     // ContentSubscriptionsResolver
-    content_group: "group_80001_7391",
-    content_admins: "creator_80001_7392",
-    content_subscription: "subscription_80001_7393",
-    group_revenue: "revenue_80001_7394",
+    content_group: "group_80001_7410",
+    content_admins: "creator_80001_7411",
+    content_subscription: "subscription_80001_7412",
+    group_revenue: "revenue_80001_7413",
     // ACResolver
-    attesters: "schema_attesters_80001_7251",
-    revokers: "schema_revokers_80001_7252",
+    attesters: "schema_attesters_80001_7408",
+    revokers: "schema_revokers_80001_7409",
 
-    offChainTimestamp: "offChain_timestamp_80001_7387",
-    offChainRevocation: "offChain_revocation_80001_7388",
+    offChainTimestamp: "offChain_timestamp_80001_7406",
+    offChainRevocation: "offChain_revocation_80001_7407",
   },
 };
 

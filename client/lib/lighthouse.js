@@ -62,12 +62,6 @@ export const getData = async (cidOrIpfsUri) => {
   }
 };
 
-const progressCallback = (progressData) => {
-  let percentageDone =
-    100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
-  return percentageDone;
-};
-
 export const uploadFile = async (file, apiKey, setUploadProgress) => {
   const progressCallback = (progressData) => {
     const percentageDone =
@@ -101,7 +95,6 @@ export const uploadFileEncrypted = async (
       100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
     setUploadProgress(percentageDone); // Update the progress state
   };
-  const { masterKey, keyShards } = await generate();
   const output = await lighthouse.uploadEncrypted(
     file,
     apiKey,
@@ -110,6 +103,16 @@ export const uploadFileEncrypted = async (
     null,
     progressCallback
   );
+
+  const { masterKey, keyShards } = await generate();
+
+  const { isSuccess } = await saveShards(
+    address,
+    output.data[0].cid,
+    jwt,
+    keyShards
+  );
+  console.log(isSuccess);
 
   return output.data;
 };
@@ -127,8 +130,10 @@ export const generateLighthouseJWT = async (address, signEncryption) => {
 };
 
 export const decrypt = async (cid, address, jwt) => {
-  const { error, shards } = await recoverShards(address, cid, jwt, 3);
-  console.log(error,shards)
+  const conditions = await lighthouse.getAccessConditions(cid);
+  console.log(conditions);
+  const { error, shards } = await recoverShards(address, cid, jwt, 5);
+  console.log(error, shards);
   const { masterKey } = await recoverKey(shards);
   // const keyObject = await lighthouse.fetchEncryptionKey(cid, address, jwt);
 
@@ -147,6 +152,7 @@ export const applyAccessConditions = async (
   address,
   jwt
 ) => {
+
   const conditions = [
     {
       id: 1,
@@ -158,7 +164,7 @@ export const applyAccessConditions = async (
         comparator: "==",
         value: "1",
       },
-      parameters: [":address", uid],
+      parameters: [":userAddress", uid],
       inputArrayType: ["address", "bytes32"],
       outputType: "uint256",
     },
@@ -180,7 +186,7 @@ export const applyAccessConditions = async (
     jwt,
     keyShards
   );
-  console.log(isSuccess)
+  console.log(isSuccess);
 
   return response;
 };
