@@ -36,7 +36,6 @@ export const getIpfsGatewayUri = (cidOrIpfsUri) => {
 
 export const getMetadata = async (cidOrIpfsUri) => {
   const LighthouseGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
-  console.log(`Getting metadata ${cidOrIpfsUri} at ${LighthouseGatewayLink}`);
   const link = LighthouseGatewayLink.replace("ipfs://", "");
   try {
     const result = await axios.get(link);
@@ -49,8 +48,6 @@ export const getMetadata = async (cidOrIpfsUri) => {
 
 export const getData = async (cidOrIpfsUri) => {
   let LighthouseGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
-
-  console.log(`Getting data ${cidOrIpfsUri} at ${nftStorageGatewayLink}`);
   const link = LighthouseGatewayLink.replace("ipfs://", "");
 
   try {
@@ -74,10 +71,6 @@ export const uploadFile = async (file, apiKey, setUploadProgress) => {
     false,
     null,
     progressCallback
-  );
-  console.log("File Status:", output);
-  console.log(
-    "Visit at https://gateway.lighthouse.storage/ipfs/" + output.data.Hash
   );
   return output.data;
 };

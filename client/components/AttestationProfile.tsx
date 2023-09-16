@@ -23,10 +23,12 @@ type AttestationProfileProps = {
     referencedAttestation: string;
     referencingAttestations: number;
   };
+  type: string;
 };
 
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
   attestationData,
+  type,
 }) => {
   const [accessInfo, setAccessInfo] = useState({
     attestAccess: false,
@@ -51,11 +53,24 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
   });
   const { write, isError, isLoading, isSuccess } = useContractWrite(config);
 
+  const { config: OFFCHAIN } = usePrepareContractWrite({
+    // @ts-ignore
+    address: CONTRACTS.TAS[chainID].contract,
+    // @ts-ignore
+    abi: CONTRACTS.TAS[chainID].abi,
+    functionName: "revokeOffchain",
+    args: [attestationData.attestationUID],
+    value: BigInt(0),
+  });
+  const { write: RevokeOffChain } = useContractWrite(OFFCHAIN);
+
   return (
     <div className={`flex-grow mx-auto`}>
       <div className="bg-white rounded-xl p-4">
-        <Typography variant="h6">attestation Details</Typography>
-
+        <div className="border rounded-lg text-white rounded-lg bg-black mt-3 mx-auto flex flex-col items-center">
+          <Typography variant="h6">attestation Details</Typography>
+          <Typography className=" border gap-1 rounded-lg mb-2 mt-1">{`Type : ${type}`}</Typography>
+        </div>
         <div className="items-center flex flex-col text-center border rounded-lg mx-auto">
           <Typography variant="h4">attestationUID</Typography>
           <EthereumAddress address={attestationData.attestationUID} />
@@ -99,10 +114,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 
         {/* Left Box */}
         <div className="items-center rounded-lg border mx-auto text-center flex flex-col">
-          <Field
-            label="Referencing Attestations"
-            value={attestationData.referencingAttestations.toString()}
-          />
+          <Field label="Referencing Attestations" value={0} />
           <Field
             label="Referenced Attestation"
             value={attestationData.referencedAttestation}
@@ -125,10 +137,28 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
           <div className="items-center flex flex-col ">
             <button
               disabled={attestationData.revoked}
-              onClick={write}
-              className={`text-white rounded-lg px-6 py-2 ${!attestationData.revoked ? "hover:bg-white hover:text-black border bg-black border-black":"bg-gray-600" } mt-3`}
+              onClick={() => {
+                if (type == "ONCHAIN") {
+                  // @ts-ignore
+                  write();
+                } else {
+                  // @ts-ignore
+                  RevokeOffChain();
+                }
+              }}
+              className={`text-white rounded-lg px-6 py-2 ${
+                !attestationData.revoked
+                  ? "hover:bg-white hover:text-black border bg-black border-black"
+                  : "bg-gray-600"
+              } mt-3`}
             >
-              {attestationData.revoked? "already revoked":attestationData.revocable?"revoke":"nonRevocable"}
+              {attestationData.revoked
+                ? "already revoked"
+                : attestationData.revocable && type == "ONCHAIN"
+                ? "revoke"
+                : attestationData.revocable && type == "OFFCHAIN"
+                ? "revoke off-chain"
+                : "nonRevocable"}
             </button>
             <Notification
               isLoading={isLoading}

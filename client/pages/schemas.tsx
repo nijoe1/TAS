@@ -112,7 +112,7 @@ const Schemas = () => {
                   </Typography>
                   <Button
                     type="button"
-                    className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black self-center mt-2"
+                    className="bg-black text-white rounded-full hover:bg-white hover:text-black border border-black mt-2"
                     onClick={openModal}
                   >
                     Create Schema
@@ -125,22 +125,22 @@ const Schemas = () => {
                 <table className="w-screen-md table-fixed border-b border-gray">
                   <thead className="bg-black">
                     <tr>
-                      <th className="w-1/24 py-2 text-white border-r border-gray">
+                      <th className=" py-2 text-white border-r border-gray">
                         #
                       </th>
-                      <th className="w-3/12 py-2 text-white border-r border-gray">
+                      <th className="py-2 text-white border-r border-gray">
                         SchemaUID
                       </th>
-                      <th className="w-4/12 py-2 text-white border-r border-gray">
+                      <th className="py-2 text-white border-r border-gray">
                         Schema
                       </th>
-                      <th className="w-2/12 py-2 text-white border-r border-gray">
+                      <th className=" py-2 text-white border-r border-gray">
                         Resolver Address
                       </th>
-                      <th className="w-4/24 py-2 text-white border-r border-gray mx-4">
+                      <th className="px-4 py-2 text-white border-r border-gray mx-4">
                         Attestations
                       </th>
-                      <th className="w-2/24 py-2 text-white mx-4">
+                      <th className="px-3 py-2 text-white mx-4">
                         <VscFeedback />
                       </th>
                     </tr>

@@ -12,6 +12,11 @@ import { useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import SubscriptionItem from "@/components/SubscriptionItem";
 import { useAccount } from "wagmi";
+import {
+  getOffChainAttestationsForSchema,
+  transformAndSortArrays,
+} from "@/lib/offchain";
+import { RiLinkUnlinkM } from "react-icons/ri";
 
 const Schema = () => {
   const useChainID = useChainId();
@@ -72,8 +77,37 @@ const Schema = () => {
   useEffect(() => {
     async function fetch() {
       if (schemaUID) {
+        let offChain = await getOffChainAttestationsForSchema(
+          useChainID,
+          schemaUID as string
+        );
+
+        const formattedEntries = [];
+
+        for (const inputObject of offChain) {
+          const body = JSON.parse(inputObject.content.body);
+
+          // Extracting relevant information
+          const toAddress = body.sig.message.recipient || null;
+          const fromAddress = body.signer;
+          const age = body.sig.message.time;
+          const uid =
+            inputObject.content.tags.find((tag: any) => tag.slug === "uid")
+              ?.title || null;
+
+          const entry = {
+            uid: uid,
+            fromAddress: fromAddress,
+            toAddress: toAddress,
+            age: age,
+            data: body.sig.message.data.toLowerCase(),
+            type: "OFFCHAIN",
+          };
+          formattedEntries.push(entry);
+        }
         // @ts-ignore
-        const attestationTableInfo = [];
+        const attestationTableInfo: any[] | ((prevState: never[]) => never[]) =
+          [];
         let attestations = await getSchemaAttestations(useChainID, schemaUID);
         let schema = await getSchema(useChainID, schemaUID);
         schema = schema[0];
@@ -84,15 +118,16 @@ const Schema = () => {
             uid: inputObject.uid,
             fromAddress: inputObject.attester,
             toAddress: inputObject.recipient,
-
             age: inputObject.creationTimestamp,
             data: inputObject.data,
+            type: "ONCHAIN",
             // Add other properties as needed from the inputObject
           };
 
           // Push the entry to the tableData array
           attestationTableInfo.push(entry);
         });
+
         schemaInfo.creator = schema.creator;
         // @ts-ignore
         schemaInfo.decodedSchema = decodeSchema(schema.schema);
@@ -110,10 +145,42 @@ const Schema = () => {
           // @ts-ignore
           CONTRACTS.SubscriptionResolver[useChainID].contract.toLowerCase()
         );
+        let tableDt:
+          | ((prevState: never[]) => never[])
+          | {
+              uid: any;
+              fromAddress: any;
+              toAddress: any;
+              age: any;
+              data: any;
+              type: string;
+            }[]
+          | {
+              uid: any;
+              schemaUid: any; // Add other properties as needed from the inputObject
+              // Add other properties as needed from the inputObject
+              fromAddress: any;
+              toAddress: any; // Push the entry to the tableData array
+              // Push the entry to the tableData array
+              age: any;
+              type: any;
+            }[] = [];
+        if (formattedEntries.length == 0 && attestationTableInfo.length == 0) {
+        } else if (attestationTableInfo.length == 0) {
+          tableDt = formattedEntries;
+        } else if (formattedEntries.length == 0) {
+          tableDt = attestationTableInfo;
+        } else {
+          tableDt = transformAndSortArrays(
+            formattedEntries,
+            attestationTableInfo
+          );
+        }
+        console.log(tableDt);
+
         // @ts-ignore
-        setTableData(attestationTableInfo);
+        setTableData(tableDt);
         setSchemaData(schemaInfo);
-        console.log(schemaData);
       }
     }
     if (!taken && schemaUID && useChainID) {
@@ -135,23 +202,27 @@ const Schema = () => {
 
             {tableData.length > 0 &&
             // @ts-ignore
-            CONTRACTS.SubscriptionResolver[useChainID].contract.toLowerCase() !==
-              schemaData.resolverContract ? (
-              <div className="mt-10 mx-[25%]">
+            CONTRACTS.SubscriptionResolver[
+              useChainID
+            ].contract.toLowerCase() !== schemaData.resolverContract ? (
+              <div className="mt-10 mx-[10%]">
                 <div className="overflow-x-auto rounded-lg">
                   <table className="w-screen-md table-fixed border-b border-gray">
                     <thead className="bg-black">
                       <tr>
-                        <th className="w-4/12 py-2 text-white border-r border-gray">
+                        <th className=" py-2 text-white border-r border-gray">
                           attestationUID
                         </th>
-                        <th className="w-3/12 py-2 text-white border-r border-gray">
+                        <th className=" py-2 text-white border-r border-gray">
                           From Address
                         </th>
-                        <th className="w-3/12 py-2 text-white border-r border-gray">
+                        <th className=" py-2 text-white border-r border-gray">
                           To Address
                         </th>
-                        <th className="w-2/12 py-2 text-white">createdAt</th>
+                        <th className=" py-2 text-white border-r border-gray">
+                          Type
+                        </th>
+                        <th className=" py-2 text-white">Age</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -166,7 +237,7 @@ const Schema = () => {
                             <div className="flex items-center justify-center">
                               <EthereumAddress
                                 // @ts-ignore
-                                link={`/attestation?uid=${row.uid}`}
+                                link={`/attestation?uid=${row.uid}&type=${row.type}`}
                                 // @ts-ignore
                                 address={row.uid}
                               />
@@ -184,8 +255,15 @@ const Schema = () => {
                               <EthereumAddress address={row.toAddress} />
                             </div>
                           </td>
+                          <td className="py-2 border-r border-gray border-b border-gray">
+                            <div className="flex flex-wrap items-center justify-center">
+                              <RiLinkUnlinkM className="ml-2" />
+                              {/* @ts-ignore */}
+                              <p className="px-2 py-2">{row.type}</p>
+                            </div>
+                          </td>
                           <td className="py-2 border-b border-gray">
-                            <div className="flex items-center justify-center">
+                            <div className="flex flex-wrap items-center justify-center">
                               <p className="px-2 py-2">
                                 {/* @ts-ignore */}
                                 {<TimeCreated createdAt={row.age} />}
@@ -205,8 +283,20 @@ const Schema = () => {
                 {tableData.map((item, index) => (
                   <SubscriptionItem
                     key={index}
-                    // @ts-ignore
-                    itemData={{ address: address, data: item.data }}
+                    itemData={{
+                      // @ts-ignore
+                      address: address,
+                      // @ts-ignore
+                      data: item.data,
+                      // @ts-ignore
+                      context: item.uid,
+                      // @ts-ignore
+                      from: item.fromAddress,
+                      // @ts-ignore
+                      age: item.age,
+                      // @ts-ignore
+                      type: item.type
+                    }}
                   />
                 ))}
               </div>

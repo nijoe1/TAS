@@ -4,16 +4,23 @@ import {
   CardBody,
   CardFooter,
   Typography,
-  Button,
 } from "@material-tailwind/react";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import {
-  decrypt,
-} from "@/lib/lighthouse";
+import ChatModal from "@/components/ChatModal";
+import { decrypt } from "@/lib/lighthouse";
+import { PiChatDotsFill } from "react-icons/pi";
+import TimeCreated from "./TimeCreated";
+import FileViewer from "./FileViewer";
+import { GrUserWorker } from "react-icons/gr";
+import router from "next/router";
 type SubscriptionItemProps = {
   itemData: {
     data: string;
-    address: string;
+    address: `0x${string}`;
+    context: string;
+    from: `0x${string}`;
+    age: number;
+    type: string;
   };
 };
 
@@ -22,6 +29,15 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
   const [description, setDescription] = useState("");
   const [fileBlob, setFileBlob] = useState(null);
   const [fileType, setFileType] = useState("");
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const openFeedbackModal = () => {
+    setModalIsOpen(true);
+  };
+
+  const closeFeedbackModal = () => {
+    setModalIsOpen(!modalIsOpen);
+  };
 
   async function parseBlobToJson(blob: any) {
     try {
@@ -33,11 +49,34 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
     }
   }
 
+  const allowedFileTypes = {
+    "image/jpeg": "Image",
+    "image/png": "Image",
+    "image/gif": "Image",
+    "video/mp4": "Video",
+    "video/webm": "Video",
+    "video/ogg": "Video",
+    "application/pdf": "PDF",
+    "text/csv": "CSV",
+  };
+
+  const getFileTypeFromAccept = (acceptValue: string): string | undefined => {
+    const acceptValues = acceptValue.split(",").map((val) => val.trim());
+
+    for (const [key, value] of Object.entries(allowedFileTypes)) {
+      if (acceptValues.includes(key)) {
+        return value;
+      }
+    }
+
+    return undefined;
+  };
+
   function transformDecodedData(inputObject: any) {
     // @ts-ignore
     const transformedArray = [];
 
-    inputObject.forEach((item:any) => {
+    inputObject.forEach((item: any) => {
       const transformedItem = {
         type: item.type,
         name: item.name,
@@ -56,7 +95,6 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
       const ipfsCID = transformDecodedData(encoder.decodeData(itemData.data))[0]
         .value;
       const jwt = localStorage.getItem(`lighthouse-jwt-${itemData.address}`);
-      console.log(itemData.address);
       const blob = await decrypt(ipfsCID, itemData.address, jwt);
       const json = await parseBlobToJson(blob);
       setName(json.name);
@@ -65,7 +103,8 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
       const fileblob = await decrypt(json.file.CID, itemData.address, jwt);
       // Set the Blob and file type
       setFileBlob(fileblob);
-      setFileType(json.file.type);
+      // @ts-ignore
+      setFileType(getFileTypeFromAccept(json.file.type));
     };
 
     fetch();
@@ -86,39 +125,67 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
           {name}
         </Typography>
         <Typography>{description}</Typography>
-      </CardBody>
-      <CardFooter className="pt-0">
-        {fileBlob && fileType ? (
-          // Check if the file type is an image or video
-          fileType.startsWith("image") ? (
-            // Render as an image
-            <img src={URL.createObjectURL(fileBlob)} alt="File" />
-          ) : fileType.startsWith("video") ? (
-            <div>
-              <video controls width="400" height="300">
-                <source src={URL.createObjectURL(fileBlob)} type={fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <a
-                href={URL.createObjectURL(fileBlob)}
-                download={`${name}.${getFileExtension(fileType)}`}
-              >
-                Download File
-              </a>
-            </div>
+        <div className="mt-4">
+          {fileBlob && fileType ? (
+            <FileViewer
+              fileBlob={fileBlob}
+              fileType={fileType}
+              fileUri={null}
+            />
           ) : (
-            // Render as a link or provide appropriate handling for other file types
-            <a
-              href={URL.createObjectURL(fileBlob)}
-              download={`${name}.${getFileExtension(fileType)}`}
-            >
-              Download File
-            </a>
-          )
-        ) : (
-          // Render loading message or handle other cases
-          <p>Loading file...</p>
-        )}
+            <p>Loading file...</p>
+          )}
+        </div>
+      </CardBody>
+      <div className="flex-grow"></div>
+      <CardFooter className="pt-0">
+        <div className="flex flex-wrap itens-center justify-between mt-4">
+          <div className="flex flex-wrap items-center">
+            <Typography variant="small">Creator:</Typography>
+            <div className="flex flex-wrap items-center">
+              <GrUserWorker
+                className="cursor-pointer"
+                onClick={() =>
+                  router.push(`/dashboard?address=${itemData.from}`)
+                }
+                title={`Go to ${itemData.from}'s dashboard`}
+              />
+              <div className="flex flex-wrap items-center">
+                <Typography
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/dashboard?address=${itemData.from}`)
+                  }
+                ></Typography>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center">
+            <Typography variant="small">Age:</Typography>
+            <TimeCreated createdAt={itemData.age} />
+          </div>
+        </div>
+
+        <div className="flex  itens-center justify-between mt-4 mx-auto">
+          <div className="flex flex-wrap items-center">
+            <Typography variant="small">Type:</Typography>
+            <Typography>{itemData.type}</Typography>
+          </div>
+          <div className="flex flex-wrap items-center">
+            <Typography variant="small">Comments:</Typography>
+            <PiChatDotsFill
+              className="bolder"
+              onClick={() => {
+                openFeedbackModal();
+              }}
+            />{" "}
+          </div>
+          <ChatModal
+            context={itemData.context}
+            isOpen={modalIsOpen}
+            closeModal={closeFeedbackModal}
+          />
+        </div>
       </CardFooter>
     </Card>
   );

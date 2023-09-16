@@ -11,7 +11,7 @@ const navLinks = [
   { text: "Attestations", href: "/attestations" },
   { text: "Schemas", href: "/schemas" },
   { text: "Exclusive Content", href: "/" },
-  { text: "Docs", href: "/" },
+  { text: "Dashboard", href: "/dashboard" },
 ];
 
 const CustomNavbar = () => {
@@ -66,7 +66,8 @@ const CustomNavbar = () => {
         <div className="w-1/40 flex rounded-xl ml-4">
           <Image
             src="/logo.png"
-            alt="BOILR3 Logo"
+            alt="TAS Logo"
+            onClick={()=>handleLinkClick("/")}
             width={125}
             height={37}
             className="rounded-lg "

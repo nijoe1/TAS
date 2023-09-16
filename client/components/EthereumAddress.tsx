@@ -33,10 +33,9 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
       return inputString; // No need to shorten if it's already shorter than maxLength.
     }
 
-    const firstPart = inputString.slice(0, maxLength / 2 - 1);
-    const lastPart = inputString.slice(-maxLength / 2 + 1);
+    const firstPart = inputString.slice(0, maxLength );
 
-    return firstPart + ".." + lastPart;
+    return firstPart + ".."
   }
 
   return (
@@ -45,10 +44,10 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
     >
       {copied ? (
         <div>
-          <p>copied!</p> <p>{stringLength? shortenString(formattedAddress, stringLength): shortenString(formattedAddress, 40)}</p>
+          <p>copied!</p> <p>{stringLength? shortenString(formattedAddress, stringLength): shortenString(formattedAddress, 30)}</p>
         </div>
       ) : (
-        stringLength? shortenString(formattedAddress, stringLength): shortenString(formattedAddress, 40)
+        stringLength? shortenString(formattedAddress, stringLength): shortenString(formattedAddress, 30)
       )}
 
       <div className="flex ">

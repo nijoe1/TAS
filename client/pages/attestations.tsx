@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Typography, Button } from "@material-tailwind/react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
-import RegisterSchemaModal from "@/components/RegisterSchemaModal"; // Import the modal component
-import Link from "next/link"; // Import Link from Next.js
+import {
+  getOffChainAttestations,
+  transformAndSortArrays,
+} from "@/lib/offchain";
 import EthereumAddress from "@/components/EthereumAddress";
 import { getAttestations } from "@/lib/tableland";
 import Loading from "@/components/Loading/Loading";
 import TimeCreated from "@/components/TimeCreated";
 import { useChainId } from "wagmi";
+import { RiLinkUnlinkM } from "react-icons/ri";
 
 const Attestations = () => {
   const chainID = useChainId();
@@ -18,10 +21,35 @@ const Attestations = () => {
 
   useEffect(() => {
     async function fetch() {
-      // @ts-ignore
-      const attestationTableInfo = [];
       let attestations = await getAttestations(chainID);
+      let offChain = await getOffChainAttestations(chainID);
+      const formattedEntries = [];
 
+      for (const inputObject of offChain) {
+        const body = JSON.parse(inputObject.content.body);
+
+        // Extracting relevant information
+        const schemaUid = body.sig.message.schema || null;
+        const toAddress = body.sig.message.recipient || null;
+        const fromAddress = body.signer;
+        const age = body.sig.message.time;
+        const uid =
+          inputObject.content.tags.find((tag: any) => tag.slug === "uid")
+            ?.title || null;
+
+        const entry = {
+          uid: uid,
+          schemaUid: schemaUid,
+          fromAddress: fromAddress,
+          toAddress: toAddress,
+          age: age,
+          type: "OFFCHAIN",
+          // Add other properties as needed from the inputObject
+        };
+        formattedEntries.push(entry);
+      }
+      // @ts-ignore
+      const attestationTableInfo: any[] = [];
       attestations.forEach((inputObject: any, index: any) => {
         // Create a tableData entry
         const entry = {
@@ -29,8 +57,8 @@ const Attestations = () => {
           schemaUid: inputObject.schemaUID,
           fromAddress: inputObject.attester,
           toAddress: inputObject.recipient,
-
           age: inputObject.creationTimestamp,
+          type: "ONCHAIN",
           // Add other properties as needed from the inputObject
         };
 
@@ -38,9 +66,14 @@ const Attestations = () => {
         attestationTableInfo.push(entry);
       });
 
+      let tableDt = transformAndSortArrays(
+        formattedEntries,
+        attestationTableInfo
+      );
+
       setTaken(!taken);
       // @ts-ignore
-      setTableData(attestationTableInfo);
+      setTableData(tableDt);
     }
     if (!taken && chainID) {
       fetch();
@@ -76,24 +109,27 @@ const Attestations = () => {
               </Typography>
             </div>
 
-            <div className="mt-10 mx-[10%]">
+            <div className="mt-10 ">
               <div className="overflow-x-auto rounded-lg">
                 <table className="w-screen-md table-fixed border-b border-gray">
                   <thead className="bg-black">
                     <tr>
-                      <th className="w-3/12 py-2 text-white border-r border-gray">
+                      <th className=" py-2 text-white border-r border-gray">
                         attestationUID
                       </th>
-                      <th className="w-3/12 py-2 text-white border-r border-gray">
+                      <th className=" py-2 text-white border-r border-gray">
                         schemaUID
                       </th>
-                      <th className="w-2/12 py-2 text-white border-r border-gray">
+                      <th className=" py-2 text-white border-r border-gray">
                         from Address
                       </th>
-                      <th className="w-2/12 py-2 text-white border-r border-gray">
+                      <th className="py-2 text-white border-r border-gray">
                         to Address
                       </th>
-                      <th className="w-2/12 py-2 text-white">createdAt</th>
+                      <th className=" py-2 text-white border-r border-gray">
+                        Type
+                      </th>
+                      <th className=" py-2 text-white">Age</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -108,7 +144,7 @@ const Attestations = () => {
                           <div className="flex items-center justify-center">
                             <EthereumAddress
                               // @ts-ignore
-                              link={`/attestation?uid=${row.uid}`}
+                              link={`/attestation?uid=${row.uid}&type=${row.type}`}
                               // @ts-ignore
                               address={row.uid}
                             />
@@ -134,6 +170,13 @@ const Attestations = () => {
                           <div className="flex items-center justify-center">
                             {/* @ts-ignore */}
                             <EthereumAddress address={row.toAddress} />
+                          </div>
+                        </td>
+                        <td className="py-2 border-r border-gray border-b border-gray">
+                          <div className="flex flex-wrap items-center justify-center">
+                            <RiLinkUnlinkM className="ml-2" />
+                            {/* @ts-ignore */}
+                            <p className="px-2 py-2">{row.type}</p>
                           </div>
                         </td>
                         <td className="py-2 border-b border-gray">

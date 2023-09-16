@@ -63,6 +63,8 @@ const AttestOffChain = ({
   const { address } = useAccount();
   const [signature, setSignature] = useState<`0x${string}`>();
   const [done, setDone] = useState(false);
+  const [doneAttest, setDoneAttest] = useState(false);
+
   const [decodedSig, setDecodedSig] = useState<Signature>({
     v: BigInt(0),
     r: "0x",
@@ -162,16 +164,14 @@ const AttestOffChain = ({
       setTypedData(tdata);
       setDone(!done);
     }
-    if (data) {
+    if (data && !doneAttest) {
       setSignature(data);
       const res = hexToSignature(data as `0x${string}`);
-      console.log("Hex to Signature Result:", res);
       setDecodedSig({ v: res.v, r: res.r, s: res.s });
     }
     if (decodedSig.v !== BigInt(0)) {
       setTimeout(() => {
         // Code to execute after a 500ms delay
-        console.log("Half a second has passed.");
       }, 500);
     }
   }, [
@@ -182,17 +182,10 @@ const AttestOffChain = ({
     refUID,
     AttestationData,
     time,
-    currentTimestamp,
     chainID,
     TAS,
     decodedSig,
   ]);
-
-  const recover = async () => {
-    const res = hexToSignature(signature as `0x${string}`);
-    console.log("Hex to Signature Result:", res);
-    setDecodedSig({ v: res.v, r: res.r, s: res.s });
-  };
 
   const createPost = async () => {
     let content = createPostContent();
@@ -205,7 +198,7 @@ const AttestOffChain = ({
           title: address,
         },
         {
-          slug: "schemaUID",
+          slug: schema,
           title: schema,
         },
         {
@@ -218,6 +211,10 @@ const AttestOffChain = ({
         },
         {
           slug: "uid",
+          title: uid?.toString(),
+        },
+        {
+          slug: uid?.toString(),
           title: uid?.toString(),
         },
       ],
@@ -251,6 +248,7 @@ const AttestOffChain = ({
             signTypedData();
           } else {
             handleSignAndCreate();
+            setDoneAttest(!doneAttest)
           }
         }}
       >

@@ -20,12 +20,9 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
   onCreate,
 }) => {
   const chainID = useChainId();
-
-  const [formData, setFormData] = useState({});
   const [months, setMonths] = useState(1);
   const [price, setPrice] = useState(0);
 
-  const [formErrors, setFormErrors] = useState({});
   const [open, setOpen] = useState(isOpen);
 
   const { config } = usePrepareContractWrite({
@@ -81,7 +78,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
             <button
               type="button"
               // @ts-ignore
-              onClick={write}
+              onClick={()=>{write(); onClose}}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Subscribe

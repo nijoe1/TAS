@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { getAttestation } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { useChainId } from "wagmi";
+import { getOffChainAttestation } from "@/lib/offchain";
 
 const Attestation = () => {
   const chainID = useChainId();
@@ -16,6 +17,7 @@ const Attestation = () => {
   const [attestationData, setAttestationData] = useState();
   const router = useRouter();
   const uid = router?.query?.uid;
+  const type = router?.query?.type;
 
   function transformDecodedData(inputObject: any) {
     // @ts-ignore
@@ -36,13 +38,17 @@ const Attestation = () => {
 
   useEffect(() => {
     async function fetch() {
-      let attestation = await getAttestation(chainID, uid);
-
-      attestation = attestation[0];
+      let attestation;
+      if (type === "ONCHAIN") {
+        attestation = await getAttestation(chainID, uid);
+        attestation = attestation[0];
+      } else {
+        attestation = await getOffChainAttestation(chainID, uid as string);
+        console.log(attestation)
+      }
 
       const encoder = new SchemaEncoder(attestation.schema);
       const data = transformDecodedData(encoder.decodeData(attestation.data));
-      console.log(data);
       setTaken(!taken);
       setAttestationData({
         // @ts-ignore
@@ -53,7 +59,7 @@ const Attestation = () => {
           attestation.revoker === "0x0000000000000000000000000000000000000000"
             ? false
             : true,
-        revocable: attestation.revocable == "true" ? true : false,
+        revocable: attestation.revocable == "false" ? false : true,
         resolver: attestation.resolver,
 
         schemaUID: attestation.schemaUID,
@@ -61,15 +67,13 @@ const Attestation = () => {
         to: attestation.recipient,
         decodedData: data,
         referencedAttestation: "No reference",
-        referencingAttestations: 0,
+        referencingAttestation: 0,
       });
-
-      console.log(attestationData);
     }
     if (!taken && uid && chainID) {
       fetch();
     }
-  }, [uid, chainID]);
+  }, [uid, , type, chainID]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
@@ -79,7 +83,7 @@ const Attestation = () => {
           <div className="flex flex-col items-center">
             <div className="mx-auto">
               {/*  @ts-ignore */}
-              <AttestationProfile attestationData={attestationData} />
+              <AttestationProfile attestationData={attestationData} type={type} />
             </div>
           </div>
         </>

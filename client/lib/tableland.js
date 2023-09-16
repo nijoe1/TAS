@@ -74,6 +74,26 @@ export const getAllSchemas = async (chainId) => {
   }
 };
 
+export const getSchemaInfo = async (chainId,schemaUID) => {
+  const getAllSchemasQuery =
+    TablelandGateway +
+    `SELECT
+          ${tables[chainId].schema}.resolver,
+          ${tables[chainId].schema}.schema
+      FROM
+          ${tables[chainId].schema}
+      WHERE
+          ${tables[chainId].schema}.schemaUID = '${schemaUID}'`;
+
+  try {
+    const result = await axios.get(getAllSchemasQuery);
+    return result.data[0];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
 export const getAttestations = async (chainId) => {
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
@@ -107,7 +127,9 @@ export const getSchema = async (chainId, schemaUID) => {
 export const getSchemaAttestations = async (chainId, schemaUID) => {
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].attestation}.uid , ${tables[chainId].attestation}.attester , ${tables[chainId].attestation}.creationTimestamp , ${tables[chainId].attestation}.data , ${tables[chainId].attestation}.recipient , ${tables[chainId].attestation}.expirationTime , ${tables[chainId].attestation}.refUID  FROM ${tables[chainId].attestation} WHERE ${tables[chainId].attestation}.schemaUID=%27${schemaUID}%27
+    `SELECT ${tables[chainId].attestation}.uid , ${tables[chainId].attestation}.attester , ${tables[chainId].attestation}.creationTimestamp , ${tables[chainId].attestation}.data , ${tables[chainId].attestation}.recipient , ${tables[chainId].attestation}.expirationTime , ${tables[chainId].attestation}.refUID  
+    FROM ${tables[chainId].attestation} 
+    WHERE ${tables[chainId].attestation}.schemaUID=%27${schemaUID}%27
     ORDER BY ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
@@ -136,7 +158,7 @@ export const getTotalAttestations = async (chainId, schemaUID) => {
 export const getAttestation = async (chainId, uid) => {
   const getAttestationDataQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].schema}.resolver , ${tables[chainId].schema}.revocable , ${tables[chainId].schema}.schema , ${tables[chainId].schema}.schemaUID ,
+    `SELECT ${tables[chainId].schema}.resolver , ${tables[chainId].revocation}.revocable , ${tables[chainId].schema}.schema , ${tables[chainId].schema}.schemaUID ,
 
     ${tables[chainId].attestation}.attester , ${tables[chainId].attestation}.creationTimestamp , ${tables[chainId].attestation}.data , ${tables[chainId].attestation}.recipient , ${tables[chainId].attestation}.expirationTime , ${tables[chainId].attestation}.refUID ,
       
