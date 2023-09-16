@@ -150,14 +150,6 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
                 }
                 title={`Go to ${itemData.from}'s dashboard`}
               />
-              <div className="flex flex-wrap items-center">
-                <Typography
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(`/dashboard?address=${itemData.from}`)
-                  }
-                ></Typography>
-              </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center">

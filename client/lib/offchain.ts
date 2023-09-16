@@ -173,7 +173,7 @@ console.log(data)
   const toAddress = body.sig.message.recipient || null;
   const fromAddress = body.signer;
   const age = body.sig.message.time;
-  const revocable = body.sig.message.revocable ? "true" : false;
+  const revocable = body.sig.message.revocable ? "true" : "false";
   const schemaUID = body.sig.message.schema;
   const expirationTime = body.sig.message.expirationTime;
   let info = await getSchemaInfo(chainID, schemaUID);
