@@ -27,36 +27,15 @@ const LighthouseChains = {
   },
 };
 
+const dealParams = {
+  num_copies: 3,
+};
+
 export const getIpfsGatewayUri = (cidOrIpfsUri) => {
   const LIGHTHOUSE_IPFS_GATEWAY =
     "https://gateway.lighthouse.storage/ipfs/{cid}";
   // const cid = cidOrIpfsUri.replace("ipfs://", "");
   return LIGHTHOUSE_IPFS_GATEWAY.replace("{cid}", cidOrIpfsUri);
-};
-
-export const getMetadata = async (cidOrIpfsUri) => {
-  const LighthouseGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
-  const link = LighthouseGatewayLink.replace("ipfs://", "");
-  try {
-    const result = await axios.get(link);
-    return result.data;
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-};
-
-export const getData = async (cidOrIpfsUri) => {
-  let LighthouseGatewayLink = getIpfsGatewayUri(cidOrIpfsUri);
-  const link = LighthouseGatewayLink.replace("ipfs://", "");
-
-  try {
-    const result = await axios.get(link);
-    return result.data;
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
 };
 
 export const uploadFile = async (file, apiKey, setUploadProgress) => {
@@ -70,7 +49,8 @@ export const uploadFile = async (file, apiKey, setUploadProgress) => {
     apiKey,
     false,
     null,
-    progressCallback
+    progressCallback,
+    dealParams
   );
   return output.data;
 };
@@ -94,7 +74,8 @@ export const uploadFileEncrypted = async (
     address,
     jwt,
     null,
-    progressCallback
+    progressCallback,
+    dealParams
   );
 
   const { masterKey, keyShards } = await generate();
@@ -105,7 +86,7 @@ export const uploadFileEncrypted = async (
     jwt,
     keyShards
   );
-  console.log(isSuccess);
+  console.log(output.data[0].cid);
 
   return output.data;
 };
@@ -145,7 +126,6 @@ export const applyAccessConditions = async (
   address,
   jwt
 ) => {
-
   const conditions = [
     {
       id: 1,

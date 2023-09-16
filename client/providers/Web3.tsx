@@ -73,7 +73,7 @@ const Web3Provider = (props: Props) => {
         })}
         appInfo={{
           appName: "TablelandAttestationService",
-          learnMoreUrl: "https://github.com/nijoe1/TablelandAttestationService",
+          learnMoreUrl: "https://github.com/nijoe1/TAS",
         }}
       >
         {props.children}

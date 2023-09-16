@@ -25,7 +25,7 @@ const SEO = () => {
         url: origin,
         images: [
           {
-            url: `${origin}/og.png`,
+            url: `${origin}/logo.png`,
             alt: `${SITE_NAME} Open Graph Image`,
           },
         ],
