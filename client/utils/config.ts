@@ -55,6 +55,9 @@ export const SITE_URL = "https://tas.vercel.app";
 
 export const ironOptions = {
   cookieName: SITE_NAME,
+  password:
+    process.env.SESSION_PASSWORD ??
+    "set_a_complex_password_at_least_32_characters_long",
   cookieOptions: {
     secure: process.env.NODE_ENV === "production",
   },
