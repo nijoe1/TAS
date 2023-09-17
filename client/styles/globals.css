@@ -6,13 +6,6 @@
   --background-color: #CCCCCC; /* Lighter gray */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-color: #FFFFFF; /* White for dark mode */
-    --background-color: #404040; /* Darker gray for dark mode */
-  }
-}
-
 body {
   color: var(--foreground-color);
   background-color: var(--background-color); /* Use a lighter gray here */
