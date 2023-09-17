@@ -5,12 +5,20 @@ import TimeCreated from "./TimeCreated";
 import Field from "@/components/Field";
 import { Typography } from "@material-tailwind/react";
 import AccessBox from "./AccessBox";
-import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId,
+  useWaitForTransaction,
+  useAccount,
+} from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
+import SubscriptionItem from "./SubscriptionItem";
 type AttestationProfileProps = {
   attestationData: {
     attestationUID: string;
+    context:string
     created: string;
     expiration: string;
     revoked: boolean;
@@ -19,12 +27,18 @@ type AttestationProfileProps = {
     schemaUID: string;
     from: string;
     to: string;
-    decodedData: Array<{ type: string; name: string; value: string }>;
+    decodedData: Array<{
+      type: string;
+      name: string;
+      value: string;
+    }>;
+    data: string;
     referencedAttestation: string;
     referencingAttestations: number;
   };
   type: string;
 };
+
 
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
   attestationData,
@@ -42,6 +56,9 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
   };
   const chainID = useChainId();
 
+  const {address} = useAccount()
+
+
   const { config } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
@@ -51,7 +68,13 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     args: [[attestationData.schemaUID, [attestationData.attestationUID, 0]]],
     value: BigInt(0),
   });
-  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
+  const {
+    write,
+    data: txdata1,
+    isError,
+    isLoading,
+    isSuccess,
+  } = useContractWrite(config);
 
   const { config: OFFCHAIN } = usePrepareContractWrite({
     // @ts-ignore
@@ -62,7 +85,16 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     args: [attestationData.attestationUID],
     value: BigInt(0),
   });
-  const { write: RevokeOffChain } = useContractWrite(OFFCHAIN);
+  const { write: RevokeOffChain, data: txdata } = useContractWrite(OFFCHAIN);
+
+  const {
+    data: res,
+    isError: err,
+    isLoading: wait,
+    isSuccess: succ,
+  } = useWaitForTransaction({
+    hash: txdata ? txdata?.hash : txdata1?.hash,
+  });
 
   return (
     <div className={`flex-grow mx-auto`}>
@@ -129,10 +161,43 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
           onAccessInfoChange={handleAccessInfoChange}
           resolverContract={attestationData.resolver}
         />
-        <div className="mx-auto text-center items-center border rounded-xl p-4">
-          <div className="text-xl font-semibold">Decoded Data</div>
-          <DecodedData decodedData={attestationData.decodedData} />
-        </div>
+
+        {
+          // @ts-ignore
+          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() ==
+            attestationData?.resolver && accessInfo.viewAccess ? (
+            <div className="mx-auto flex flex-col items-center justify-center">
+              {" "}
+              {/* Adjust the grid layout */}
+              <SubscriptionItem
+                key={0}
+                itemData={{
+                  // @ts-ignore
+                  address: address,
+                  // @ts-ignore
+                  data: attestationData.data,
+                  // @ts-ignore
+                  context: attestationData.uid,
+                  // @ts-ignore
+                  from: attestationData.from,
+                  // @ts-ignore
+                  age: attestationData.created,
+                  // @ts-ignore
+                  type: type,
+                }}
+              />
+            </div>
+          ) : // @ts-ignore
+          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() !=
+            attestationData?.resolver ? (
+            <div className="mx-auto text-center items-center border rounded-xl p-4">
+              <div className="text-xl font-semibold">Decoded Data</div>
+              <DecodedData decodedData={attestationData.decodedData} />
+            </div>
+          ) : (
+            <div className="text-center mt-3">No access</div>
+          )
+        }
         {attestationData.revocable && (
           <div className="items-center flex flex-col ">
             <button
@@ -164,6 +229,9 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
               isLoading={isLoading}
               isSuccess={isSuccess}
               isError={isError}
+              wait={wait}
+              error={err}
+              success={succ}
             />
           </div>
         )}

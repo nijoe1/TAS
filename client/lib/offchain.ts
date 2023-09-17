@@ -152,7 +152,7 @@ export const getOffChainAttestationsForSchema = async (
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
   const { data, error } = await orbis.getPosts({
-    context: `off-chain-attestation-${TAS}`,
+    // context: `off-chain-attestation-${TAS}`,
     tag: schemaUID,
   });
   console.log(data);
@@ -163,7 +163,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
   const { data, error } = await orbis.getPosts({
-    context: `off-chain-attestation-${TAS}`,
+    context: `${uid}`,
     tag: uid,
   });
 console.log(data)

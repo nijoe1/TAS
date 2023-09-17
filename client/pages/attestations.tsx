@@ -2,16 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Typography, Button } from "@material-tailwind/react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
-import {
-  getOffChainAttestations,
-  transformAndSortArrays,
-} from "@/lib/offchain";
 import EthereumAddress from "@/components/EthereumAddress";
-import { getAttestations } from "@/lib/tableland";
 import Loading from "@/components/Loading/Loading";
 import TimeCreated from "@/components/TimeCreated";
 import { useChainId } from "wagmi";
 import { RiLinkUnlinkM } from "react-icons/ri";
+import { getAllAttestations } from "@/lib/tas";
 
 const Attestations = () => {
   const chainID = useChainId();
@@ -21,59 +17,10 @@ const Attestations = () => {
 
   useEffect(() => {
     async function fetch() {
-      let attestations = await getAttestations(chainID);
-      let offChain = await getOffChainAttestations(chainID);
-      const formattedEntries = [];
-
-      for (const inputObject of offChain) {
-        const body = JSON.parse(inputObject.content.body);
-
-        // Extracting relevant information
-        const schemaUid = body.sig.message.schema || null;
-        const toAddress = body.sig.message.recipient || null;
-        const fromAddress = body.signer;
-        const age = body.sig.message.time;
-        const uid =
-          inputObject.content.tags.find((tag: any) => tag.slug === "uid")
-            ?.title || null;
-
-        const entry = {
-          uid: uid,
-          schemaUid: schemaUid,
-          fromAddress: fromAddress,
-          toAddress: toAddress,
-          age: age,
-          type: "OFFCHAIN",
-          // Add other properties as needed from the inputObject
-        };
-        formattedEntries.push(entry);
-      }
-      // @ts-ignore
-      const attestationTableInfo: any[] = [];
-      attestations.forEach((inputObject: any, index: any) => {
-        // Create a tableData entry
-        const entry = {
-          uid: inputObject.uid,
-          schemaUid: inputObject.schemaUID,
-          fromAddress: inputObject.attester,
-          toAddress: inputObject.recipient,
-          age: inputObject.creationTimestamp,
-          type: "ONCHAIN",
-          // Add other properties as needed from the inputObject
-        };
-
-        // Push the entry to the tableData array
-        attestationTableInfo.push(entry);
-      });
-
-      let tableDt = transformAndSortArrays(
-        formattedEntries,
-        attestationTableInfo
-      );
-
+      let allAttestations = await getAllAttestations(chainID);
       setTaken(!taken);
       // @ts-ignore
-      setTableData(tableDt);
+      setTableData(allAttestations);
     }
     if (!taken && chainID) {
       fetch();

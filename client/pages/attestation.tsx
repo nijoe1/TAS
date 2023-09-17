@@ -2,73 +2,39 @@ import React, { useState, useEffect } from "react";
 import Loading from "@/components/Loading/Loading";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
-import Link from "next/link"; // Import Link from Next.js
 import AttestationProfile from "@/components/AttestationProfile";
 import { useRouter } from "next/router";
-import { getAttestation } from "@/lib/tableland";
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { useChainId } from "wagmi";
-import { getOffChainAttestation } from "@/lib/offchain";
+import { getAttestationData } from "@/lib/tas"
 
 const Attestation = () => {
   const chainID = useChainId();
-
   const [taken, setTaken] = useState(false);
   const [attestationData, setAttestationData] = useState();
   const router = useRouter();
   const uid = router?.query?.uid;
   const type = router?.query?.type;
 
-  function transformDecodedData(inputObject: any) {
-    // @ts-ignore
-    const transformedArray = [];
+  const [accessInfo, setAccessInfo] = useState({
+    attestAccess: false,
+    revokeAccess: false,
+    viewAccess: false,
+  });
 
-    inputObject.forEach((item: any) => {
-      const transformedItem = {
-        type: item.type,
-        name: item.name,
-        value: item.value.value,
-      };
+  // Define a function to update the accessInfo state
+  const handleAccessInfoChange = (newAccessInfo: any) => {
+    setAccessInfo(newAccessInfo);
+    console.log(newAccessInfo);
+  };
 
-      transformedArray.push(transformedItem);
-    });
-    // @ts-ignore
-    return transformedArray;
-  }
 
   useEffect(() => {
     async function fetch() {
-      let attestation;
-      if (type === "ONCHAIN") {
-        attestation = await getAttestation(chainID, uid);
-        attestation = attestation[0];
-      } else {
-        attestation = await getOffChainAttestation(chainID, uid as string);
-        console.log(attestation)
-      }
-
-      const encoder = new SchemaEncoder(attestation.schema);
-      const data = transformDecodedData(encoder.decodeData(attestation.data));
+      // @ts-ignore
+      let AttestationData = await getAttestationData(type, chainID, uid);
       setTaken(!taken);
-      setAttestationData({
-        // @ts-ignore
-        attestationUID: uid,
-        created: attestation.creationTimestamp,
-        expiration: attestation.expirationTime === "0" ? "Never" : "Somewhere",
-        revoked:
-          attestation.revoker === "0x0000000000000000000000000000000000000000"
-            ? false
-            : true,
-        revocable: attestation.revocable == "false" ? false : true,
-        resolver: attestation.resolver,
-
-        schemaUID: attestation.schemaUID,
-        from: attestation.attester,
-        to: attestation.recipient,
-        decodedData: data,
-        referencedAttestation: "No reference",
-        referencingAttestation: 0,
-      });
+      // @ts-ignore
+      setAttestationData(AttestationData);
     }
     if (!taken && uid && chainID) {
       fetch();

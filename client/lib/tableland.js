@@ -39,13 +39,6 @@ const tables = {
 const TablelandGateway =
   "https://testnets.tableland.network/api/v1/query?statement=";
 
-export const getIpfsGatewayUri = (cidOrIpfsUri) => {
-  const LIGHTHOUSE_IPFS_GATEWAY =
-    "https://gateway.lighthouse.storage/ipfs/{cid}";
-  // const cid = cidOrIpfsUri.replace("ipfs://", "");
-  return LIGHTHOUSE_IPFS_GATEWAY.replace("{cid}", cidOrIpfsUri);
-};
-
 export const getAllSchemas = async (chainId) => {
   const getAllSchemasQuery =
     TablelandGateway +
@@ -53,6 +46,7 @@ export const getAllSchemas = async (chainId) => {
           ${tables[chainId].schema}.resolver,
           ${tables[chainId].schema}.schema,
           ${tables[chainId].schema}.schemaUID,
+          ${tables[chainId].schema}.creationTimestamp,
           COUNT(${tables[chainId].attestation}.uid) AS total
       FROM
           ${tables[chainId].schema}
@@ -74,7 +68,7 @@ export const getAllSchemas = async (chainId) => {
   }
 };
 
-export const getSchemaInfo = async (chainId,schemaUID) => {
+export const getSchemaInfo = async (chainId, schemaUID) => {
   const getAllSchemasQuery =
     TablelandGateway +
     `SELECT
@@ -180,19 +174,23 @@ export const getAttestation = async (chainId, uid) => {
 };
 
 export const getAttestAccess = async (chainId, schemaUID, address) => {
-  const getSchemaQuery =
-    TablelandGateway +
-    `SELECT COUNT(${tables[chainId].content_admins}.attester) AS NUM FROM ${
-      tables[chainId].content_admins
-    } WHERE
+  if (address) {
+    const getSchemaQuery =
+      TablelandGateway +
+      `SELECT COUNT(${tables[chainId].content_admins}.attester) AS NUM FROM ${
+        tables[chainId].content_admins
+      } WHERE
      ${tables[chainId].content_admins}.schemaUID='${schemaUID}' AND
      ${tables[chainId].content_admins}.attester='${address.toLowerCase()}'`;
-  try {
-    const result = await axios.get(getSchemaQuery);
-    console.log(result.data);
-    return result.data[0].NUM > 0;
-  } catch (err) {
-    console.error(err);
+    try {
+      const result = await axios.get(getSchemaQuery);
+      console.log(result.data);
+      return result.data[0].NUM > 0;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  } else {
     return null;
   }
 };

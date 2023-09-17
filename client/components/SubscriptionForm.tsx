@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
-import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId,
+  useWaitForTransaction,
+} from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import { useAccount } from "wagmi";
 import Notification from "./Notification";
@@ -34,7 +39,17 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     args: [schemaUID, months],
     value: BigInt(price * months),
   });
-  const { write, isLoading, isSuccess, isError } = useContractWrite(config);
+  const { write, data, isLoading, isSuccess, isError } =
+    useContractWrite(config);
+
+  const {
+    data: res,
+    isError: err,
+    isLoading: wait,
+    isSuccess: succ
+  } = useWaitForTransaction({
+    hash: data?.hash,
+  });
 
   const { address } = useAccount();
 
@@ -70,6 +85,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
               placeholder="Subscribe for x months"
               name={"Months"}
               value={months}
+              min={1}
               // @ts-ignore
               onChange={(e) => setMonths(e.target.value)}
             />
@@ -77,8 +93,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
           <div className="flex justify-end">
             <button
               type="button"
-              // @ts-ignore
-              onClick={()=>{write(); onClose}}
+              onClick={write}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Subscribe
@@ -91,7 +106,14 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
               Cancel
             </button>
           </div>
-          <Notification isLoading={isLoading} isSuccess={isSuccess} isError={isError} />
+          <Notification
+            isLoading={isLoading}
+            isSuccess={isSuccess}
+            isError={isError}
+            wait = {wait}
+            error = {err}
+            success = {succ}
+          />
         </form>
       </Card>
     </div>

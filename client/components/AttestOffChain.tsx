@@ -11,6 +11,7 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 import { CONTRACTS } from "@/constants/contracts/index";
 import { getTypedData, primaryType, types, getPostData } from "@/lib/offchain";
 import crypto from "crypto";
+import Notification from "./Notification";
 interface Signature {
   v: BigInt;
   r: `0x${string}`;
@@ -64,7 +65,8 @@ const AttestOffChain = ({
   const [signature, setSignature] = useState<`0x${string}`>();
   const [done, setDone] = useState(false);
   const [doneAttest, setDoneAttest] = useState(false);
-
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
   const [decodedSig, setDecodedSig] = useState<Signature>({
     v: BigInt(0),
     r: "0x",
@@ -185,6 +187,8 @@ const AttestOffChain = ({
     chainID,
     TAS,
     decodedSig,
+    success,
+    error,
   ]);
 
   const createPost = async () => {
@@ -218,16 +222,16 @@ const AttestOffChain = ({
           title: uid?.toString(),
         },
       ],
-      context: `off-chain-attestation-${TAS}`,
+      context: uid?.toString(),
       // Other properties based on your requirements
     };
     await orbis.isConnected();
     const res = await orbis.createPost(post);
     console.log(res);
     if (res.status == 200) {
-      alert("done");
+      setSuccess(true);
     } else {
-      alert("error");
+      setError(true);
     }
   };
 
@@ -241,19 +245,33 @@ const AttestOffChain = ({
   return (
     <div>
       <button
-        className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+        disabled={success}
+        className={`bg-black text-white rounded-full px-6 py-2 ${
+         !success && "hover:bg-white hover:text-black"
+        } border border-black`}
         onClick={async (e) => {
           e.preventDefault(); // Prevent default behavior
           if (!signature) {
             signTypedData();
           } else {
             handleSignAndCreate();
-            setDoneAttest(!doneAttest)
+            setDoneAttest(!doneAttest);
           }
         }}
       >
         {!signature ? "sign" : "attest"}
       </button>
+      {(success || error) && (
+        <Notification
+          isLoading={false}
+          isSuccess={false}
+          isError={false}
+          wait={false}
+          success={success}
+          error={error}
+          offchain={true}
+        />
+      )}
     </div>
   );
 };

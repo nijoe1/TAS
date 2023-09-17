@@ -4,59 +4,80 @@ type NotificationProps = {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
+  wait: boolean;
+  success: boolean;
+  error: boolean;
+  offchain?:boolean
 };
 
 const Notification: React.FC<NotificationProps> = ({
   isLoading,
   isSuccess,
   isError,
+  wait,
+  success,
+  error,
+  offchain
 }) => {
-  const [successful, setSuccessful] = useState(false);
-
+  const [isVisible, setIsVisible] = useState(false);
+  const [started, setStarted] = useState(false);
   useEffect(() => {
-    setSuccessful(true);
-    // Automatically hide the success message after 4 seconds if it's a success
-    if (isSuccess) {
-      const hideSuccessTimeout = setTimeout(() => {
-        setSuccessful(false); // Hide the entire notification
-      }, 4000); // Hide after 4 seconds
-
-      // Clear the hide timeout on unmount to avoid memory leaks
-      return () => {
-        clearTimeout(hideSuccessTimeout);
-      };
+    if ((isLoading && !started) || isError || offchain) {
+      setIsVisible(true);
+      setStarted(false);
     }
-    if (isError) {
-        const hideSuccessTimeout = setTimeout(() => {
-          setSuccessful(false); // Hide the entire notification
-        }, 4000); // Hide after 4 seconds
-  
-        // Clear the hide timeout on unmount to avoid memory leaks
-        return () => {
-          clearTimeout(hideSuccessTimeout);
-        };
-      }
-  }, [isLoading, isSuccess]);
 
-  const notificationClasses = `fixed bottom-20 items-center flex flex-col  p-2 mx-auto rounded-md ${
-    isLoading
-      ? "border bg-black text-white"
-      : isSuccess && successful
-      ? "border bg-green-500 text-white"
-      : isError
-      ? "border bg-red-500 text-white"
-      : ""
-  }`;
+    if (success) {
+      const timeout = setTimeout(() => {
+        setIsVisible(false);
+      }, 3000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, isSuccess, isError, wait, success, error,offchain]);
+
+  const notificationStyles: React.CSSProperties = {
+    position: "fixed",
+    bottom: "10px",
+    right: "10px",
+    padding: "12px",
+    borderRadius: "8px",
+    color: "#fff",
+    fontWeight: "bold",
+    display: isVisible ? "block" : "none",
+    zIndex: 9999,  // Ensure it's on top of other elements
+  };
 
   const notificationText = isLoading
-    ? "Loading..."
-    : isSuccess && successful
-    ? "Transaction created successfully!"
+    ? "Confirm Transaction..."
     : isError
-    ? "Transaction failed. Please try again."
+    ? "Transaction rejected"
+    : wait && !success
+    ? "Wait until transaction is confirmed"
+    : success
+    ? offchain?"Attested Succesfully":"Transaction confirmed"
+    : error
+    ? "An error occured try again"
+    : "";
+  const notificationColor = isLoading
+    ? "#001" // Black for loading
+    : isError
+    ? "#cc0000" // Red for error
+    : wait && !success
+    ? "#ffcc00" // Yellow for wait
+    : success
+    ? "#00cc00" // Green for success
+    : error
+    ? "#cc0000" // Red for error
     : "";
 
-  return <div className={notificationClasses}>{notificationText}</div>;
+  notificationStyles.backgroundColor = notificationColor;
+
+  return isVisible ? (
+    <div style={notificationStyles}>
+      <div>{notificationText}</div>
+    </div>
+  ) : null;
 };
 
 export default Notification;

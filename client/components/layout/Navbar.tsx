@@ -70,7 +70,7 @@ const CustomNavbar = () => {
             onClick={()=>handleLinkClick("/")}
             width={125}
             height={37}
-            className="rounded-lg "
+            className="rounded-lg cursor-pointer"
           />
         </div>
         <div className="w-8/10 flex flex-wrap rounded-xl mx-auto gap-4">

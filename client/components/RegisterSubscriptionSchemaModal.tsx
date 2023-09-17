@@ -6,7 +6,7 @@ import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
 // @ts-ignore
 import TagsInput from "react-tagsinput";
-import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
+import { useContractWrite, usePrepareContractWrite, useChainId, useWaitForTransaction } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 type RegisterSchemaModalProps = {
@@ -49,7 +49,17 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       schemaDescription,
     ],
   });
-  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
+  const { write, data, isLoading, isSuccess, isError } =
+    useContractWrite(config);
+
+  const {
+    data: res,
+    isError: err,
+    isLoading: wait,
+    isSuccess: succ,
+  } = useWaitForTransaction({
+    hash: data?.hash,
+  });
 
   useEffect(() => {
     let creatorsList = [];
@@ -64,19 +74,19 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setShares(sharesList);
   }, [attributes]);
 
-  const handleTagChange = (tags:any) => {
+  const handleTagChange = (tags: any) => {
     setCategories({ tags });
     console.log(tags);
   };
 
-  const handleAttributeChange = (index:any, key:any, value:any) => {
+  const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
     updatedAttributes[index][key] = value;
     setAttributes(updatedAttributes);
   };
 
-  const handleAttributeAddressChange = (index:any, key:any, value:any) => {
+  const handleAttributeAddressChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
     updatedAttributes[index][key] = value;
@@ -87,7 +97,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setAttributes([...attributes, { address: "Select address", shares: 0 }]);
   };
 
-  const removeAttribute = (index:any) => {
+  const removeAttribute = (index: any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
@@ -287,8 +297,14 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               Cancel
             </button>
           </div>
-          <Notification isLoading={isLoading} isSuccess={isSuccess} isError={isError} />
-
+          <Notification
+            isLoading={isLoading}
+            isSuccess={isSuccess}
+            isError={isError}
+            wait={wait}
+            error={err}
+            success={succ}
+          />
         </form>
       </Card>
     </div>

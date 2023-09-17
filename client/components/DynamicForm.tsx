@@ -3,7 +3,12 @@ import { Card, Input, Progress, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { validateInput, transformFormData } from "@/lib/utils";
-import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId,
+  useWaitForTransaction,
+} from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 import AttestOffChain from "./AttestOffChain";
@@ -55,7 +60,22 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     ],
     value: BigInt(0),
   });
-  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
+  const {
+    write,
+    data: txdata,
+    isError,
+    isLoading,
+    isSuccess,
+  } = useContractWrite(config);
+
+  const {
+    data: res,
+    isError: err,
+    isLoading: wait,
+    isSuccess: succ,
+  } = useWaitForTransaction({
+    hash: txdata?.hash,
+  });
 
   useEffect(() => {
     try {
@@ -205,9 +225,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               </div>
             ))}
             <div className="flex flex-col">
-              <label
-                className="mb-1"
-              >
+              <label className="mb-1">
                 {"Attestation Recipient (Optional)"}
               </label>
               <Input
@@ -221,9 +239,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               />
             </div>
             <div className="flex flex-col">
-              <label
-                className="mb-1"
-              >
+              <label className="mb-1">
                 {"Reference Attestation (Optional)"}
               </label>
               <Input
@@ -309,6 +325,9 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         isLoading={isLoading}
         isSuccess={isSuccess}
         isError={isError}
+        wait={wait}
+        error={err}
+        success={succ}
       />
     </div>
   );

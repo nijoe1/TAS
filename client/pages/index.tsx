@@ -41,10 +41,10 @@ export default function Home() {
       href: "https://www.lighthouse.storage/",
     },
     {
-      title: "Lilypad",
+      title: "Ceramic x Orbis",
       description:
-        "Lilypad is building the infrastructure for internet-scale trustless distributed compute networks for #web3 underpinned by the Bacalhau Project.",
-      href: `https://docs.lilypadnetwork.org/`,
+        "Ceramic is a decentralized data network that powers an ecosystem of interoperable Web3 applications and services.",
+      href: `https://ceramic.network/`,
     },
   ];
   const style = {

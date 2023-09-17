@@ -1,67 +1,44 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Button } from "@material-tailwind/react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
 import Loading from "@/components/Loading/Loading";
 import SchemaProfile from "@/components/SchemaProfile";
 import { useRouter } from "next/router";
-import { getSchemaAttestations, getSchema } from "@/lib/tableland";
 import TimeCreated from "@/components/TimeCreated"; // Replace with the actual path
 import EthereumAddress from "@/components/EthereumAddress";
 import { useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import SubscriptionItem from "@/components/SubscriptionItem";
 import { useAccount } from "wagmi";
-import {
-  getOffChainAttestationsForSchema,
-  transformAndSortArrays,
-} from "@/lib/offchain";
+import { getSchemaData, SchemaInfo } from "@/lib/tas";
 import { RiLinkUnlinkM } from "react-icons/ri";
 
+interface SchemaData {
+  schemaUID: string;
+  name: string;
+  description: string;
+  created: string;
+  creator: string;
+  resolverContract: string;
+  revocable: boolean;
+  attestationCount: {
+    onchain: number;
+    offchain: number;
+  };
+  decodedSchema: Array<{ type: string; name: string }>; // Adjust the type based on the actual schema structure
+  rawSchema: string;
+}
 const Schema = () => {
-  const useChainID = useChainId();
+  const chainID = useChainId();
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
-  const [schemaData, setSchemaData] = useState({
-    schemaUID: "",
-    name: "",
-    description: "",
-    created: "17 hours ago",
-    creator: "",
-    resolverContract: "",
-    revocable: true,
-    attestationCount: {
-      onchain: 1,
-      offchain: 0,
-    },
-    decodedSchema: [],
-    rawSchema: "",
-  });
+  const [schemaData, setSchemaData] = useState<SchemaData>();
   const [subscriptionResolver, setSubscriptionResolver] = useState();
   const { address } = useAccount();
 
   const router = useRouter();
   const schemaUID = router?.query?.schemaUID;
 
-  function decodeSchema(rawSchema: string) {
-    if (typeof rawSchema !== "string") {
-      // Handle the case where rawSchema is not a string (e.g., it's undefined or null)
-      return [];
-    }
-
-    // Continue with your existing code to split and decode the schema
-    const fieldStrings = rawSchema.split(",").map((field) => field.trim());
-    // @ts-ignore
-    const decodedSchema = [];
-    fieldStrings.forEach((fieldString) => {
-      const [type, name] = fieldString.split(" ");
-      decodedSchema.push({ type, name });
-    });
-    // @ts-ignore
-    console.log(decodedSchema);
-    // @ts-ignore
-    return decodedSchema;
-  }
   const [accessInfo, setAccessInfo] = useState({
     attestAccess: false,
     revokeAccess: false,
@@ -77,116 +54,21 @@ const Schema = () => {
   useEffect(() => {
     async function fetch() {
       if (schemaUID) {
-        let offChain = await getOffChainAttestationsForSchema(
-          useChainID,
-          schemaUID as string
-        );
-
-        const formattedEntries = [];
-
-        for (const inputObject of offChain) {
-          const body = JSON.parse(inputObject.content.body);
-
-          // Extracting relevant information
-          const toAddress = body.sig.message.recipient || null;
-          const fromAddress = body.signer;
-          const age = body.sig.message.time;
-          const uid =
-            inputObject.content.tags.find((tag: any) => tag.slug === "uid")
-              ?.title || null;
-
-          const entry = {
-            uid: uid,
-            fromAddress: fromAddress,
-            toAddress: toAddress,
-            age: age,
-            data: body.sig.message.data.toLowerCase(),
-            type: "OFFCHAIN",
-          };
-          formattedEntries.push(entry);
-        }
+        let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
         // @ts-ignore
-        const attestationTableInfo: any[] | ((prevState: never[]) => never[]) =
-          [];
-        let attestations = await getSchemaAttestations(useChainID, schemaUID);
-        let schema = await getSchema(useChainID, schemaUID);
-        schema = schema[0];
-        let schemaInfo = schemaData;
-        attestations.forEach((inputObject: any, index: any) => {
-          // Create a tableData entry
-          const entry = {
-            uid: inputObject.uid,
-            fromAddress: inputObject.attester,
-            toAddress: inputObject.recipient,
-            age: inputObject.creationTimestamp,
-            data: inputObject.data,
-            type: "ONCHAIN",
-            // Add other properties as needed from the inputObject
-          };
-
-          // Push the entry to the tableData array
-          attestationTableInfo.push(entry);
-        });
-
-        schemaInfo.creator = schema.creator;
-        // @ts-ignore
-        schemaInfo.decodedSchema = decodeSchema(schema.schema);
-        // @ts-ignore
-
-        schemaInfo.schemaUID = schemaUID;
-        schemaInfo.name = schema.name;
-        schemaInfo.description = schema.description;
-        schemaInfo.resolverContract = schema.resolver;
-        schemaInfo.rawSchema = schema.schema;
-        schemaInfo.revocable = schema.revocable === "true" ? true : false;
-        schemaInfo.created = schema.creationTimestamp;
+        setTableData(res.tableDt);
+        setSchemaData(res.schemaInfo ? res.schemaInfo : SchemaInfo);
         setTaken(!taken);
         setSubscriptionResolver(
           // @ts-ignore
-          CONTRACTS.SubscriptionResolver[useChainID].contract.toLowerCase()
+          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
         );
-        let tableDt:
-          | ((prevState: never[]) => never[])
-          | {
-              uid: any;
-              fromAddress: any;
-              toAddress: any;
-              age: any;
-              data: any;
-              type: string;
-            }[]
-          | {
-              uid: any;
-              schemaUid: any; // Add other properties as needed from the inputObject
-              // Add other properties as needed from the inputObject
-              fromAddress: any;
-              toAddress: any; // Push the entry to the tableData array
-              // Push the entry to the tableData array
-              age: any;
-              type: any;
-            }[] = [];
-        if (formattedEntries.length == 0 && attestationTableInfo.length == 0) {
-        } else if (attestationTableInfo.length == 0) {
-          tableDt = formattedEntries;
-        } else if (formattedEntries.length == 0) {
-          tableDt = attestationTableInfo;
-        } else {
-          tableDt = transformAndSortArrays(
-            formattedEntries,
-            attestationTableInfo
-          );
-        }
-        console.log(tableDt);
-
-        // @ts-ignore
-        setTableData(tableDt);
-        setSchemaData(schemaInfo);
       }
     }
-    if (!taken && schemaUID && useChainID) {
+    if (!taken && schemaUID && chainID) {
       fetch();
     }
-  }, [schemaUID, useChainID, address]);
+  }, [schemaUID, chainID, address]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
@@ -195,16 +77,15 @@ const Schema = () => {
         <>
           <div className="flex flex-col items-center">
             <SchemaProfile
-              schemaData={schemaData}
+              schemaData={schemaData ? schemaData : SchemaInfo}
               onAccessInfoChange={handleAccessInfoChange}
-              chainID={useChainID}
+              chainID={chainID}
             ></SchemaProfile>
 
             {tableData.length > 0 &&
             // @ts-ignore
-            CONTRACTS.SubscriptionResolver[
-              useChainID
-            ].contract.toLowerCase() !== schemaData.resolverContract ? (
+            CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() !==
+              schemaData?.resolverContract ? (
               <div className="mt-10 mx-[10%]">
                 <div className="overflow-x-auto rounded-lg">
                   <table className="w-screen-md table-fixed border-b border-gray">
@@ -295,7 +176,7 @@ const Schema = () => {
                       // @ts-ignore
                       age: item.age,
                       // @ts-ignore
-                      type: item.type
+                      type: item.type,
                     }}
                   />
                 ))}

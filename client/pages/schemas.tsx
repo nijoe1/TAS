@@ -3,16 +3,16 @@ import { Typography, Button } from "@material-tailwind/react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
 import CreateSchemaModal from "@/components/CreateSchemaModal"; // Import the modal component
-import Link from "next/link"; // Import Link from Next.js
 import DecodedSchema from "@/components/DecodedSchema";
 import EthereumAddress from "@/components/EthereumAddress";
 import ChatModal from "@/components/ChatModal";
 
-import { getAllSchemas } from "@/lib/tableland";
+import { getSchemas } from "@/lib/tas";
 import Loading from "@/components/Loading/Loading";
 import { useChainId } from "wagmi";
 import { VscFeedback } from "react-icons/vsc";
 import { PiChatDotsFill } from "react-icons/pi";
+import TimeCreated from "@/components/TimeCreated";
 
 const Schemas = () => {
   const chainID = useChainId();
@@ -44,38 +44,9 @@ const Schemas = () => {
     console.log("Schema Data:", schemaData);
   };
 
-  function parseInputString(inputString: any) {
-    const fields = inputString.split(",").map((field: any) => {
-      const [type, name] = field.trim().split(" ");
-      return { type, name };
-    });
-
-    return { fields };
-  }
-
   useEffect(() => {
     async function fetch() {
-      // @ts-ignore
-      const tableData = [];
-      let schemas = await getAllSchemas(chainID);
-      console.log(schemas);
-      schemas.forEach((inputObject: any, index: any) => {
-        const schemaString = inputObject.schema;
-        const schema = parseInputString(schemaString);
-
-        // Create a tableData entry
-        const entry = {
-          id: index + 1, // Incrementing ID
-          uid: inputObject.schemaUID,
-          schema,
-          resolverAddress: inputObject.resolver,
-          attestations: inputObject.total,
-          // Add other properties as needed from the inputObject
-        };
-
-        // Push the entry to the tableData array
-        tableData.push(entry);
-      });
+      let tableData = await getSchemas(chainID);
       setTaken(!taken);
       // @ts-ignore
       setTableData(tableData);
@@ -87,7 +58,7 @@ const Schemas = () => {
 
   return (
     <div
-      className={`flex flex-col min-h-screen bg-blue-gray-100 w-full rounded-lg`}
+      className={`flex flex-col min-h-screen w-full rounded-lg`}
     >
       <Navbar />
       {taken ? (
@@ -140,6 +111,9 @@ const Schemas = () => {
                       <th className="px-4 py-2 text-white border-r border-gray mx-4">
                         Attestations
                       </th>
+                      <th className=" py-2 text-white border-r border-gray">
+                        Age
+                      </th>
                       <th className="px-3 py-2 text-white mx-4">
                         <VscFeedback />
                       </th>
@@ -189,8 +163,20 @@ const Schemas = () => {
                             <p>{row.attestations}</p>
                           </div>
                         </td>
-                        <td className="py-2 border-b border-gray">
+                        <td className="py-2 border-r border-gray border-b border-gray">
                           <div className="flex items-center justify-center">
+                            <p className="px-2 py-2">
+                              {
+                                <TimeCreated
+                                  // @ts-ignore
+                                  createdAt={row.creationTimestamp}
+                                />
+                              }
+                            </p>
+                          </div>
+                        </td>
+                        <td className="py-2 border-b border-gray">
+                          <div className="flex items-center justify-center cursor-pointer">
                             <PiChatDotsFill
                               className="bolder"
                               onClick={() => {

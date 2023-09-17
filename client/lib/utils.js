@@ -54,10 +54,87 @@ export const transformFormData = (formData, schema) => {
   return transformedData;
 };
 
+export const transformDecodedData = (inputObject) => {
+  // @ts-ignore
+  const transformedArray = [];
+
+  inputObject.forEach((item) => {
+    const transformedItem = {
+      type: item.type,
+      name: item.name,
+      value: item.value.value,
+    };
+
+    transformedArray.push(transformedItem);
+  });
+  // @ts-ignore
+  return transformedArray;
+};
+
+export const decodeSchema = (rawSchema) => {
+  if (typeof rawSchema !== "string") {
+    // Handle the case where rawSchema is not a string (e.g., it's undefined or null)
+    return [];
+  }
+
+  // Continue with your existing code to split and decode the schema
+  const fieldStrings = rawSchema.split(",").map((field) => field.trim());
+  // @ts-ignore
+  const decodedSchema = [];
+  fieldStrings.forEach((fieldString) => {
+    const [type, name] = fieldString.split(" ");
+    decodedSchema.push({ type, name });
+  });
+  // @ts-ignore
+  console.log(decodedSchema);
+  // @ts-ignore
+  return decodedSchema;
+};
+
 const getTypeForAttribute = (attributeName, schemaArray) => {
   const schemaEntry = schemaArray.find((entry) => entry.name === attributeName);
 
   return schemaEntry.type;
 };
 
+export const parseInputString = (inputString) => {
+  const fields = inputString.split(",").map((field) => {
+    const [type, name] = field.trim().split(" ");
+    return { type, name };
+  });
 
+  return { fields };
+};
+
+const allowedFileTypes = {
+  "image/jpeg": "Image",
+  "image/png": "Image",
+  "image/gif": "Image",
+  "video/mp4": "Video",
+  "video/webm": "Video",
+  "video/ogg": "Video",
+  "application/pdf": "PDF",
+  "text/csv": "CSV",
+};
+
+export const getFileTypeFromAccept = (acceptValue) => {
+  const acceptValues = acceptValue.split(",").map((val) => val.trim());
+
+  for (const [key, value] of Object.entries(allowedFileTypes)) {
+    if (acceptValues.includes(key)) {
+      return value;
+    }
+  }
+
+  return undefined;
+};
+
+export const parseBlobToJson = async (blob) => {
+  try {
+    const response = await fetch(URL.createObjectURL(blob));
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    throw new Error("Error parsing Blob as JSON: " + error.message);
+  }
+};

@@ -4,7 +4,7 @@ import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
-import { useContractWrite, usePrepareContractWrite, useChainId } from "wagmi";
+import { useContractWrite, usePrepareContractWrite, useChainId, useWaitForTransaction } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 
@@ -59,9 +59,18 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     functionName: "register",
     args: [rawSchema, schemaName, schemaDescription, resolver, isRevocable],
   });
-  const { write, isError, isLoading, isSuccess } = useContractWrite(config);
+  const { write, data, isLoading, isSuccess, isError } =
+    useContractWrite(config);
 
-  const handleAttributeChange = (index:any, key:any, value:any) => {
+  const {
+    data: res,
+    isError: err,
+    isLoading: wait,
+    isSuccess: succ,
+  } = useWaitForTransaction({
+    hash: data?.hash,
+  });
+  const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
     updatedAttributes[index][key] = value;
@@ -81,14 +90,14 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setAttributes(updatedAttributes);
   };
 
-  const handleAttributeNameChange = (index:any, key:any, value:any) => {
+  const handleAttributeNameChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
     updatedAttributes[index][key] = value;
     setAttributes(updatedAttributes);
   };
 
-  const handleCheckboxChange = (index:any) => {
+  const handleCheckboxChange = (index: any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes[index]["isArray"] = !updatedAttributes[index]["isArray"];
     setAttributes(updatedAttributes);
@@ -103,7 +112,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     generateAttributeString();
   };
 
-  const removeAttribute = (index:any) => {
+  const removeAttribute = (index: any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
     setAttributes(updatedAttributes);
@@ -114,7 +123,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setRawSchema(
       // @ts-ignore
       attributes
-        .map((attr:any) => {
+        .map((attr: any) => {
           const type = attr.isArray ? `${attr.type}[]` : attr.type;
           return `${type} ${attr.name}`;
         })
@@ -342,8 +351,14 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               Cancel
             </button>
           </div>
-          <Notification isLoading={isLoading} isSuccess={isSuccess} isError={isError} />
-
+          <Notification
+            isLoading={isLoading}
+            isSuccess={isSuccess}
+            isError={isError}
+            wait={wait}
+            error={err}
+            success={succ}
+          />
         </form>
       </Card>
     </div>

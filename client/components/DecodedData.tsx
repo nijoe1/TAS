@@ -6,6 +6,7 @@ import { getIpfsGatewayUri } from "@/lib/lighthouse";
 
 type DecodedDataProps = {
   decodedData: any;
+  
 };
 
 const DecodedData: React.FC<DecodedDataProps> = ({ decodedData }) => {
