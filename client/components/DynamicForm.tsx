@@ -258,10 +258,10 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                 type="checkbox"
                 checked={isRevocable}
                 onChange={() => setIsRevocable(!isRevocable)}
-                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3 cursor-pointer "
+                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
               />
               <Typography
-                className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3"
+                className="cursor-pointer focus:ring-blue-500 focus:ring-2  mb-3"
                 color="black"
                 onClick={() => setIsRevocable(!isRevocable)}
               >
@@ -271,10 +271,10 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                 type="checkbox"
                 checked={isOffChain}
                 onChange={() => setIsOffChain(!isOffChain)}
-                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3 cursor-pointer "
+                className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
               />
               <Typography
-                className="cursor-pointer focus:ring-blue-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mb-3"
+                className="cursor-pointer focus:ring-blue-500 focus:ring-2  mb-3"
                 color="black"
                 onClick={() => setIsOffChain(!isOffChain)}
               >

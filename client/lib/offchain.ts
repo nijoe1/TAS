@@ -140,7 +140,7 @@ export const getOffChainAttestations = async (chainID: number) => {
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
   const { data, error } = await orbis.getPosts({
-    context: `off-chain-attestation-${TAS}`,
+    tag: `address:${TAS}/chainID:${chainID}`,
   });
   return data;
 };
@@ -152,7 +152,6 @@ export const getOffChainAttestationsForSchema = async (
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
   const { data, error } = await orbis.getPosts({
-    // context: `off-chain-attestation-${TAS}`,
     tag: schemaUID,
   });
   console.log(data);
@@ -167,7 +166,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
     tag: uid,
   });
 console.log(data)
-  const body = JSON.parse(data[0].content.body);
+  const body = JSON.parse(JSON.stringify(data[0].content.data));
 
   // Extracting relevant information
   const toAddress = body.sig.message.recipient || null;

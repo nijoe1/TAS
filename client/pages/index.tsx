@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import Animation from "@/components/HeroAnimation/Animation";
-const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const router = useRouter();
@@ -52,17 +51,17 @@ export default function Home() {
   };
   return (
     <div
-      className={`flex flex-col min-h-screen ${inter.className} bg-blue-gray-100`}
+      className={`flex flex-col min-h-screen bg-blue-gray-100`}
     >
       <Navbar />
       <div className="flex flex-row items-center">
         <Animation></Animation>
-        <section className="flex-grow dark:bg-gray-800 dark:text-gray-100">
+        <section className="flex-grow">
           <div className="container mx-auto flex flex-col items-center px-4 py-16 text-center md:py-32 md:px-10 lg:px-32 xl:max-w-3xl">
-            <h1 className="text-4xl font-bold leading-tight sm:text-5xl text-black dark:text-white">
+            <h1 className="text-4xl font-bold leading-tight sm:text-5xl text-black ">
               Welcome to Tableland Attestation Service
             </h1>
-            <p className="px-8 mt-6 mb-12 text-lg text-gray-600 dark:text-gray-300">
+            <p className="px-8 mt-6 mb-12 text-lg text-gray-600  ">
               TAS, integrated with EAS protocol, elevates Tableland, presenting
               an interoperable and indexable decentralized solution. It enables
               decentralized identity, subscription-based content, expert-revoked
@@ -79,7 +78,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => handleLinkClick("https://github.com/nijoe1/tas")}
-                className="px-8 py-3 m-2 text-lg border rounded-full dark:border-white dark:hover:border-black dark:hover:bg-white dark:text-black hover:bg-black hover:text-white transition duration-300"
+                className="px-8 py-3 m-2 text-lg border rounded-full hover:bg-black hover:text-white transition duration-300"
               >
                 Source Code
               </button>
@@ -94,7 +93,7 @@ export default function Home() {
             <Link
               key={index}
               href={link.href}
-              className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+              className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100"
               rel="noopener noreferrer"
             >
               <h2 className={`mb-3 text-2xl font-semibold`}>

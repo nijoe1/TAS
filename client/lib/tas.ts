@@ -58,7 +58,7 @@ export const getAllAttestations = async (chainID: number) => {
   const formattedEntries = [];
 
   for (const inputObject of offChain) {
-    const body = JSON.parse(inputObject.content.body);
+    const body = JSON.parse(JSON.stringify(inputObject.content.data));
 
     // Extracting relevant information
     const schemaUid = body.sig.message.schema || null;
@@ -186,7 +186,7 @@ export const getSchemaData = async (
   const formattedEntries = [];
 
   for (const inputObject of offChain) {
-    const body = JSON.parse(inputObject.content.body);
+    const body = JSON.parse(JSON.stringify(inputObject.content.data));
 
     // Extracting relevant information
     const toAddress = body.sig.message.recipient || null;

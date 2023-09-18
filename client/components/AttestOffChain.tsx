@@ -194,7 +194,9 @@ const AttestOffChain = ({
   const createPost = async () => {
     let content = createPostContent();
     const post = {
-      body: JSON.stringify(content),
+      title: `uid: ${uid}`,
+      body: `Off chain attestation for TAS protocol https://tas.vercel.app/attestation?uid=${uid}&type=OFFCHAIN.`,
+      data: content,
       mentions: [],
       tags: [
         {
@@ -220,6 +222,10 @@ const AttestOffChain = ({
         {
           slug: uid?.toString(),
           title: uid?.toString(),
+        },
+        {
+          slug: `address:${TAS}/chainID:${chainID}`,
+          title: `address:${TAS}/chainID:${chainID}`,
         },
       ],
       context: uid?.toString(),
@@ -247,7 +253,7 @@ const AttestOffChain = ({
       <button
         disabled={success}
         className={`bg-black text-white rounded-full px-6 py-2 ${
-         !success && "hover:bg-white hover:text-black"
+          !success && "hover:bg-white hover:text-black"
         } border border-black`}
         onClick={async (e) => {
           e.preventDefault(); // Prevent default behavior
