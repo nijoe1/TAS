@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import { Card, Input, Typography, Tooltip } from "@material-tailwind/react";
-import { BsTrash3Fill } from "react-icons/bs";
-import { SlOptionsVertical } from "react-icons/sl";
-import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
-// @ts-ignore
-import TagsInput from "react-tagsinput";
 import RegisterSchemaModal from "./RegisterSchemaModal";
 import RegisterSubscriptionSchemaModal from "./RegisterSubscriptionSchemaModal";
-
+import RegisterACSchemaModal from "./RegisterACSchemaModal";
 // import 'react-tagsinput/react-tagsinput.css'
 // import "@/styles/globals.css"
 type RegisterSchemaModalProps = {
@@ -24,7 +19,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 }) => {
   const [type, setType] = useState("Select schema type");
 
-  const schemaTypes = ["Select schema type", "standard", "subscription"];
+  const schemaTypes = ["Select schema type", "Standard", "Subscription", "Access-Control"];
 
   const [open, setOpen] = useState(false);
 
@@ -72,7 +67,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 </option>
               ))}
             </select>
-            {type === "subscription" && (
+            {type === "Subscription" && (
               <RegisterSubscriptionSchemaModal
                 isOpen={open}
                 onClose={function (): void {
@@ -85,8 +80,21 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 }}
               />
             )}
-            {type === "standard" && (
+            {type === "Standard" && (
               <RegisterSchemaModal
+                isOpen={open}
+                onClose={function (): void {
+                  setOpen(!open);
+                  onClose()
+                  setType("Select schema type")
+                }}
+                onCreate={function (schemaData: any): void {
+                  setOpen(!open);
+                }}
+              />
+            )}
+            {type === "Access-Control" && (
+              <RegisterACSchemaModal
                 isOpen={open}
                 onClose={function (): void {
                   setOpen(!open);

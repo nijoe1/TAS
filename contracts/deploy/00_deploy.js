@@ -32,13 +32,19 @@ module.exports = async ({ deployments }) => {
   //   log: true,
   // });
 
-  // const SchemaIndexerContract = await hre.ethers.getContractFactory("SchemaTablelandIndexer")
-  // const SchemaIndexerContractInstance = SchemaIndexerContract.attach(SchemaTablelandIndexer.address);
+  // // const SchemaIndexerContract = await hre.ethers.getContractFactory(
+  // //   "SchemaTablelandIndexer"
+  // // );
+  // // const SchemaIndexerContractInstance = SchemaIndexerContract.attach(
+  // //   SchemaTablelandIndexer.address
+  // // );
 
-  // let makeRegistryOwner = await SchemaIndexerContractInstance.transferOwnership(SchemaRegistry.address)
-  // await makeRegistryOwner.wait()
+  // // let makeRegistryOwner = await SchemaIndexerContractInstance.transferOwnership(
+  // //   SchemaRegistry.address
+  // // );
+  // // await makeRegistryOwner.wait();
 
-  // console.log("Registry IS Schema_INDEXER OWNER")
+  // // console.log("Registry IS Schema_INDEXER OWNER");
 
   // //deploy SchemaRegistry
   // const TASIndexer = await deploy("TASIndexer", {
@@ -54,13 +60,17 @@ module.exports = async ({ deployments }) => {
   //   log: true,
   // });
 
-  // const TasIndexerContract = await hre.ethers.getContractFactory("TASIndexer")
-  // const TasIndexerContractInstance = TasIndexerContract.attach(TASIndexer.address);
+  // // const TasIndexerContract = await hre.ethers.getContractFactory("TASIndexer");
+  // // const TasIndexerContractInstance = TasIndexerContract.attach(
+  // //   TASIndexer.address
+  // // );
 
-  // let makeTasOwner = await TasIndexerContractInstance.transferOwnership(TAS.address)
-  // await makeTasOwner.wait()
+  // // let makeTasOwner = await TasIndexerContractInstance.transferOwnership(
+  // //   TAS.address
+  // // );
+  // // await makeTasOwner.wait();
 
-  // console.log("TAS IS INDEXER OWNER")
+  // // console.log("TAS IS INDEXER OWNER");
 
   // //deploy SchemaRegistry
   // const Splitter = await deploy("Splitter", {
@@ -77,11 +87,31 @@ module.exports = async ({ deployments }) => {
   // });
 
   // //deploy SchemaRegistry
-  // const ACResolver = await deploy("ACResolver", {
+  // const ACResolverIndexer = await deploy("ACResolverIndexer", {
   //   from: wallet.address,
-  //   args: [TAS.address, SplitterFactory.address, SchemaRegistry.address],
+  //   args: [],
   //   log: true,
   // });
+
+  // //deploy SchemaRegistry
+  // const ACResolver = await deploy("ACResolver", {
+  //   from: wallet.address,
+  //   args: [TAS.address, SplitterFactory.address, SchemaRegistry.address, ACResolverIndexer.address],
+  //   log: true,
+  // });
+
+  // const ACResolverIndexerContract = await hre.ethers.getContractFactory("ACResolverIndexer");
+  // const ACResolverIndexerContractInstance = ACResolverIndexerContract.attach(
+  //   ACResolverIndexer.address
+  // );
+
+  // let makeACReosolverOwner = await ACResolverIndexerContractInstance.transferOwnership(
+  //   ACResolver.address
+  // );
+  // await makeACReosolverOwner.wait();
+
+  // console.log("ACResolver IS ACResolverINDEXER OWNER");
+
 
   // //deploy SchemaRegistry
   // const TablelandSubscriptions = await deploy("TablelandSubscriptionsIndexer", {

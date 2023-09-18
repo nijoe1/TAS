@@ -36,6 +36,11 @@ module.exports = {
       url: "https://rpc.ankr.com/polygon_mumbai",
       accounts: [PRIVATE_KEY],
     },
+    calibration: {
+      chainId: 314159,
+      url: "https://filecoin-calibration.chainstacklabs.com/rpc/v1",
+      accounts: [PRIVATE_KEY],
+    },
   },
   etherscan: {
     // Goerli

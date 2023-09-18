@@ -150,6 +150,21 @@ tablelandContract = TablelandDeployments.get();
         );
     }
 
+    function SchemaPriceUpdated(
+        bytes32 schemaUID,
+        uint256 newPrice
+    )public onlyOwner{
+        mutate(
+            tableIDs[0],
+            SQLHelpers.toUpdate(
+                GROUP_TABLE_PREFIX,
+                tableIDs[0],
+                string.concat("monthlySubscriptionPrice=",SQLHelpers.quote(Strings.toString(newPrice))),
+                string.concat("schemaUID=",SQLHelpers.quote(bytes32ToString(schemaUID)))
+            )
+        );
+    }
+
     function SchemaSubscriptionUpdated(
         bytes32 schemaUID,
         address subscriber,

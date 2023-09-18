@@ -7,12 +7,6 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
-
-import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
-
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-
 import {ITAS, Attestation} from "../../ITAS.sol";
 
 import {SchemaResolver} from "../SchemaResolver.sol";
@@ -36,7 +30,6 @@ contract ContentSubscriptionResolver is SchemaResolver {
         EnumerableSet.AddressSet contentCreators;
         address multisig;
         uint256 subscriptionPrice;
-        uint256 subscriptionsPool;
         uint256 totalRevenue;
         address splitterContract;
     }
@@ -80,12 +73,14 @@ contract ContentSubscriptionResolver is SchemaResolver {
     function registerSubscriptionSchema(
         address[] memory contentCreators,
         uint256[] memory creatorsShares,
+        string[] memory categories,
         uint256 monthlySubscriptionPrice,
         string memory schemaName,
         string memory schemaDescription
     )external{
+        require(monthlySubscriptionPrice > 0);
         // Register the schema and get its UID
-        bytes32 schemaUID = registerSchema(schemaName, schemaDescription);
+        bytes32 schemaUID = registerSchema(schemaName, schemaDescription, categories);
 
         SchemaInfo storage Schema = schemas[schemaUID];
 
@@ -97,7 +92,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
             Schema.contentCreators.add(contentCreators[i]);
         }
 
-        Schema.multisig = msg.sender;
+        Schema.multisig = tx.origin;
 
         tableland.SchemaInfoInserted(schemaUID,  monthlySubscriptionPrice, Schema.splitterContract);
 
@@ -109,15 +104,19 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     function registerSchema(
         string memory schemaName,
-        string memory schemaDescription
+        string memory schemaDescription,
+        string[] memory categories 
     )internal returns(bytes32 schemaUID){
         // Register the schema and get its UID
         schemaUID = schemaRegistry.register(
-            schema,
-            schemaName,
-            schemaDescription,
-            schemaResolver,
-            revocable
+            SchemaRegistrationInput(
+                schema,
+                schemaName,
+                schemaDescription,
+                categories,
+                schemaResolver,
+                revocable
+            )
         );
     }
 
@@ -215,6 +214,13 @@ contract ContentSubscriptionResolver is SchemaResolver {
 
     function hasAccess(address sender, bytes32 schemaUID) external view returns (uint256) {
         return (userSubscriptions[sender][schemaUID] > block.timestamp || schemas[schemaUID].contentCreators.contains(sender))?1:0;
+    }
+
+    function updatePrice(bytes32 schemaUID, uint256 newPrice)external{
+        require(schemas[schemaUID].multisig == msg.sender);
+        require(newPrice > 0);
+        schemas[schemaUID].subscriptionPrice = newPrice;
+        tableland.SchemaPriceUpdated(schemaUID, newPrice);
     }
 
     function bytes32ToString(bytes32 data) public pure returns (string memory) {

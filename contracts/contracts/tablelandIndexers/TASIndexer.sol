@@ -2,10 +2,6 @@
 
 pragma solidity 0.8.19;
 
-import {
-    Attestation
-} from "./ITAS.sol";
-
 import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 
 import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
@@ -15,6 +11,10 @@ import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
+import {
+    Attestation
+} from "../ITAS.sol";
 
 /// @title TAS
 /// @notice The Tableland Attestation Service protocol.

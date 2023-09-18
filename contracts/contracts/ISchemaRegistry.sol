@@ -12,21 +12,22 @@ struct SchemaRecord {
     string schema; // Custom specification of the schema (e.g., an ABI).
 }
 
+struct SchemaRegistrationInput {
+    string schema;
+    string schemaName;
+    string schemaDescription;
+    string[] categories;
+    ISchemaResolver schemaResolver;
+    bool revocable;
+}
+
 /// @title ISchemaRegistry
 /// @notice The interface of global attestation schemas for the Tableland Attestation Service protocol.
 interface ISchemaRegistry {
 
-    /// @notice Submits and reserves a new schema
-    /// @param schema The schema data schema.
-    /// @param resolver An optional schema resolver.
-    /// @param revocable Whether the schema allows revocations explicitly.
-    /// @return The UID of the new schema.
+
     function register(        
-        string memory schema,
-        string memory schemaName,
-        string memory schemaDescription,
-        ISchemaResolver resolver,
-        bool revocable
+        SchemaRegistrationInput memory input
     ) external returns (bytes32);
 
     /// @notice Returns an existing schema by UID

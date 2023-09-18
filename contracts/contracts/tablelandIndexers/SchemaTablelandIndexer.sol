@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.19;
 
+import { SchemaRegistrationInput } from "../ISchemaRegistry.sol";
+
 import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 
 import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
@@ -19,11 +21,19 @@ contract SchemaTablelandIndexer is Ownable {
 
     string[] public tables;
 
+    uint256 tablesUpdates;
+
+    uint256 tableRowsCounter;
+
     uint256[] tableIDs;
 
     string private constant SCHEMA_TABLE_PREFIX = "schema";
 
     string private constant SCHEMA_SCHEMA = "schemaUID text primary key, schema text, resolver text, revocable text, name text, description text, creator text, creationTimestamp text";
+
+    string private constant SCHEMA_CATEGORIES_TABLE_PREFIX = "schema_categories";
+
+    string private constant SCHEMA_CATEGORIES_SCHEMA = "schemaUID text, category text";
 
     /// @dev Creates a new SchemaRegistry instance.
     constructor() {
@@ -33,6 +43,9 @@ contract SchemaTablelandIndexer is Ownable {
         createTableStatements.push(
             SQLHelpers.toCreateFromSchema(SCHEMA_SCHEMA, SCHEMA_TABLE_PREFIX)
         );
+        createTableStatements.push(
+            SQLHelpers.toCreateFromSchema(SCHEMA_CATEGORIES_SCHEMA, SCHEMA_CATEGORIES_TABLE_PREFIX)
+        );
 
 
         tableIDs = tablelandContract.create(
@@ -41,19 +54,19 @@ contract SchemaTablelandIndexer is Ownable {
         );
 
         tables.push(SQLHelpers.toNameFromId(SCHEMA_TABLE_PREFIX, tableIDs[0]));
+        tables.push(SQLHelpers.toNameFromId(SCHEMA_CATEGORIES_TABLE_PREFIX, tableIDs[1]));
 
     }
 
 
     function SchemaRegistered(
-        bytes32 schemaUID,
-        string memory schema,
-        string memory schemaName,
-        string memory schemaDescription,
-        address resolver,
-        bool revocable
+        SchemaRegistrationInput memory input,
+        bytes32 schemaUID
     ) public onlyOwner {
-        // require(attestation.data.length <= 1024, "Tableland limitation");
+        uint256 size = input.categories.length;
+        if(tableRowsCounter + size > 100000){
+            RenewTables();
+        }
         mutate(
             tableIDs[0],
             SQLHelpers.toInsert(
@@ -63,15 +76,15 @@ contract SchemaTablelandIndexer is Ownable {
                 string.concat(
                     SQLHelpers.quote(bytes32ToString(schemaUID)),
                     ",",
-                    SQLHelpers.quote(schema),
+                    SQLHelpers.quote(input.schema),
                     ",",
-                    SQLHelpers.quote(Strings.toHexString(resolver)),
+                    SQLHelpers.quote(Strings.toHexString(address(input.schemaResolver))),
                     ",",
-                    SQLHelpers.quote(revocable ? "true" : "false"),
+                    SQLHelpers.quote(input.revocable ? "true" : "false"),
                     ",",
-                    SQLHelpers.quote(schemaName),
+                    SQLHelpers.quote(input.schemaName),
                     ",",
-                    SQLHelpers.quote(schemaDescription),
+                    SQLHelpers.quote(input.schemaDescription),
                     ",",
                     SQLHelpers.quote(Strings.toHexString(tx.origin)),
                     ",",
@@ -79,6 +92,22 @@ contract SchemaTablelandIndexer is Ownable {
                 )
             )
         );
+        for(uint i = 0; i < input.categories.length; i++){
+            mutate(
+            tableIDs[1],
+            SQLHelpers.toInsert(
+                SCHEMA_TABLE_PREFIX,
+                tableIDs[1],
+                "schemaUID, category",
+                string.concat(
+                    SQLHelpers.quote(bytes32ToString(schemaUID)),
+                    ",",
+                    SQLHelpers.quote(input.categories[i])
+                )
+            )
+        );
+        }
+        tableRowsCounter += size;
     }
 
     function bytes32ToString(bytes32 data) public pure returns (string memory) {
@@ -93,6 +122,16 @@ contract SchemaTablelandIndexer is Ownable {
         }
 
         return string(abi.encodePacked("0x", converted));
+    }
+
+    function RenewTables()internal{
+        tableIDs = tablelandContract.create(address(this), createTableStatements);
+
+        tables.push(SQLHelpers.toNameFromId(SCHEMA_TABLE_PREFIX, tableIDs[0]));
+        tables.push(SQLHelpers.toNameFromId(SCHEMA_CATEGORIES_TABLE_PREFIX, tableIDs[1]));
+
+        tableRowsCounter = 0; 
+        tablesUpdates++;
     }
 
     /*

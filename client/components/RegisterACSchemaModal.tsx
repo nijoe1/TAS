@@ -4,35 +4,55 @@ import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
-import { useContractWrite, usePrepareContractWrite, useChainId, useWaitForTransaction } from "wagmi";
-import { CONTRACTS } from "@/constants/contracts";
-import Notification from "./Notification";
 // @ts-ignore
 import TagsInput from "react-tagsinput";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId,
+  useWaitForTransaction,
+} from "wagmi";
+import { CONTRACTS } from "@/constants/contracts";
+import Notification from "./Notification";
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (schemaData: any) => void; // Replace 'any' with the actual type of your event data
+  onCreate: (schemaData: any) => void; // Replace 'any' with the actual address of your event data
 };
 
-const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
+const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   isOpen,
   onClose,
   onCreate,
 }) => {
   const chainID = useChainId();
+  const [schemaName, setSchemaName] = useState("");
+  const [schemaDescription, setSchemaDescription] = useState("");
   const [attributes, setAttributes] = useState([
     { type: "Select Type", name: "", isArray: false },
   ]);
   const [rawSchema, setRawSchema] = useState();
-  const [schemaName, setSchemaName] = useState("");
-  const [schemaDescription, setSchemaDescription] = useState("");
   const [categories, setCategories] = useState({ tags: [] });
-  const [isRevocable, setIsRevocable] = useState(true);
-  const [resolver, setResolver] = useState(
-    "0x0000000000000000000000000000000000000000"
-  );
-  const [chainid, setChainid] = useState(chainID);
+  const [attestersTags, setAttestersTags] = useState({ tags: [] });
+  const [revokersTags, setRevokersTags] = useState({ tags: [] });
+  const [isEncrypted, setIsEncrypted] = useState(false);
+
+  const { config } = usePrepareContractWrite({
+    // @ts-ignore
+    address: CONTRACTS.SubscriptionResolver[chainID].contract,
+    // @ts-ignore
+    abi: CONTRACTS.SubscriptionResolver[chainID].abi,
+    functionName: "registerSubscriptionSchema",
+    args: [
+      attestersTags,
+      revokersTags,
+      categories,
+      isEncrypted,
+      rawSchema,
+      schemaName,
+      schemaDescription,
+    ],
+  });
 
   const solidityTypes = [
     "string",
@@ -53,15 +73,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     generateAttributeString();
   }, [attributes]); // Add attributes as a dependency
 
-  const { config } = usePrepareContractWrite({
-    // @ts-ignore
-    address: CONTRACTS.SchemaRegistry[chainid].contract,
-    // @ts-ignore
-    abi: CONTRACTS.SchemaRegistry[chainid].abi,
-    functionName: "register",
-    args: [[rawSchema, schemaName, schemaDescription,categories, resolver, isRevocable]],
-  });
-
   const { write, data, isLoading, isSuccess, isError } =
     useContractWrite(config);
 
@@ -71,9 +82,10 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations:1,
+    confirmations: 1,
     hash: data?.hash,
   });
+
   const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
@@ -101,18 +113,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setAttributes(updatedAttributes);
   };
 
-  const handleTagChange = (tags: any) => {
-    setCategories({ tags });
-    console.log(tags);
-  };
-
-  const handleCheckboxChange = (index: any) => {
-    const updatedAttributes = [...attributes];
-    updatedAttributes[index]["isArray"] = !updatedAttributes[index]["isArray"];
-    setAttributes(updatedAttributes);
-    generateAttributeString();
-  };
-
   const addAttribute = () => {
     setAttributes([
       ...attributes,
@@ -124,6 +124,13 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const removeAttribute = (index: any) => {
     const updatedAttributes = [...attributes];
     updatedAttributes.splice(index, 1);
+    setAttributes(updatedAttributes);
+    generateAttributeString();
+  };
+
+  const handleCheckboxChange = (index: any) => {
+    const updatedAttributes = [...attributes];
+    updatedAttributes[index]["isArray"] = !updatedAttributes[index]["isArray"];
     setAttributes(updatedAttributes);
     generateAttributeString();
   };
@@ -141,23 +148,22 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     return rawSchema;
   };
 
-  const handleSubmit = () => {
-    const schemaData = {
-      schemaName,
-      schemaDescription,
-      isRevocable,
-      resolver,
-      attributes: attributes.map((attr) => ({
-        type: attr.type,
-        name: attr.name,
-        isArray: attr.isArray,
-      })),
-    };
-
-    console.log(JSON.stringify(schemaData, null, 2));
-    onCreate(schemaData);
-    onClose();
+  const handleTagChange = (tags: any) => {
+    setCategories({ tags });
+    console.log(tags);
   };
+
+  const handleRevokersChange = (tags: any) => {
+    setRevokersTags({ tags });
+    console.log(tags);
+  };
+
+  const handleAttestersChange = (tags: any) => {
+    setAttestersTags({ tags });
+    console.log(tags);
+  };
+
+  const ethereumAddressRegex = /^0x[a-fA-F0-9]{40}$/; // Regular expression for Ethereum address
 
   return (
     <div
@@ -231,49 +237,60 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
             <TagsInput
+              inputProps={{ placeholder: "Add category" }}
+              onlyUnique={true}
               className="background-color-white"
               value={categories.tags}
               onChange={handleTagChange}
             />
           </div>
-          <div className="mb-4 items-center">
+
+          <div className="mb-4">
             <div className="mb-1 flex">
               <Tooltip
                 placement="right-start"
-                content="Optional smart contract.
-(Can be used to verify, limit, act upon any attestation)"
+                content="describe your schema useCase"
               >
-                <label className="text-black font-medium">
-                  Resolver Address
+                <label htmlFor="picture" className="text-black font-medium">
+                  Attesters
                 </label>
               </Tooltip>
 
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
-            <Input
-              type="text"
-              value={resolver}
-              onChange={(e) => setResolver(e.target.value)}
-              placeholder="Resolver Address"
-              className="rounded-full flex-grow px-4 py-2 border border-black"
+            <TagsInput
+              className="background-color-white"
+              inputProps={{ placeholder: "Add attester" }}
+              onlyUnique={true}
+              value={attestersTags.tags}
+              onChange={handleAttestersChange}
+              validationRegex={ethereumAddressRegex} // Set the Ethereum address validation regex
             />
           </div>
-          <div className="flex justify-center items-center gap-2 ">
-            {" "}
-            <input
-              type="checkbox"
-              checked={isRevocable}
-              onChange={() => setIsRevocable(!isRevocable)}
-              className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
+
+          <div className="mb-4">
+            <div className="mb-1 flex">
+              <Tooltip
+                placement="right-start"
+                content="describe your schema useCase"
+              >
+                <label htmlFor="picture" className="text-black font-medium">
+                  Revokers
+                </label>
+              </Tooltip>
+
+              <FaInfoCircle className="mt-1 ml-2" />
+            </div>
+            <TagsInput
+              inputProps={{ placeholder: "Add revoker" }}
+              onlyUnique={true}
+              className="background-color-white"
+              value={revokersTags.tags}
+              onChange={handleRevokersChange}
+              validationRegex={ethereumAddressRegex} // Set the Ethereum address validation regex
             />
-            <Typography
-              className="cursor-pointer focus:ring-blue-500 focus:ring-2  mb-3"
-              color="black"
-              onClick={() => setIsRevocable(!isRevocable)}
-            >
-              Revocable
-            </Typography>
           </div>
+
           {attributes.map((attr, index) => (
             <div
               key={index}
@@ -362,11 +379,34 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             </Typography>
             <Typography color="black">{rawSchema}</Typography>
           </div>
+
+          <div className="flex justify-center items-center gap-2 ">
+            <input
+              type="checkbox"
+              checked={isEncrypted}
+              onChange={() =>
+                setIsEncrypted((prevIsEncrypted) => !prevIsEncrypted)
+              }
+              className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ml-2 cursor-pointer"
+            />
+            <Typography
+              onClick={() =>
+                setIsEncrypted((prevIsEncrypted) => !prevIsEncrypted)
+              }
+              className="cursor-pointer"
+              color="black"
+            >
+              encrypted
+            </Typography>
+          </div>
           <div className="flex justify-end">
             <button
               type="button"
               // @ts-ignore
-              onClick={write}
+              onClick={() => {
+                // @ts-ignore
+                write();
+              }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit
@@ -393,4 +433,4 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   );
 };
 
-export default RegisterSchemaModal;
+export default RegisterACSchemaModal;

@@ -302,13 +302,13 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                 version={"1"}
                 schema={schemaUID as `0x${string}`}
                 recipient={
-                  "0x0000000000000000000000000000000000000000" as `0x${string}`
+                  recipient as `0x${string}`
                 }
                 time={0}
                 expirationTime={0}
                 revocable={isRevocable}
                 refUID={
-                  "0x0000000000000000000000000000000000000000000000000000000000000000" as `0x${string}`
+                  referencedAttestation as `0x${string}`
                 }
                 AttestationData={data as `0x${string}`}
               />

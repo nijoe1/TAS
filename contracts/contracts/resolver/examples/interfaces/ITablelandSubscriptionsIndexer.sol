@@ -37,4 +37,9 @@ interface ITablelandSubscriptionsIndexer {
         bytes32 schemaUID,
         uint256 totalClaimed
     )external;
+
+    function SchemaPriceUpdated(
+        bytes32 schemaUID,
+        uint256 newPrice
+    )external;
 }

@@ -8,7 +8,7 @@ import { EMPTY_UID } from "./Common.sol";
 
 import { Semver } from "./Semver.sol";
 
-import { ISchemaRegistry, SchemaRecord } from "./ISchemaRegistry.sol";
+import { ISchemaRegistry, SchemaRecord, SchemaRegistrationInput } from "./ISchemaRegistry.sol";
 
 import {ISchemaTablelandIndexer} from "./interfaces/ISchemaTablelandIndexer.sol";
 
@@ -31,17 +31,13 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
     }
 
     function register(
-        string memory schema,
-        string memory schemaName,
-        string memory schemaDescription,
-        ISchemaResolver resolver,
-        bool revocable
+        SchemaRegistrationInput memory input
     ) external returns (bytes32) {
         SchemaRecord memory schemaRecord = SchemaRecord({
             uid: EMPTY_UID,
-            schema: schema,
-            resolver: resolver,
-            revocable: revocable
+            schema: input.schema,
+            resolver: input.schemaResolver,
+            revocable: input.revocable
         });
 
         bytes32 uid = _getUID(schemaRecord);
@@ -53,12 +49,8 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
         _registry[uid] = schemaRecord;
 
         tableland.SchemaRegistered(
-            schemaRecord.uid,
-            schema,
-            schemaName,
-            schemaDescription,
-            address(resolver),
-            revocable
+            input,
+            schemaRecord.uid
         );
 
         return uid;

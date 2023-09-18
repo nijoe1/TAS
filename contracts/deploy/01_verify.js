@@ -91,18 +91,32 @@ module.exports = async ({ deployments }) => {
   });
 
   //deploy SchemaRegistry
-  const ACResolver = await deploy("ACResolver", {
+  const ACResolverIndexer = await deploy("ACResolverIndexer", {
     from: wallet.address,
-    args: [TAS.address, SplitterFactory.address, SchemaRegistry.address],
+    args: [],
     log: true,
   });
+
+    //deploy SchemaRegistry
+    const ACResolver = await deploy("ACResolver", {
+      from: wallet.address,
+      args: [TAS.address, SplitterFactory.address, SchemaRegistry.address,ACResolverIndexer.address],
+      log: true,
+    });
+
+    await hre.run("verify:verify", {
+      address: ACResolverIndexer.address,
+      constructorArguments: [
+
+      ],
+    });
 
   await hre.run("verify:verify", {
     address: ACResolver.address,
     constructorArguments: [
       TAS.address,
       SplitterFactory.address,
-      SchemaRegistry.address,
+      SchemaRegistry.address,ACResolverIndexer.address
     ],
   });
 

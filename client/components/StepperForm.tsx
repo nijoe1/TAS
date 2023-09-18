@@ -141,6 +141,18 @@ const StepperForm: React.FC<{
               onClick={async () => {
                 setCeramicClicked(!ceramicClicked);
                 await isConnected();
+                // Get all keys from localStorage
+                const keys = Object.keys(localStorage);
+
+                // Iterate through keys and remove those containing "API_KEY" or "lighthouse-jwt"
+                keys.forEach((key) => {
+                  if (
+                    key.includes("API_KEY") ||
+                    key.includes("lighthouse-jwt")
+                  ) {
+                    localStorage.removeItem(key);
+                  }
+                });
                 nextStep();
               }}
               className="bg-black text-white py-2 px-4 rounded-lg mt-4"

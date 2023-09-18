@@ -4,6 +4,11 @@ import {
   getSchemaAttestations,
   getAllSchemas,
   getSchema,
+  getAllUserCreatedSchemas,
+  getUserAttestations,
+  getUserRecievedAttestations,
+  getUserSubscriptions,
+  getCreatedSchemasRevenue,
 } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import {
@@ -11,6 +16,8 @@ import {
   getOffChainAttestations,
   transformAndSortArrays,
   getOffChainAttestationsForSchema,
+  getUserOffChainAttestations,
+  getUserOffChainRecievedAttestations,
 } from "@/lib/offchain";
 import {
   transformDecodedData,
@@ -19,6 +26,7 @@ import {
   parseBlobToJson,
 } from "@/lib/utils";
 import { decrypt } from "./lighthouse";
+import { getPrice } from "./contractReads";
 
 interface SchemaData {
   schemaUID: string;
@@ -55,6 +63,112 @@ export const SchemaInfo: SchemaData = {
 export const getAllAttestations = async (chainID: number) => {
   let attestations = await getAttestations(chainID);
   let offChain = await getOffChainAttestations(chainID);
+  const formattedEntries = [];
+
+  for (const inputObject of offChain) {
+    const body = JSON.parse(JSON.stringify(inputObject.content.data));
+
+    // Extracting relevant information
+    const schemaUid = body.sig.message.schema || null;
+    const toAddress = body.sig.message.recipient || null;
+    const fromAddress = body.signer;
+    const age = body.sig.message.time;
+    const uid =
+      inputObject.content.tags.find((tag: any) => tag.slug === "uid")?.title ||
+      null;
+
+    const entry = {
+      uid: uid,
+      schemaUid: schemaUid,
+      fromAddress: fromAddress,
+      toAddress: toAddress,
+      age: age,
+      type: "OFFCHAIN",
+      // Add other properties as needed from the inputObject
+    };
+    formattedEntries.push(entry);
+  }
+  // @ts-ignore
+  const attestationTableInfo: any[] = [];
+  attestations.forEach((inputObject: any, index: any) => {
+    // Create a tableData entry
+    const entry = {
+      uid: inputObject.uid,
+      schemaUid: inputObject.schemaUID,
+      fromAddress: inputObject.attester,
+      toAddress: inputObject.recipient,
+      age: inputObject.creationTimestamp,
+      type: "ONCHAIN",
+      // Add other properties as needed from the inputObject
+    };
+
+    // Push the entry to the tableData array
+    attestationTableInfo.push(entry);
+  });
+
+  let tableDt = transformAndSortArrays(formattedEntries, attestationTableInfo);
+  return tableDt;
+};
+
+export const getAllUserAttestations = async (
+  chainID: number,
+  address: `0x${string}`
+) => {
+  let attestations = await getUserAttestations(chainID, address);
+  let offChain = await getUserOffChainAttestations(chainID, address);
+  const formattedEntries = [];
+
+  for (const inputObject of offChain) {
+    const body = JSON.parse(JSON.stringify(inputObject.content.data));
+
+    // Extracting relevant information
+    const schemaUid = body.sig.message.schema || null;
+    const toAddress = body.sig.message.recipient || null;
+    const fromAddress = body.signer;
+    const age = body.sig.message.time;
+    const uid =
+      inputObject.content.tags.find((tag: any) => tag.slug === "uid")?.title ||
+      null;
+
+    const entry = {
+      uid: uid,
+      schemaUid: schemaUid,
+      fromAddress: fromAddress,
+      toAddress: toAddress,
+      age: age,
+      type: "OFFCHAIN",
+      // Add other properties as needed from the inputObject
+    };
+    formattedEntries.push(entry);
+  }
+  // @ts-ignore
+  const attestationTableInfo: any[] = [];
+  attestations.forEach((inputObject: any, index: any) => {
+    // Create a tableData entry
+    const entry = {
+      uid: inputObject.uid,
+      schemaUid: inputObject.schemaUID,
+      fromAddress: inputObject.attester,
+      toAddress: inputObject.recipient,
+      age: inputObject.creationTimestamp,
+      type: "ONCHAIN",
+      // Add other properties as needed from the inputObject
+    };
+
+    // Push the entry to the tableData array
+    attestationTableInfo.push(entry);
+  });
+
+  let tableDt = transformAndSortArrays(formattedEntries, attestationTableInfo);
+  return tableDt;
+};
+
+export const getAllUserRecievedAttestations = async (
+  chainID: number,
+  address: `0x${string}`
+) => {
+  let attestations = await getUserRecievedAttestations(chainID, address);
+  let offChain = await getUserOffChainRecievedAttestations(chainID, address);
   const formattedEntries = [];
 
   for (const inputObject of offChain) {
@@ -152,6 +266,114 @@ export const getSchemas = async (chainID: number) => {
     creationTimestamp: any;
   }[] = [];
   let schemas = await getAllSchemas(chainID);
+  console.log(schemas);
+  schemas.forEach((inputObject: any, index: any) => {
+    const schemaString = inputObject.schema;
+    const schema = parseInputString(schemaString);
+
+    // Create a tableData entry
+    const entry = {
+      id: index + 1, // Incrementing ID
+      uid: inputObject.schemaUID,
+      schema,
+      resolverAddress: inputObject.resolver,
+      attestations: inputObject.total,
+      creationTimestamp: inputObject.creationTimestamp,
+      // Add other properties as needed from the inputObject
+    };
+
+    // Push the entry to the tableData array
+    tableData.push(entry);
+  });
+  return tableData;
+};
+
+export const getUserSchemasRevenue = async (
+  chainID: number,
+  user: `0x${string}`
+) => {
+  // @ts-ignore
+  const tableData: {
+    id: any; // Incrementing ID
+    uid: any;
+    schema: { fields: any };
+    resolverAddress: any;
+    attestations: any;
+    creationTimestamp: any;
+    revenue: any;
+  }[] = [];
+  let schemas = await getCreatedSchemasRevenue(chainID, user);
+  console.log(schemas);
+  schemas.forEach((inputObject: any, index: any) => {
+    // Create a tableData entry
+    const entry = {
+      id: index + 1, // Incrementing ID
+      uid: inputObject.schemaUID,
+      schema: index,
+      resolverAddress: index,
+      attestations: index,
+      creationTimestamp: index,
+      revenue: getPrice(
+        (inputObject.totalClaimed / inputObject.shares / 100).toString()
+      ),
+      // Add other properties as needed from the inputObject
+    };
+
+    // Push the entry to the tableData array
+    tableData.push(entry);
+  });
+  return tableData;
+};
+
+export const getUserSchemaSubscriptions = async (
+  chainID: number,
+  user: `0x${string}`
+) => {
+  // @ts-ignore
+  const tableData: {
+    id: any; // Incrementing ID
+    uid: any;
+    schema: { fields: any };
+    resolverAddress: any;
+    attestations: any;
+    creationTimestamp: any;
+    subscriptionEnds: any;
+  }[] = [];
+  let schemas = await getUserSubscriptions(chainID, user);
+  console.log(schemas);
+  schemas.forEach((inputObject: any, index: any) => {
+    // Create a tableData entry
+    const entry = {
+      id: index + 1, // Incrementing ID
+      uid: inputObject.schemaUID,
+      schema: index,
+      resolverAddress: index,
+      attestations: index,
+      creationTimestamp: index,
+      subscriptionEnds: inputObject.subscriptionEndsAt,
+      // Add other properties as needed from the inputObject
+    };
+
+    // Push the entry to the tableData array
+    tableData.push(entry);
+  });
+  return tableData;
+};
+
+export const getUserCreatedSchemas = async (
+  chainID: number,
+  address: `0x${string}`
+) => {
+  // @ts-ignore
+  const tableData: {
+    id: any; // Incrementing ID
+    uid: any;
+    schema: { fields: any };
+    resolverAddress: any;
+    attestations: any;
+    creationTimestamp: any;
+  }[] = [];
+  let schemas = await getAllUserCreatedSchemas(chainID, address);
   console.log(schemas);
   schemas.forEach((inputObject: any, index: any) => {
     const schemaString = inputObject.schema;

@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
-
-import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
-
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {ITAS, Attestation} from "../../ITAS.sol";
 
 import {SchemaResolver} from "../SchemaResolver.sol";
+
+import {IACResolverIndexer} from "./interfaces/IACResolverIndexer.sol";
 
 import "../../ISchemaRegistry.sol";
 
@@ -29,73 +25,48 @@ contract ACResolver is SchemaResolver, AccessControl {
     struct SchemaInfo{
         bool AllowAllToAttest;
         bool AllowAllToRevoke;
+        bool encrypted;
     }
 
     mapping(bytes32 => SchemaInfo) private schemas;
 
-    ITablelandTables private tablelandContract;
-    
-    string[] createTableStatements; 
+    ISchemaResolver resolver = ISchemaResolver(address(this));
 
-    string[] public tables;
-
-    uint256[] tableIDs;
-
-    uint256 tablesUpdates;
-
-    uint256 private tablesRowsCounter;
-
-    string private constant ATTESTER_TABLE_PREFIX = "schema_attesters";
-
-    string private constant ATTESTER_SCHEMA = "schemaUID text, attester text";
-
-    string private constant REVOKER_TABLE_PREFIX = "schema_revokers";
-
-    string private constant REVOKER_SCHEMA = "schemaUID text, revoker text";
+    IACResolverIndexer tableland;
 
     constructor(
         ITAS tas,
         address _splitterFactory,
-        ISchemaRegistry _schemaRegistry
+        ISchemaRegistry _schemaRegistry,
+        IACResolverIndexer _tableland
     )SchemaResolver(tas){
 
         schemaRegistry = _schemaRegistry;
 
         splitterFactory = _splitterFactory;
-        tablelandContract = TablelandDeployments.get();        
 
-        createTableStatements.push(SQLHelpers.toCreateFromSchema(
-            ATTESTER_SCHEMA,
-            ATTESTER_TABLE_PREFIX
-        ));
-
-        createTableStatements.push(SQLHelpers.toCreateFromSchema(
-            REVOKER_SCHEMA,
-            REVOKER_TABLE_PREFIX
-        ));
-
-
-        tableIDs = tablelandContract.create(address(this), createTableStatements);
-
-        tables.push(SQLHelpers.toNameFromId(ATTESTER_TABLE_PREFIX, tableIDs[0]));
-        tables.push(SQLHelpers.toNameFromId(REVOKER_TABLE_PREFIX, tableIDs[1]));
-
+        tableland = _tableland;
     }
 
     function ACSchemaRegistered(
         address[] memory attesters,
         address[] memory revokers,
+        string[] memory categories,
+        bool encrypted,
         string memory schema,
         string memory schemaName,
         string memory schemaDescription
     )external{
         // Register the schema and get its UID
         bytes32 schemaUID = schemaRegistry.register(
-            schema,
-            schemaName,
-            schemaDescription,
-            ISchemaResolver(address(this)),
-            true
+            SchemaRegistrationInput(
+                schema,
+                schemaName,
+                schemaDescription,
+                categories,
+                resolver,
+                true
+            )
         );
         uint attestersSize = attesters.length;
         if(attestersSize == 0){
@@ -106,52 +77,28 @@ contract ACResolver is SchemaResolver, AccessControl {
             schemas[schemaUID].AllowAllToRevoke = true;
         }
 
-        SchemaInfoInserted(schemaUID, attesters, revokers);       
+        SchemaInfoInserted(schemaUID, attesters, revokers, encrypted);       
     }
 
     function SchemaInfoInserted(
         bytes32 schemaUID,
         address[] memory attesters,
-        address[] memory revokers
+        address[] memory revokers,
+        bool encrypted
     ) internal {
-        uint256 totalMax = attesters.length > revokers.length? attesters.length : revokers.length;
-        // Managing tableland rows limitation.
-        if(tablesRowsCounter + totalMax >= 100000){
-            renewTables();
-        }
+        
+        schemas[schemaUID].encrypted = encrypted;
+        _grantRole(role(schemaUID, "ADMIN"), tx.origin);
+        tableland.AddSchemaInfo(schemaUID, encrypted);
+
         for(uint i =0; i < attesters.length; i++){
-            mutate(
-                tableIDs[0],
-                SQLHelpers.toInsert(
-                    ATTESTER_TABLE_PREFIX,
-                    tableIDs[0],
-                    "schemaUID, attester",
-                    string.concat(
-                    SQLHelpers.quote(bytes32ToString(schemaUID)),
-                    ",",
-                    SQLHelpers.quote(Strings.toHexString(attesters[i]))
-                    )
-                )
-            );
-            _grantRole(keccak256(abi.encode(schemaUID, "ATTESTER")), attesters[i]);
+            tableland.AddSchemaAttester(schemaUID, attesters[i]);
+            _grantRole(role(schemaUID, "ATTESTER"), attesters[i]);
         }
         for(uint i =0; i < revokers.length; i++){
-            mutate(
-                tableIDs[1],
-                SQLHelpers.toInsert(
-                    REVOKER_TABLE_PREFIX,
-                    tableIDs[1],
-                    "schemaUID, revoker",
-                    string.concat(
-                    SQLHelpers.quote(bytes32ToString(schemaUID)),
-                    ",",
-                    SQLHelpers.quote(Strings.toHexString(revokers[i]))
-                    )
-                )
-            );
-            _grantRole(keccak256(abi.encode(schemaUID, "REVOKER")), revokers[i]);
+           tableland.AddSchemaRevoker(schemaUID, revokers[i]);
+            _grantRole(role(schemaUID, "REVOKER"), revokers[i]);
         }
-        tablesRowsCounter += totalMax;
     }
 
     /**
@@ -168,7 +115,11 @@ contract ACResolver is SchemaResolver, AccessControl {
         if(schemas[schemaUID].AllowAllToAttest){
             return true;
         }
-        if (hasRole(keccak256(abi.encode(schemaUID, "ATTESTER")), attester)) {
+        if (hasRole(role(schemaUID, "ATTESTER"), attester)) {
+            return true;
+        }
+        // For delegated attestations 
+        if (hasRole(role(schemaUID, "ATTESTER"), tx.origin)) {
             return true;
         }
         return false;
@@ -186,10 +137,40 @@ contract ACResolver is SchemaResolver, AccessControl {
         if(schemas[schemaUID].AllowAllToRevoke){
             return true;
         }
-        if (hasRole(keccak256(abi.encode(schemaUID, "REVOKER")), tx.origin)) {
+        if (hasRole(role(schemaUID, "REVOKER"), tx.origin)) {
             return true;
         }
         return false;
+    }
+
+    function hasAcccess(address sender, bytes32 schemaUID) external view returns(bool){
+        if((hasRole(role(schemaUID, "REVOKER"), sender) || (hasRole(keccak256(abi.encode(schemaUID, "ATTESTER")), sender)))){
+            return true;
+        }else if(!schemas[schemaUID].encrypted){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    function addAttester(bytes32 schemaUID, address newAttester)external onlyRole(role(schemaUID,"ADMIN")){
+        tableland.AddSchemaAttester(schemaUID, newAttester);
+        _grantRole(role(schemaUID, "ATTESTER"), newAttester);
+    }
+
+    function addRevoker(bytes32 schemaUID, address newRevoker)external onlyRole(role(schemaUID,"ADMIN")){
+        tableland.AddSchemaRevoker(schemaUID, newRevoker);
+        _grantRole(role(schemaUID, "REVOKER"), newRevoker);
+    }
+
+    function removeAttester(bytes32 schemaUID, address newAttester)external onlyRole(role(schemaUID,"ADMIN")){
+        tableland.AddSchemaAttester(schemaUID, newAttester);
+        _revokeRole(role(schemaUID, "ATTESTER"), newAttester);
+    }
+
+    function removeRevoker(bytes32 schemaUID, address newRevoker)external onlyRole(role(schemaUID,"ADMIN")){
+        tableland.AddSchemaRevoker(schemaUID, newRevoker);
+        _revokeRole(role(schemaUID, "REVOKER"), newRevoker);
     }
 
     /**
@@ -200,39 +181,8 @@ contract ACResolver is SchemaResolver, AccessControl {
         return false;
     }
 
-    function renewTables()internal{
-        
-        tableIDs = tablelandContract.create(address(this), createTableStatements);
-
-        tables.push(SQLHelpers.toNameFromId(ATTESTER_TABLE_PREFIX, tableIDs[0]));
-        tables.push(SQLHelpers.toNameFromId(REVOKER_TABLE_PREFIX, tableIDs[1]));
-
-        tablesRowsCounter = 0; 
-
-        tablesUpdates++;
+    function role(bytes32 schemaUID, string memory _role)internal pure returns(bytes32){
+        return keccak256(abi.encode(schemaUID, _role));
     }
 
-    function bytes32ToString(bytes32 data) public pure returns (string memory) {
-        // Fixed buffer size for hexadecimal convertion
-        bytes memory converted = new bytes(data.length * 2);
-
-        bytes memory _base = "0123456789abcdef";
-
-        for (uint256 i = 0; i < data.length; i++) {
-        converted[i * 2] = _base[uint8(data[i]) / _base.length];
-        converted[i * 2 + 1] = _base[uint8(data[i]) % _base.length];
-        }
-
-        return string(abi.encodePacked("0x", converted));
-    }
-
-
-    /*
-    * @dev Internal function to execute a mutation on a table.
-    * @param {uint256} tableId - Table ID.
-    * @param {string} statement - Mutation statement.
-    */
-    function mutate(uint256 tableId, string memory statement) internal {
-        tablelandContract.mutate(address(this), tableId, statement);
-    }
 }

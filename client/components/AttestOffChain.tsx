@@ -204,6 +204,14 @@ const AttestOffChain = ({
           title: address,
         },
         {
+          slug: `attester/${address}`,
+          title: "attester",
+        },
+        {
+          slug: `recipient/${recipient}`,
+          title: "recipient",
+        },
+        {
           slug: schema,
           title: schema,
         },

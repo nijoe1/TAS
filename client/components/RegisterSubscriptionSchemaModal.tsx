@@ -28,11 +28,10 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const chainID = useChainId();
   const [schemaName, setSchemaName] = useState("");
   const [schemaDescription, setSchemaDescription] = useState("");
-  const [isRevocable, setIsRevocable] = useState(false);
-  const [resolver, setResolver] = useState(
-    "0x0000000000000000000000000000000000000000"
-  );
-  const [monthlySubscriptionPrice, setMonthlySubscriptionPrice] = useState(0);
+
+  const [monthlySubscriptionPrice, setMonthlySubscriptionPrice] =
+    useState(0);
+  const [finalPrice, setFinalPrice] = useState(1)
   const [categories, setCategories] = useState({ tags: [] });
   const [attributes, setAttributes] = useState([
     { address: "creator address", shares: 0 },
@@ -49,7 +48,8 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     args: [
       creators,
       shares,
-      monthlySubscriptionPrice,
+      categories,
+      BigInt(finalPrice),
       schemaName,
       schemaDescription,
     ],
@@ -78,7 +78,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     setCreators(creatorsList);
     // @ts-ignore
     setShares(sharesList);
-  }, [attributes]);
+  }, [attributes,monthlySubscriptionPrice]);
 
   const handleTagChange = (tags: any) => {
     setCategories({ tags });
@@ -190,21 +190,23 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <div className="mb-1 flex">
               <Tooltip
                 placement="right-start"
-                content="Optional smart contract.
-(Can be used to verify, limit, act upon any attestation)"
+                content="Optional smart contract."
               >
                 <label className="text-black font-medium">
                   Monthly Subscription Price
                 </label>
               </Tooltip>
-
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
             <Input
               type="number"
               value={monthlySubscriptionPrice}
               // @ts-ignore
-              onChange={(e) => setMonthlySubscriptionPrice(e.target.value)}
+              onChange={(e) => {
+                setMonthlySubscriptionPrice(parseFloat(e.target.value) as unknown as number);
+                // console.log(getWEI(adjustedPrice.toString()));
+              }}
+              min={1 / 10 ** 17}
               placeholder="Monthly Subscription Price"
               className="rounded-full flex-grow px-4 py-2 border border-black"
             />
@@ -288,8 +290,11 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               type="button"
               // @ts-ignore
               onClick={() => {
+                setFinalPrice(monthlySubscriptionPrice*10**18),
+                console.log(finalPrice)
+
                 // @ts-ignore
-                write();
+                write
               }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >

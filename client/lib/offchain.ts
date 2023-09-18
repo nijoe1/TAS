@@ -158,6 +158,32 @@ export const getOffChainAttestationsForSchema = async (
   return data;
 };
 
+export const getUserOffChainAttestations = async (
+  chainID: number,
+  address: string
+) => {
+  // @ts-ignore
+  const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
+  const { data, error } = await orbis.getPosts({
+    tag: `attester/${address}`,
+  });
+  console.log(data);
+  return data;
+};
+
+export const getUserOffChainRecievedAttestations = async (
+  chainID: number,
+  address: string
+) => {
+  // @ts-ignore
+  const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
+  const { data, error } = await orbis.getPosts({
+    tag: `recipient/${address}`,
+  });
+  console.log(data);
+  return data;
+};
+
 export const getOffChainAttestation = async (chainID: number, uid: string) => {
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
