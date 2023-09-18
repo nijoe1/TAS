@@ -6,7 +6,12 @@ import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
 // @ts-ignore
 import TagsInput from "react-tagsinput";
-import { useContractWrite, usePrepareContractWrite, useChainId, useWaitForTransaction } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId,
+  useWaitForTransaction,
+} from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 type RegisterSchemaModalProps = {
@@ -58,6 +63,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
+    confirmations: 1,
     hash: data?.hash,
   });
 

@@ -46,8 +46,9 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     data: res,
     isError: err,
     isLoading: wait,
-    isSuccess: succ
+    isSuccess: succ,
   } = useWaitForTransaction({
+    confirmations: 1,
     hash: data?.hash,
   });
 
@@ -110,9 +111,9 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
             isLoading={isLoading}
             isSuccess={isSuccess}
             isError={isError}
-            wait = {wait}
-            error = {err}
-            success = {succ}
+            wait={wait}
+            error={err}
+            success={succ}
           />
         </form>
       </Card>

@@ -93,6 +93,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
+    confirmations:1,
     hash: txdata ? txdata?.hash : txdata1?.hash,
   });
 

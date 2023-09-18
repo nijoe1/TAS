@@ -68,6 +68,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
+    confirmations:1,
     hash: data?.hash,
   });
   const handleAttributeChange = (index: any, key: any, value: any) => {

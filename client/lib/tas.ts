@@ -136,8 +136,8 @@ export const getAttestationData = async (
     decodedData: data,
     referencedAttestation: "No reference",
     referencingAttestation: 0,
-    data:attestation.data,
-    context: uid
+    data: attestation.data,
+    context: uid,
   };
 };
 
@@ -184,28 +184,30 @@ export const getSchemaData = async (
   );
 
   const formattedEntries = [];
+  if (offChain.length != 0) {
+    for (const inputObject of offChain) {
+      const body = JSON.parse(JSON.stringify(inputObject.content.data));
 
-  for (const inputObject of offChain) {
-    const body = JSON.parse(JSON.stringify(inputObject.content.data));
+      // Extracting relevant information
+      const toAddress = body.sig.message.recipient || null;
+      const fromAddress = body.signer;
+      const age = body.sig.message.time;
+      const uid =
+        inputObject.content.tags.find((tag: any) => tag.slug === "uid")
+          ?.title || null;
 
-    // Extracting relevant information
-    const toAddress = body.sig.message.recipient || null;
-    const fromAddress = body.signer;
-    const age = body.sig.message.time;
-    const uid =
-      inputObject.content.tags.find((tag: any) => tag.slug === "uid")?.title ||
-      null;
-
-    const entry = {
-      uid: uid,
-      fromAddress: fromAddress,
-      toAddress: toAddress,
-      age: age,
-      data: body.sig.message.data.toLowerCase(),
-      type: "OFFCHAIN",
-    };
-    formattedEntries.push(entry);
+      const entry = {
+        uid: uid,
+        fromAddress: fromAddress,
+        toAddress: toAddress,
+        age: age,
+        data: body.sig.message.data.toLowerCase(),
+        type: "OFFCHAIN",
+      };
+      formattedEntries.push(entry);
+    }
   }
+
   const attestationTableInfo: any[] | ((prevState: never[]) => never[]) = [];
   let attestations = await getSchemaAttestations(chainID, schemaUID);
   let schema = await getSchema(chainID, schemaUID);
@@ -285,5 +287,3 @@ export const getEncryptedJson = async (
 
   return { json, fileblob };
 };
-
-

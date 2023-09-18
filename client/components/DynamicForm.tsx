@@ -74,6 +74,8 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
+    confirmations: 1,
+
     hash: txdata?.hash,
   });
 

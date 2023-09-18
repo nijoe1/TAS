@@ -28,7 +28,7 @@ contract TASIndexer is  IERC721Receiver, Ownable {
 
     uint256[] tableIDs;
 
-    uint256 tablesUpdates;
+    uint256 public tablesUpdates;
 
     uint256 private tablesRowsCounter;
 
