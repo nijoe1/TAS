@@ -3,7 +3,7 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import { MdDoNotDisturbAlt } from "react-icons/md";
 import { useChainId, useAccount, useContractRead } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts/index";
-import { getAttestAccess } from "@/lib/tableland";
+import { getAttestAccess, getAttestRevokeAccess } from "@/lib/tableland";
 
 type AccessBoxProps = {
   uid: string;
@@ -40,6 +40,15 @@ const AccessBox: React.FC<AccessBoxProps> = ({
     args: [address, uid],
   });
 
+  const { data: hasViewAccess2 } = useContractRead({
+    // @ts-ignore
+    address: CONTRACTS.ACResolver[chainid].contract,
+    // @ts-ignore
+    abi: CONTRACTS.ACResolver[chainid].abi,
+    functionName: "hasAcccess",
+    args: [address, uid],
+  });
+
   // Simulated API call to fetch access information
   useEffect(() => {
     const fetch = async () => {
@@ -48,8 +57,11 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         revokeAccess: false, // Replace with your actual data
         viewAccess: true, // Replace with your actual data
       };
-      // @ts-ignore
-      if (resolverContract == CONTRACTS.SubscriptionResolver[chainid].contract.toLowerCase()) {
+      if (
+        resolverContract ==
+        // @ts-ignore
+        CONTRACTS.SubscriptionResolver[chainid].contract.toLowerCase()
+      ) {
         accessData.revokeAccess = false;
         accessData.attestAccess = (await getAttestAccess(
           chainid,
@@ -58,12 +70,21 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         )) as unknown as boolean;
         accessData.viewAccess = (Number(hasViewAccess) >
           0) as unknown as boolean;
-      } else if (false) {
-        // ADD ACRESOLVER CHECK
+      } else if (resolverContract ==
+        // @ts-ignore
+        CONTRACTS.ACResolver[chainid].contract.toLowerCase()
+      ) {
+        let res = await getAttestRevokeAccess(chainid, address);
+        console.log(res);
+        accessData.revokeAccess = res ? res.revokeAccess && isRevocable : false;
+        accessData.attestAccess = res ? res.attestAccess : false;
+        accessData.viewAccess = (hasViewAccess2) ? true :false
       } else {
+        let res = await getAttestRevokeAccess(chainid, address);
+        console.log(res);
         accessData.revokeAccess = isRevocable;
         accessData.attestAccess = true;
-        accessData.viewAccess = true;
+        accessData.viewAccess = true
       }
       onAccessInfoChange(accessData);
 

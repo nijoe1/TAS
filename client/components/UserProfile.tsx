@@ -24,6 +24,7 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
   const [onProgress, setOnProgress] = useState(-1);
   const { address } = useAccount();
   const [fetched, setFetched] = useState(false);
+  const [update, setUpdate] = useState(false);
   const [profileDetails, setProfileDetails] = useState({
     pfp: "",
     username: "",
@@ -66,7 +67,13 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
       await orbis.isConnected();
 
       let userDid = router.query.address;
-
+      if (!userDid) {
+        setUpdate(true);
+      } else if (userDid == address) {
+        setUpdate(true);
+      } else {
+        setUpdate(false);
+      }
       if (!userDid) {
         // If address is null, get it from local storage
         userDid = localStorage.getItem("userdid") || "";
@@ -90,7 +97,7 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
       }
     };
     fetch();
-  }, [onDataFetch]);
+  }, []);
 
   return (
     <div>
@@ -116,7 +123,7 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
             </Typography>
           </CardBody>
           <CardFooter className="flex justify-center  pt-1">
-            <FaEdit onClick={toggleModal} />
+            {update && <FaEdit onClick={toggleModal} />}
 
             <div>
               {isModalOpen && (

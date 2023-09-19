@@ -7,10 +7,9 @@ import DynamicForm from "./DynamicForm";
 import TimeCreated from "./TimeCreated"; // Replace with the actual path
 import AccessBox from "./AccessBox";
 import { Card, CardBody, Typography } from "@material-tailwind/react";
-import { subscribe } from "diagnostics_channel";
 import SubscriptionForm from "./SubscriptionForm";
 import { CONTRACTS } from "@/constants/contracts";
-
+import { getSchemaType } from "@/lib/contractReads";
 
 type SchemaDataProps = {
   schemaData: {
@@ -33,10 +32,14 @@ type SchemaDataProps = {
     revokeAccess: boolean; // Replace with your actual data
     viewAccess: boolean;
   }) => void;
-  chainID:number;
+  chainID: number;
 };
 
-const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChange,chainID}) => {
+const SchemaProfile: React.FC<SchemaDataProps> = ({
+  schemaData,
+  onAccessInfoChange,
+  chainID,
+}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [subscribeModalIsOpen, setSubscribeModalIsOpen] = useState(false);
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
@@ -67,7 +70,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
 
   const formattedDescription = formatDescription(schemaData.description);
 
-  function splitTextIntoChunks(text:any, chunkSize:any) {
+  function splitTextIntoChunks(text: any, chunkSize: any) {
     const regex = new RegExp(`.{1,${chunkSize}}`, "g");
     return text.match(regex) || [];
   }
@@ -79,7 +82,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
   });
 
   // Define a function to update the accessInfo state
-  const handleAccessInfoChange = (newAccessInfo:any) => {
+  const handleAccessInfoChange = (newAccessInfo: any) => {
     setAccessInfo(newAccessInfo);
     onAccessInfoChange(newAccessInfo);
   };
@@ -89,6 +92,9 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
       <div className="bg-white rounded-xl p-4 ">
         <Typography variant="h6" color="blue-gray">
           {"Schema Details"}
+        </Typography>
+        <Typography variant="h6" color="blue-gray">
+          {getSchemaType(schemaData.resolverContract, chainID)}
         </Typography>
         <Card className="mt-6 flex flex-col border rounded-lg items-center">
           <CardBody>
@@ -107,7 +113,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
             </Typography>
             <div className="text-center">
               {splitTextIntoChunks(schemaData.description, 50).map(
-                (chunk:any, index:any) => (
+                (chunk: any, index: any) => (
                   <React.Fragment key={index}>
                     {chunk}
                     <br />
@@ -127,7 +133,12 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
             />
             <Field
               label="Creator"
-              value={<EthereumAddress address={schemaData.creator} />}
+              value={
+                <EthereumAddress
+                  address={schemaData.creator}
+                  link={`/dashboard?address=${schemaData.creator}`}
+                />
+              }
             />
             <Field
               label="Resolver"
@@ -176,20 +187,32 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({ schemaData ,onAccessInfoChan
                 feedbackChat
               </button>
             ))}
-          {!accessInfo.attestAccess && !accessInfo.viewAccess && (
-            <button
-              className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-              onClick={openSubscribeModal}
-            >
-              Subscribe
-            </button>
-          )}
+          {/* @ts-ignore */}
+          {!accessInfo.attestAccess &&
+          !accessInfo.viewAccess &&
+          schemaData.resolverContract ==
+            // @ts-ignore
+            CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
+            ? true
+            : false && (
+                <button
+                  className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                  onClick={openSubscribeModal}
+                >
+                  Subscribe
+                </button>
+              )}
           {isAttestModalOpen && (
             <DynamicForm
               schema={schemaData.rawSchema}
               schemaUID={schemaData.schemaUID}
-              // @ts-ignore
-              isSubscription={schemaData.resolverContract==CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()?true:false}
+              isSubscription={
+                schemaData.resolverContract ==
+                // @ts-ignore
+                CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
+                  ? true
+                  : false
+              }
               isOpen={isAttestModalOpen}
               onClose={closeAttestModal}
             />

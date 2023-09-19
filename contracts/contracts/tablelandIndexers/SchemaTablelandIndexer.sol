@@ -96,7 +96,7 @@ contract SchemaTablelandIndexer is Ownable {
             mutate(
             tableIDs[1],
             SQLHelpers.toInsert(
-                SCHEMA_TABLE_PREFIX,
+                SCHEMA_CATEGORIES_TABLE_PREFIX,
                 tableIDs[1],
                 "schemaUID, category",
                 string.concat(

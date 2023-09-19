@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { CONTRACTS } from "@/constants/contracts/index";
 
 const providers = {
@@ -45,7 +45,7 @@ export const getSchemaType = (resolver: string, chainID: number) => {
 };
 
 export const getPrice = (wei: string) => {
-  const price = ethers.utils.formatUnits(BigInt(wei), "ether").toString();
+  const price = wei;
   return price;
 };
 

@@ -117,12 +117,16 @@ const allowedFileTypes = {
   "text/csv": "CSV",
 };
 
-export const getFileTypeFromAccept = (acceptValue) => {
+export const getFileTypeFromAccept = (acceptValue, size) => {
   const acceptValues = acceptValue.split(",").map((val) => val.trim());
 
   for (const [key, value] of Object.entries(allowedFileTypes)) {
     if (acceptValues.includes(key)) {
-      return value;
+      if (size > 1) {
+        return `${value}[]`
+      } else {
+        return value;
+      }
     }
   }
 

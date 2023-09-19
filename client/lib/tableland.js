@@ -18,23 +18,23 @@ const tables = {
   },
   80001: {
     // SchemaRegistry
-    schema: "schema_80001_7420",
-    categories:"schema_categories_80001_7421",
+    schema: "schema_80001_7433",
+    categories: "schema_categories_80001_7434",
     // Tableland Attestation Service
-    attestation: "attestation_80001_7422",
-    revocation: "revocation_80001_7423",
-    info:"schema_info_80001_7428",
+    attestation: "attestation_80001_7435",
+    revocation: "revocation_80001_7436",
+    info: "schema_info_80001_7441",
     // ContentSubscriptionsResolver
-    content_group: "group_80001_7429",
-    content_admins: "creator_80001_7430",
-    content_subscription: "subscription_80001_7431",
-    group_revenue: "revenue_80001_7432",
+    content_group: "group_80001_7442",
+    content_admins: "creator_80001_7443",
+    content_subscription: "subscription_80001_7444",
+    group_revenue: "revenue_80001_7445",
     // ACResolver
-    attesters: "schema_attesters_80001_7426",
-    revokers: "schema_revokers_80001_7427",
+    attesters: "schema_attesters_80001_7439",
+    revokers: "schema_revokers_80001_7440",
 
-    offChainTimestamp: "offChain_timestamp_80001_7424",
-    offChainRevocation: "offChain_revocation_80001_7425",
+    offChainTimestamp: "offChain_timestamp_80001_7437",
+    offChainRevocation: "offChain_revocation_80001_7438",
   },
 };
 
@@ -118,10 +118,12 @@ export const getCreatedSchemasRevenue = async (chainId, user) => {
       JOIN
           ${tables[chainId].content_admins}
       ON
-          ${tables[chainId].group_revenue}.schemaUID = ${tables[chainId].content_admins}.schemaUID
+          ${tables[chainId].group_revenue}.schemaUID = ${
+      tables[chainId].content_admins
+    }.schemaUID
       WHERE ${tables[chainId].content_admins}.attester = '${user.toLowerCase()}'
       GROUP BY
-          ${tables[chainId].content_admins}.shares`
+          ${tables[chainId].content_admins}.shares`;
 
   try {
     const result = await axios.get(getAllSchemasQuery);
@@ -141,7 +143,9 @@ export const getUserSubscriptions = async (chainId, address) => {
       FROM
           ${tables[chainId].content_subscription}
       WHERE
-          ${tables[chainId].content_subscription}.subscriber = '${address.toLowerCase()}'`;
+          ${
+            tables[chainId].content_subscription
+          }.subscriber = '${address.toLowerCase()}'`;
 
   try {
     const result = await axios.get(getAllSchemasQuery);
@@ -326,8 +330,31 @@ export const getAttestAccess = async (chainId, schemaUID, address) => {
      ${tables[chainId].content_admins}.attester='${address.toLowerCase()}'`;
     try {
       const result = await axios.get(getSchemaQuery);
-      console.log(result.data);
       return result.data[0].NUM > 0;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  } else {
+    return null;
+  }
+};
+
+export const getAttestRevokeAccess = async (chainId, address) => {
+  if (address) {
+    const getSchemaQuery =
+      TablelandGateway +
+      `SELECT COUNT(${tables[chainId].attesters}.attester) AS rev , COUNT(${
+        tables[chainId].revokers
+      }.revoker) AS at FROM ${tables[chainId].attesters}, ${
+        tables[chainId].revokers
+      } WHERE
+     ${tables[chainId].attesters}.attester='${address.toLowerCase()}' AND
+     ${tables[chainId].revokers}.revoker='${address.toLowerCase()}'`;
+    try {
+      const result = await axios.get(getSchemaQuery);
+      
+      return {revokeAccess: (result.data[0].rev > 0), attestAccess:(result.data[0].at > 0)};
     } catch (err) {
       console.error(err);
       return null;

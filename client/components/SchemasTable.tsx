@@ -42,10 +42,10 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
     setModalIsOpen(!modalIsOpen);
   };
 
-  const getCellStyle = (schemaType:string) => {
+  const getCellStyle = (schemaType: string) => {
     let backgroundColorClass;
     let textColorClass;
-  
+
     switch (schemaType) {
       case "CLASIC":
         backgroundColorClass = "bg-green-200 rounded-lg"; // Green background for "classic"
@@ -64,7 +64,7 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
         textColorClass = "text-black"; // Default black text color
         break;
     }
-  
+
     return `${backgroundColorClass} ${textColorClass}`;
   };
 
@@ -93,7 +93,7 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                 <th className="py-2 text-white border-r border-gray">
                   SchemaUID
                 </th>
-                {!showRevenue && !subscription ? (
+                {!subscription ? (
                   <>
                     <th className="py-2 text-white border-r border-gray">
                       Schema
@@ -110,12 +110,13 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                     <th className=" py-2 text-white border-r border-gray">
                       Age
                     </th>
+                    {showRevenue && (
+                      <th className="py-2 text-white mx-4">Taken Revenue</th>
+                    )}
                     <th className="px-3 py-2 text-white mx-4">
                       <VscFeedback />
                     </th>
                   </>
-                ) : showRevenue ? (
-                  <th className="py-2 text-white mx-4">Taken Revenue</th>
                 ) : (
                   <th className="py-2 text-white mx-4">
                     Remaining Subscription
@@ -147,7 +148,7 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                       ></EthereumAddress>
                     </div>
                   </td>
-                  {!showRevenue && !subscription ? (
+                  {!subscription ? (
                     <>
                       <td className="flex flex-col py-2 border-r border-gray border-b border-gray">
                         <div className="flex flex-col  ">
@@ -168,7 +169,12 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                         )}`}
                       >
                         <div className="flex items-center justify-center">
-                          <p>{getSchemaType(row.resolverAddress, chainID as number)}</p>
+                          <p>
+                            {getSchemaType(
+                              row.resolverAddress,
+                              chainID as number
+                            )}
+                          </p>
                         </div>
                       </td>
                       <td className="py-2 border-r border-gray border-b border-gray">
@@ -188,7 +194,16 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                             }
                           </p>
                         </div>
-                      </td>{" "}
+                      </td>
+                      {showRevenue && (
+                        <td className="py-2 border-r border-gray border-b border-gray">
+                          <div className="flex items-center justify-center">
+                            {row.revenue ? (
+                              <p className="px-2 py-2">{`${row.revenue} ether`}</p>
+                            ):(<p className="px-2 py-2">{`0 ether`}</p>)}
+                          </div>
+                        </td>
+                      )}
                       <td className="py-2 border-b border-gray">
                         <div className="flex items-center justify-center cursor-pointer">
                           <PiChatDotsFill

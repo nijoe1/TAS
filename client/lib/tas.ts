@@ -325,6 +325,51 @@ export const getUserSchemasRevenue = async (
   return tableData;
 };
 
+export const getUserCreatedSchemas = async (
+  chainID: number,
+  address: `0x${string}`
+) => {
+  // @ts-ignore
+  const tableData: {
+    id: any; // Incrementing ID
+    uid: any;
+    schema: { fields: any };
+    resolverAddress: any;
+    attestations: any;
+    creationTimestamp: any;
+  }[] = [];
+  let indexer = [[]];
+  let schemas = await getCreatedSchemasRevenue(chainID, address);
+  schemas.forEach((inputObject: any, index: any) => {
+    // @ts-ignore
+    indexer[inputObject.schemaUID] = getPrice(
+      (inputObject.totalClaimed / inputObject.shares / 100).toString()
+    );
+  });
+  schemas = await getAllUserCreatedSchemas(chainID, address);
+  console.log(schemas);
+  schemas.forEach((inputObject: any, index: any) => {
+    const schemaString = inputObject.schema;
+    const schema = parseInputString(schemaString);
+
+    // Create a tableData entry
+    const entry = {
+      id: index + 1, // Incrementing ID
+      uid: inputObject.schemaUID,
+      schema,
+      resolverAddress: inputObject.resolver,
+      attestations: inputObject.total,
+      creationTimestamp: inputObject.creationTimestamp,
+      revenue: indexer[inputObject.schemaUID]
+      // Add other properties as needed from the inputObject
+    };
+
+    // Push the entry to the tableData array
+    tableData.push(entry);
+  });
+  return tableData;
+};
+
 export const getUserSchemaSubscriptions = async (
   chainID: number,
   user: `0x${string}`
@@ -351,42 +396,6 @@ export const getUserSchemaSubscriptions = async (
       attestations: index,
       creationTimestamp: index,
       subscriptionEnds: inputObject.subscriptionEndsAt,
-      // Add other properties as needed from the inputObject
-    };
-
-    // Push the entry to the tableData array
-    tableData.push(entry);
-  });
-  return tableData;
-};
-
-export const getUserCreatedSchemas = async (
-  chainID: number,
-  address: `0x${string}`
-) => {
-  // @ts-ignore
-  const tableData: {
-    id: any; // Incrementing ID
-    uid: any;
-    schema: { fields: any };
-    resolverAddress: any;
-    attestations: any;
-    creationTimestamp: any;
-  }[] = [];
-  let schemas = await getAllUserCreatedSchemas(chainID, address);
-  console.log(schemas);
-  schemas.forEach((inputObject: any, index: any) => {
-    const schemaString = inputObject.schema;
-    const schema = parseInputString(schemaString);
-
-    // Create a tableData entry
-    const entry = {
-      id: index + 1, // Incrementing ID
-      uid: inputObject.schemaUID,
-      schema,
-      resolverAddress: inputObject.resolver,
-      attestations: inputObject.total,
-      creationTimestamp: inputObject.creationTimestamp,
       // Add other properties as needed from the inputObject
     };
 
@@ -505,7 +514,11 @@ export const getEncryptedJson = async (
   const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
   const blob = await decrypt(ipfsCID, address, jwt);
   const json = await parseBlobToJson(blob);
-  const fileblob = await decrypt(json.file.CID, address, jwt);
-
-  return { json, fileblob };
+  let filesBlob = [];
+  let CIDs = [];
+  for (const file of json.files) {
+    filesBlob.push(await decrypt(file.CID, address, jwt));
+    CIDs.push(file.CID);
+  }
+  return { json, filesBlob, CIDs };
 };

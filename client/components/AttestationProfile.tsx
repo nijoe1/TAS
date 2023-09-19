@@ -18,7 +18,7 @@ import SubscriptionItem from "./SubscriptionItem";
 type AttestationProfileProps = {
   attestationData: {
     attestationUID: string;
-    context:string
+    context: string;
     created: string;
     expiration: string;
     revoked: boolean;
@@ -39,7 +39,6 @@ type AttestationProfileProps = {
   type: string;
 };
 
-
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
   attestationData,
   type,
@@ -56,8 +55,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
   };
   const chainID = useChainId();
 
-  const {address} = useAccount()
-
+  const { address } = useAccount();
 
   const { config } = usePrepareContractWrite({
     // @ts-ignore
@@ -93,7 +91,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations:1,
+    confirmations: 2,
     hash: txdata ? txdata?.hash : txdata1?.hash,
   });
 
@@ -102,7 +100,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
       <div className="bg-white rounded-xl p-4">
         <div className="border rounded-lg text-white rounded-lg bg-black mt-3 mx-auto flex flex-col items-center">
           <Typography variant="h6">attestation Details</Typography>
-          <Typography className=" border gap-1 rounded-lg mb-2 mt-1">{`Type : ${type}`}</Typography>
+          <Typography className=" bold text-white rounded-lg mb-2 mt-1">{`${type}`}</Typography>
         </div>
         <div className="items-center flex flex-col text-center border rounded-lg mx-auto">
           <Typography variant="h4">attestationUID</Typography>
@@ -113,15 +111,35 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
           <div className="mb-4 mt-3 w-4/6 flex-col flex border rounded-lg items-center text-center">
             <Field
               label="schemaUID"
-              value={<EthereumAddress address={attestationData.schemaUID} />}
+              value={
+                <EthereumAddress
+                  address={attestationData.schemaUID}
+                  link={`/schema?schemaUID=${attestationData.schemaUID}`}
+                />
+              }
             />
             <Field
               label="attester"
-              value={<EthereumAddress address={attestationData.from} />}
+              value={
+                <EthereumAddress
+                  address={attestationData.from}
+                  link={`/dashboard?address=${attestationData.from}`}
+                />
+              }
             />
             <Field
               label="recipient"
-              value={<EthereumAddress address={attestationData.to} />}
+              value={
+                attestationData.to ==
+                "0x0000000000000000000000000000000000000000" ? (
+                  <EthereumAddress address={attestationData.to} />
+                ) : (
+                  <EthereumAddress
+                    address={attestationData.to}
+                    link={`/dashboard?address=${attestationData.from}`}
+                  />
+                )
+              }
             />
             <Field
               label="resolver"

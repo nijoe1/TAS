@@ -82,12 +82,23 @@ const AttestationsTable: React.FC<AttestationsTableProps> = ({
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">
                     <div className="flex items-center justify-center">
-                      <EthereumAddress address={row.fromAddress} />
+                      <EthereumAddress
+                        address={row.fromAddress}
+                        link={`/dashboard?address=${row.fromAddress}`}
+                      />
                     </div>
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">
                     <div className="flex items-center justify-center">
-                      <EthereumAddress address={row.toAddress} />
+                      {row.toAddress !=
+                      "0x0000000000000000000000000000000000000000" ? (
+                        <EthereumAddress
+                          address={row.toAddress}
+                          link={`/dashboard?address=${row.toAddress}`}
+                        />
+                      ) : (
+                        <EthereumAddress address={row.toAddress} />
+                      )}
                     </div>
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">

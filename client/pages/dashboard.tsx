@@ -14,7 +14,6 @@ import {
   getAllUserAttestations,
   getAllUserRecievedAttestations,
   getUserCreatedSchemas,
-  getUserSchemasRevenue,
   getUserSchemaSubscriptions,
 } from "@/lib/tas";
 import { useChainId, useAccount } from "wagmi";
@@ -30,7 +29,6 @@ export function DashboardPage({}) {
   const [taken, setTaken] = useState(false);
   const [attestationsTableData, setAttestationsTableData] = useState([]);
   const [subscriptionTableData, setSubscriptionTableData] = useState([]);
-
   const [attestationsRecievedTableData, setAttestationsRecievedTableData] =
     useState([]);
   const [revenueData, setRevenueData] = useState([]);
@@ -43,7 +41,6 @@ export function DashboardPage({}) {
   // Sample data for the Tabs
   const data = [
     { label: "Attestations", value: "attestations" },
-    { label: "Total Revenue", value: "total-revenue" },
     { label: "Created Schemas", value: "created-schemas" },
     { label: "Subscribed Schemas", value: "subscribed-schemas" },
   ];
@@ -57,8 +54,6 @@ export function DashboardPage({}) {
       );
       let createdSchemas = await getUserCreatedSchemas(chainID, user);
 
-      let revenue = await getUserSchemasRevenue(chainID, user);
-
       let subscriptionData = await getUserSchemaSubscriptions(chainID, user);
 
       setTaken(!taken);
@@ -68,8 +63,6 @@ export function DashboardPage({}) {
       setAttestationsRecievedTableData(allRecievedAttestations);
       // @ts-ignore
       setSchemasTableData(createdSchemas);
-      // @ts-ignore
-      setRevenueData(revenue);
       // @ts-ignore
       setSubscriptionTableData(subscriptionData);
     }
@@ -81,7 +74,7 @@ export function DashboardPage({}) {
     if (!taken && chainID && user) {
       fetch(user as `0x${string}`);
     }
-  }, [chainID, selection]);
+  },[]);
 
   return (
     <div
@@ -90,7 +83,7 @@ export function DashboardPage({}) {
       <Navbar />
 
       <div className="flex flex-col items-center mt-10">
-        <ProfileCard onDataFetch={handleDataFetch} />
+        <ProfileCard onDataFetch={handleDataFetch}/>
         {isDataFetched && taken ? (
           <Tabs value="attestations" className="mx-auto mt-10">
             <TabsHeader
@@ -144,18 +137,6 @@ export function DashboardPage({}) {
                   }
                 />
               </TabPanel>
-              <TabPanel value="total-revenue">
-                {/* Content for Total Revenue Tab */}
-                <h2 className="text-lg font-semibold mb-2">
-                  Total Revenue Content
-                </h2>
-                {/* Add your content here */}
-                <SchemasTable
-                  schemaTableData={revenueData}
-                  showRevenue={true}
-                  chainID={chainID}
-                />
-              </TabPanel>
               <TabPanel value="created-schemas">
                 {/* Content for Created Schemas Tab */}
                 <h2 className="text-lg font-semibold mb-2">
@@ -164,6 +145,7 @@ export function DashboardPage({}) {
                 <SchemasTable
                   schemaTableData={schemasTableData}
                   chainID={chainID}
+                  showRevenue={true}
                 />
                 {/* Add your content here */}
               </TabPanel>

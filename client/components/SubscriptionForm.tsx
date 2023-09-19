@@ -11,6 +11,7 @@ import { useAccount } from "wagmi";
 import Notification from "./Notification";
 
 import { getGroupPrice } from "@/lib/tableland";
+import { getPrice } from "@/lib/contractReads";
 type DynamicFormModalProps = {
   schemaUID?: string;
   isOpen: boolean;
@@ -27,7 +28,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
   const chainID = useChainId();
   const [months, setMonths] = useState(1);
   const [price, setPrice] = useState(0);
-
+  const [visiblePrice, setVisiblePrice] = useState("0")
   const [open, setOpen] = useState(isOpen);
 
   const { config } = usePrepareContractWrite({
@@ -37,7 +38,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     abi: CONTRACTS.SubscriptionResolver[chainID].abi,
     functionName: "subscribe",
     args: [schemaUID, months],
-    value: BigInt(price * months),
+    value: BigInt(price*10 ** 18 * months),
   });
   const { write, data, isLoading, isSuccess, isError } =
     useContractWrite(config);
@@ -48,7 +49,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations: 1,
+    confirmations: 2,
     hash: data?.hash,
   });
 
@@ -56,7 +57,8 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
 
   useEffect(() => {
     const fetch = async () => {
-      setPrice(Number(await getGroupPrice(chainID, schemaUID)));
+      setPrice(Number(getPrice(await getGroupPrice(chainID, schemaUID))));
+      setVisiblePrice((getPrice(await getGroupPrice(chainID, schemaUID))))
     };
     fetch();
   }, []);
@@ -70,16 +72,22 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
       <Card
         color="white"
         shadow={false}
-        className="mb-4 p-4 border border-black rounded-xl"
+        className="mb-4 p-4 border border-black rounded-xl flex flex-col items-center mx-auto"
       >
         <Typography color="gray" className="mt-1 font-normal">
           Subscribe to get Access.
         </Typography>
         <Typography color="gray" className="mt-1 font-normal">
-          {`Price per month: ${price}`}
+          {`Price per month: ${visiblePrice}`}
         </Typography>
-        <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
-          <div className="mb-4 flex flex-col gap-6">
+        <Typography color="gray" className="mt-1 font-normal">
+          {`total : ${price * months} ethers for ${months} months`}
+        </Typography>
+        <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96 flex flex-col items-center mx-auto">
+          <div className="mb-4 flex flex-col items-center mx-auto gap-6">
+            <label className="mt-1 font-normal">
+              Months
+            </label>
             <Input
               type="number"
               size="lg"

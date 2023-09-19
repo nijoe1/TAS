@@ -6,7 +6,6 @@ import { getIpfsGatewayUri } from "@/lib/lighthouse";
 
 type DecodedDataProps = {
   decodedData: any;
-  
 };
 
 const DecodedData: React.FC<DecodedDataProps> = ({ decodedData }) => {
@@ -14,20 +13,32 @@ const DecodedData: React.FC<DecodedDataProps> = ({ decodedData }) => {
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
   const checkName = (name: string) => {
-    if (name.endsWith("CID")) {
+    if (name.endsWith("CID") || name.endsWith("CIDs")) {
       return true;
     }
     return false;
   };
 
   const getFileType = (name: string) => {
-    const fileType = name.split("CID")[0];
-    if (fileType === "image") return "Image";
-    if (fileType === "video") return "Video";
-    if (fileType === "pdf") return "PDF";
-    if (fileType === "json") return "JSON";
-    if (fileType === "csv") return "CSV";
-    return "";
+    if (name.endsWith("CIDs")) {
+      const fileType = name.split("CID")[0];
+      if (fileType === "image") return "Image[]";
+      if (fileType === "video") return "Video[]";
+      if (fileType === "pdf") return "PDF[]";
+      if (fileType === "json") return "JSON[]";
+      if (fileType === "csv") return "CSV[]";
+
+      return "";
+    } else {
+      const fileType = name.split("CID")[0];
+      if (fileType === "image") return "Image";
+      if (fileType === "video") return "Video";
+      if (fileType === "pdf") return "PDF";
+      if (fileType === "json") return "JSON";
+      if (fileType === "csv") return "CSV";
+
+      return "";
+    }
   };
 
   const openModal = (name: string) => {
@@ -61,14 +72,21 @@ const DecodedData: React.FC<DecodedDataProps> = ({ decodedData }) => {
               className="text-white flex flex-col items-center cursor-pointer"
               onClick={() => openModal(item.value)} // Pass item.value instead of item.name
             >
-              <GrView className="text-white bg-white rounded-sm" color="green" size={20} />
+              <GrView
+                className="text-white bg-white rounded-sm"
+                color="green"
+                size={20}
+              />
             </div>
           )}
           {modalOpen && selectedFileName && selectedFileName === item.value && (
             <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-75">
               <div className="relative max-w-2xl w-full mx-auto p-6">
                 <div className="flex justify-end">
-                  <button onClick={closeModal} className="text-white text-lg cursor-pointer">
+                  <button
+                    onClick={closeModal}
+                    className="text-white text-lg cursor-pointer"
+                  >
                     Close
                   </button>
                 </div>
@@ -76,7 +94,11 @@ const DecodedData: React.FC<DecodedDataProps> = ({ decodedData }) => {
                   {item.value && (
                     <FileViewer
                       fileBlob={null}
-                      fileUri={getIpfsGatewayUri(item.value)}
+                      fileUri={
+                        item.name.endsWith("CIDs")
+                          ? getIpfsGatewayUri(item.value[0])
+                          : getIpfsGatewayUri(item.value)
+                      }
                       fileType={getFileType(item.name)} // Use item.name to determine the file type
                     />
                   )}

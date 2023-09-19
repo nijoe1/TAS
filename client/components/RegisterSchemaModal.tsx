@@ -4,7 +4,12 @@ import { BsTrash3Fill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
 import { CgAddR } from "react-icons/cg";
 import { FaInfoCircle } from "react-icons/fa";
-import { useContractWrite, usePrepareContractWrite, useChainId, useWaitForTransaction } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useChainId,
+  useWaitForTransaction,
+} from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 // @ts-ignore
@@ -59,7 +64,16 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     // @ts-ignore
     abi: CONTRACTS.SchemaRegistry[chainid].abi,
     functionName: "register",
-    args: [[rawSchema, schemaName, schemaDescription,categories, resolver, isRevocable]],
+    args: [
+      [
+        rawSchema,
+        schemaName,
+        schemaDescription,
+        categories.tags,
+        resolver,
+        isRevocable,
+      ],
+    ],
   });
 
   const { write, data, isLoading, isSuccess, isError } =
@@ -71,7 +85,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations:1,
+    confirmations: 2,
     hash: data?.hash,
   });
   const handleAttributeChange = (index: any, key: any, value: any) => {
@@ -81,6 +95,17 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
     if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
       updatedAttributes[index]["type"] = "string";
+      updatedAttributes[index]["name"] = value;
+      // @ts-ignore
+      updatedAttributes[index]["readonly"] = true;
+    } else if (
+      value === "videoCIDs" ||
+      value === "imageCIDs" ||
+      value === "jsonCIDs"
+    ) {
+      updatedAttributes[index]["type"] = "string";
+      updatedAttributes[index]["isArray"] = true;
+
       updatedAttributes[index]["name"] = value;
       // @ts-ignore
       updatedAttributes[index]["readonly"] = true;
@@ -307,7 +332,11 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 >
                   <option value="Select Type">Select Type</option>
                   <option value="imageCID">imageCID</option>
+                  <option value="imageCIDs">imageCIDs</option>
+
                   <option value="videoCID">VideoCID</option>
+                  <option value="videoCIDs">VideoCIDs</option>
+
                   <option value="jsonCID">JSONCID</option>
                   {solidityTypes.map((type, typeIndex) => (
                     <option key={typeIndex} value={type}>

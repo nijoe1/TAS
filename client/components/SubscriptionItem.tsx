@@ -28,7 +28,8 @@ type SubscriptionItemProps = {
 const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [fileBlob, setFileBlob] = useState(null);
+  const [fileBlobs, setFileBlobs] = useState<Blob[]>([]);
+  const [fileCIDs, setFileCIDs] = useState<string[]>([])
   const [fileType, setFileType] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -47,9 +48,14 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
         itemData.data as `0x${string}`,
         itemData.address as `0x${string}`
       );
-      setFileBlob(res.fileblob);
+      // let blobs = []
+      // for(const blob of res.filesBlob){
+      //   blobs.push(blob)
+      // }
+      setFileBlobs(res.filesBlob);
+      setFileCIDs(res.CIDs)
       // @ts-ignore
-      setFileType(getFileTypeFromAccept(res.json.file.type));
+      setFileType(getFileTypeFromAccept(res.json.files[0].type, res.filesBlob.length));
       setName(res.json.name);
       setDescription(res.json.description);
     };
@@ -74,11 +80,12 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
           <Typography>{description}</Typography>
         </div>
         <div className="mt-4">
-          {fileBlob && fileType ? (
+          {fileBlobs && fileType ? (
             <FileViewer
-              fileBlob={fileBlob}
+              fileBlob={fileBlobs}
               fileType={fileType}
               fileUri={null}
+              CIDs={fileCIDs}
             />
           ) : (
             <p>Loading file...</p>

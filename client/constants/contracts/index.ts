@@ -5,6 +5,7 @@ import SchemaRegistry from "./deployments/goerli/SchemaRegistry.json";
 import TAS_m from "./deployments/mumbai/TAS.json";
 import SubscriptionResolver_m from "./deployments/mumbai/ContentSubscriptionResolver.json";
 import SchemaRegistry_m from "./deployments/mumbai/SchemaRegistry.json";
+import ACResolver_m from "./deployments/mumbai/ACResolver.json";
 
 export const CONTRACTS = {
   TAS: {
@@ -35,6 +36,12 @@ export const CONTRACTS = {
     80001: {
       contract: SchemaRegistry_m.address,
       abi: SchemaRegistry_m.abi,
+    },
+  },
+  ACResolver: {
+    80001: {
+      contract: ACResolver_m.address,
+      abi: ACResolver_m.abi,
     },
   },
 };

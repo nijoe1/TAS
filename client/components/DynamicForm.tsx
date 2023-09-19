@@ -74,7 +74,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations: 1,
+    confirmations: 2,
 
     hash: txdata?.hash,
   });
@@ -97,8 +97,14 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
       const updatedFormData = { ...prevData };
 
       // Update the specific attribute based on its type
-      if (attributeType.endsWith("[]")) {
+      if (
+        attributeType.endsWith("[]") ||
+        attributeName == "jsonCIDs" ||
+        attributeName == "videoCIDs" ||
+        attributeName == "imageCIDs"
+      ) {
         // For array attributes, update the attribute directly within the array
+        console.log(newValue)
         updatedFormData[attributeName] = newValue;
       } else {
         if (
@@ -172,7 +178,12 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                     {formErrors[attribute.name]}
                   </Typography>
                 )}
-                {attribute.type.endsWith("[]") ? (
+                {attribute.type.endsWith("[]") &&
+                !(
+                  attribute.name == "jsonCIDs" ||
+                  attribute.name == "imageCIDs" ||
+                  attribute.name == "videoCIDs"
+                ) ? (
                   <TagSelect
                     name={attribute.name}
                     onChange={(tags: any) => {
@@ -196,7 +207,10 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                   />
                 ) : attribute.name == "jsonCID" ||
                   attribute.name == "imageCID" ||
-                  attribute.name == "videoCID" ? (
+                  attribute.name == "videoCID" ||
+                  attribute.name == "jsonCIDs" ||
+                  attribute.name == "imageCIDs" ||
+                  attribute.name == "videoCIDs" ? (
                   <FileUploadForm
                     isSubscription={isSubscription}
                     chainID={chainID}
@@ -301,15 +315,11 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               <AttestOffChain
                 version={"1"}
                 schema={schemaUID as `0x${string}`}
-                recipient={
-                  recipient as `0x${string}`
-                }
+                recipient={recipient as `0x${string}`}
                 time={0}
                 expirationTime={0}
                 revocable={isRevocable}
-                refUID={
-                  referencedAttestation as `0x${string}`
-                }
+                refUID={referencedAttestation as `0x${string}`}
                 AttestationData={data as `0x${string}`}
               />
             )}

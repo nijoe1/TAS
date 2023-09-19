@@ -4,8 +4,9 @@ import { useRouter } from "next/router";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount, useChainId, } from "wagmi";
 import StepperForm from "@/components/StepperForm";
+import { useConnect } from 'wagmi'
 
 const navLinks = [
   { text: "Attestations", href: "/attestations" },
@@ -36,8 +37,16 @@ const CustomNavbar = () => {
   const handleLinkClick = (href: any) => {
     router.push(href);
   };
+  const connect = useConnect({
+    onSuccess(data) {
+      console.log('Connect', data)
+    },
+  })
 
   useEffect(() => {
+    if(!address){
+      connect
+    }
     const check = async () => {
       console.log(chainID);
       if (currentAddress != address && address) {

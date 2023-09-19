@@ -46,7 +46,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 placement="right-start"
                 content="add a relevant name to your schema"
               >
-                <label className="text-black font-medium">Schema Name</label>
+                <label className="text-black font-medium">Schema type</label>
               </Tooltip>
 
               <FaInfoCircle className="mt-1 ml-2" />

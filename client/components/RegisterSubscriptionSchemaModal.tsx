@@ -48,7 +48,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     args: [
       creators,
       shares,
-      categories,
+      categories.tags,
       BigInt(finalPrice),
       schemaName,
       schemaDescription,
@@ -63,7 +63,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations: 1,
+    confirmations: 2,
     hash: data?.hash,
   });
 
@@ -294,7 +294,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 console.log(finalPrice)
 
                 // @ts-ignore
-                write
+                write()
               }}
               className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
             >

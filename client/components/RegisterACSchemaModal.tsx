@@ -39,14 +39,14 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
   const { config } = usePrepareContractWrite({
     // @ts-ignore
-    address: CONTRACTS.SubscriptionResolver[chainID].contract,
+    address: CONTRACTS.ACResolver[chainID].contract,
     // @ts-ignore
-    abi: CONTRACTS.SubscriptionResolver[chainID].abi,
-    functionName: "registerSubscriptionSchema",
+    abi: CONTRACTS.ACResolver[chainID].abi,
+    functionName: "ACSchemaRegistered",
     args: [
-      attestersTags,
-      revokersTags,
-      categories,
+      attestersTags.tags,
+      revokersTags.tags,
+      categories.tags,
       isEncrypted,
       rawSchema,
       schemaName,
@@ -82,7 +82,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     isLoading: wait,
     isSuccess: succ,
   } = useWaitForTransaction({
-    confirmations: 1,
+    confirmations: 2,
     hash: data?.hash,
   });
 
@@ -93,6 +93,11 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
     if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
       updatedAttributes[index]["type"] = "string";
+      updatedAttributes[index]["name"] = value;
+      // @ts-ignore
+      updatedAttributes[index]["readonly"] = true;
+    }else if(value === "videoCIDs" || value === "imageCIDs" || value === "jsonCIDs"){
+      updatedAttributes[index]["type"] = "string[]";
       updatedAttributes[index]["name"] = value;
       // @ts-ignore
       updatedAttributes[index]["readonly"] = true;
@@ -324,7 +329,11 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 >
                   <option value="Select Type">Select Type</option>
                   <option value="imageCID">imageCID</option>
+                  <option value="imageCIDs">imageCIDs</option>
+
                   <option value="videoCID">VideoCID</option>
+                  <option value="videoCIDs">VideoCIDs</option>
+
                   <option value="jsonCID">JSONCID</option>
                   {solidityTypes.map((type, typeIndex) => (
                     <option key={typeIndex} value={type}>
