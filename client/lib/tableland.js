@@ -77,23 +77,42 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
   const getAllSchemasQuery =
     TablelandGateway +
     `SELECT
-          ${tables[chainId].schema}.resolver,
-          ${tables[chainId].schema}.schema,
-          ${tables[chainId].schema}.schemaUID,
-          ${tables[chainId].schema}.creationTimestamp,
-          COUNT(${tables[chainId].attestation}.uid) AS total
-      FROM
-          ${tables[chainId].schema}
-      LEFT JOIN
-          ${tables[chainId].attestation}
-      ON
-          ${tables[chainId].schema}.schemaUID = ${
-      tables[chainId].attestation
+        ${tables[chainId].schema}.resolver,
+        ${tables[chainId].schema}.schema,
+        ${tables[chainId].schema}.schemaUID,
+        ${tables[chainId].schema}.creationTimestamp,
+        COUNT(${tables[chainId].attesters}.attester) AS attester_count,
+        COUNT(${tables[chainId].revokers}.revoker) AS revoker_count,
+        COUNT(${tables[chainId].info}.admin) AS admin_count
+    FROM
+        ${tables[chainId].schema}
+    LEFT JOIN
+        ${tables[chainId].revokers}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${
+      tables[chainId].revokers
     }.schemaUID
-      WHERE ${tables[chainId].schema}.creator='${address?.toLowerCase()}'
-      GROUP BY
-          ${tables[chainId].schema}.schemaUID
-      ORDER BY ${tables[chainId].schema}.creationTimestamp DESC`;
+    LEFT JOIN
+        ${tables[chainId].attesters}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${
+      tables[chainId].attesters
+    }.schemaUID
+    LEFT JOIN
+        ${tables[chainId].info}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${tables[chainId].info}.schemaUID
+    WHERE
+        ${tables[chainId].schema}.creator='${address?.toLowerCase()}' OR
+        ${tables[chainId].revokers}.revoker='${address?.toLowerCase()}' OR
+        ${tables[chainId].attesters}.attester='${address?.toLowerCase()}'
+    GROUP BY
+        ${tables[chainId].schema}.schemaUID,
+        ${tables[chainId].schema}.resolver,
+        ${tables[chainId].schema}.schema,
+        ${tables[chainId].schema}.creationTimestamp
+    ORDER BY
+        ${tables[chainId].schema}.creationTimestamp DESC`;
 
   try {
     const result = await axios.get(getAllSchemasQuery);
@@ -170,6 +189,30 @@ export const getSchemaInfo = async (chainId, schemaUID) => {
   try {
     const result = await axios.get(getAllSchemasQuery);
     return result.data[0];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const getIsEncrypted = async (chainId, schemaUID) => {
+  const getAllSchemasQuery =
+    TablelandGateway +
+    `SELECT
+        ${tables[chainId].info}.encrypted
+    FROM
+        ${tables[chainId].info}
+    WHERE
+        ${tables[chainId].info}.schemaUID = '${schemaUID}'`;
+
+  try {
+    const result = await axios.get(getAllSchemasQuery);
+    console.log("DFsdfsdfsdf:df:      ",result)
+    if (result.data.length == 0) {
+      return false;
+    } else {
+      return result.data[0].encrypted == "true" ? true : false;
+    }
   } catch (err) {
     console.error(err);
     return null;
@@ -340,21 +383,37 @@ export const getAttestAccess = async (chainId, schemaUID, address) => {
   }
 };
 
-export const getAttestRevokeAccess = async (chainId, address) => {
+export const getAttestRevokeAccess = async (chainId, address, schemaUID) => {
   if (address) {
     const getSchemaQuery =
       TablelandGateway +
-      `SELECT COUNT(${tables[chainId].attesters}.attester) AS rev , COUNT(${
-        tables[chainId].revokers
-      }.revoker) AS at FROM ${tables[chainId].attesters}, ${
-        tables[chainId].revokers
-      } WHERE
-     ${tables[chainId].attesters}.attester='${address.toLowerCase()}' AND
-     ${tables[chainId].revokers}.revoker='${address.toLowerCase()}'`;
+      `SELECT 
+          COUNT(attesters.attester) AS at, 
+          COUNT(revokers.revoker) AS rev, 
+          COUNT(info.admin) AS admin 
+      FROM 
+          ${tables[chainId].attesters} AS attesters
+      LEFT JOIN 
+          ${tables[chainId].revokers} AS revokers
+      ON 
+          attesters.schemaUID = revokers.schemaUID
+          AND revokers.revoker = '${address.toLowerCase()}'
+      LEFT JOIN 
+          ${tables[chainId].info} AS info
+      ON 
+          attesters.schemaUID = info.schemaUID
+          AND info.admin = '${address.toLowerCase()}'
+      WHERE
+          attesters.attester = '${address.toLowerCase()}'
+          AND attesters.schemaUID = '${schemaUID.toLowerCase()}'`;
     try {
       const result = await axios.get(getSchemaQuery);
-      
-      return {revokeAccess: (result.data[0].rev > 0), attestAccess:(result.data[0].at > 0)};
+      console.log(result);
+      return {
+        revokeAccess: result.data[0].rev > 0,
+        attestAccess: result.data[0].at > 0,
+        isAdmin: result.data[0].admin > 0,
+      };
     } catch (err) {
       console.error(err);
       return null;

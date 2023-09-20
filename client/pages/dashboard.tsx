@@ -31,7 +31,6 @@ export function DashboardPage({}) {
   const [subscriptionTableData, setSubscriptionTableData] = useState([]);
   const [attestationsRecievedTableData, setAttestationsRecievedTableData] =
     useState([]);
-  const [revenueData, setRevenueData] = useState([]);
   const [schemasTableData, setSchemasTableData] = useState([]);
   const [selection, setSelection] = useState("created");
 
@@ -41,7 +40,7 @@ export function DashboardPage({}) {
   // Sample data for the Tabs
   const data = [
     { label: "Attestations", value: "attestations" },
-    { label: "Created Schemas", value: "created-schemas" },
+    { label: "User Schemas", value: "user-schemas" },
     { label: "Subscribed Schemas", value: "subscribed-schemas" },
   ];
 
@@ -137,7 +136,7 @@ export function DashboardPage({}) {
                   }
                 />
               </TabPanel>
-              <TabPanel value="created-schemas">
+              <TabPanel value="user-schemas">
                 {/* Content for Created Schemas Tab */}
                 <h2 className="text-lg font-semibold mb-2">
                   Created Schemas Content
@@ -146,6 +145,7 @@ export function DashboardPage({}) {
                   schemaTableData={schemasTableData}
                   chainID={chainID}
                   showRevenue={true}
+                  showRole={true}
                 />
                 {/* Add your content here */}
               </TabPanel>

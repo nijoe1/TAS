@@ -117,6 +117,33 @@ export const uploadFolder = async (files, type, apiKey, setUploadProgress) => {
   return [jsonCID.data.Hash];
 };
 
+export const jsonCIDsUpload = async(apiKey, type, CIDs)=>{
+  // Create JSON object
+  const json = {
+    type: type,
+    CIDs: CIDs,
+  };
+
+  const jsonBlob = new Blob([JSON.stringify(json)], {
+    type: "application/json",
+  });
+
+  // Create a File object from the Blob
+  const jsonFile = new File([jsonBlob], `type.json`, {
+    type: "application/json",
+  });
+
+  const jsonCID = await lighthouse.upload(
+    [jsonFile],
+    apiKey,
+    false,
+    null,
+    null,
+    dealParams
+  );
+  return [jsonCID.data.Hash];
+}
+
 /* Deploy file along with encryption */
 export const uploadFileEncrypted = async (
   file,
@@ -148,7 +175,7 @@ export const uploadFileEncrypted = async (
     jwt,
     keyShards
   );
-  console.log(output.data[0].cid);
+  console.log(isSuccess);
 
   let RAAS_Response = await registerCIDtoRAAS(output.data[0].cid);
   console.log(RAAS_Response);
@@ -215,11 +242,10 @@ export const generateLighthouseJWT = async (address, signEncryption) => {
 
 export const decrypt = async (cid, address, jwt) => {
   const conditions = await lighthouse.getAccessConditions(cid);
-  console.log(conditions);
-  const { error, shards } = await recoverShards(address, cid, jwt, 5);
-  console.log(error, shards);
+
+  const { error, shards } = await recoverShards(address, cid, jwt, 3);
+
   const { masterKey } = await recoverKey(shards);
-  // const keyObject = await lighthouse.fetchEncryptionKey(cid, address, jwt);
 
   const fileType = "application/json";
   const decrypted = await lighthouse.decryptFile(cid, masterKey, fileType);
@@ -234,22 +260,24 @@ export const applyAccessConditions = async (
   chainID,
   uid,
   address,
-  jwt
+  jwt,
+  resolver
 ) => {
+  console.log(resolver)
   const conditions = [
     {
       id: 1,
       chain: LighthouseChains[chainID].name,
-      method: "hasAccess",
+      method: "hasAcccess",
       standardContractType: "Custom",
-      contractAddress: CONTRACTS.SubscriptionResolver[chainID].contract,
+      contractAddress: resolver,
       returnValueTest: {
         comparator: "==",
-        value: "1",
+        value: "true",
       },
       parameters: [":userAddress", uid],
       inputArrayType: ["address", "bytes32"],
-      outputType: "uint256",
+      outputType: "bool",
     },
   ];
   const aggregator = "([1])";
@@ -261,6 +289,9 @@ export const applyAccessConditions = async (
     conditions,
     aggregator
   );
+
+  let RAAS_Response = await registerCIDtoRAAS(cid);
+
   const { masterKey, keyShards } = await generate();
 
   const { isSuccess } = await saveShards(
@@ -269,7 +300,6 @@ export const applyAccessConditions = async (
     jwt,
     keyShards
   );
-  console.log(isSuccess);
-
+  console.log(isSuccess)
   return response;
 };

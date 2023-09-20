@@ -4,14 +4,13 @@ import Footer from "@/components/Footer";
 import Loading from "@/components/Loading/Loading";
 import SchemaProfile from "@/components/SchemaProfile";
 import { useRouter } from "next/router";
-import TimeCreated from "@/components/TimeCreated"; // Replace with the actual path
-import EthereumAddress from "@/components/EthereumAddress";
 import { useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import SubscriptionItem from "@/components/SubscriptionItem";
 import { useAccount } from "wagmi";
 import { getSchemaData, SchemaInfo } from "@/lib/tas";
-import { RiLinkUnlinkM } from "react-icons/ri";
+import AttestationsTable from "@/components/AttestationsTable";
+import { getIsEncrypted } from "@/lib/tableland";
 
 interface SchemaData {
   schemaUID: string;
@@ -34,6 +33,7 @@ const Schema = () => {
   const [tableData, setTableData] = useState([]);
   const [schemaData, setSchemaData] = useState<SchemaData>();
   const [subscriptionResolver, setSubscriptionResolver] = useState();
+  const [isEncrypted, setIsEncrypted] = useState<boolean>(false)
   const { address } = useAccount();
 
   const router = useRouter();
@@ -55,6 +55,8 @@ const Schema = () => {
     async function fetch() {
       if (schemaUID) {
         let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
+
+        setIsEncrypted(await getIsEncrypted(chainID, schemaUID) as boolean)
         // @ts-ignore
         setTableData(res.tableDt);
         setSchemaData(res.schemaInfo ? res.schemaInfo : SchemaInfo);
@@ -80,83 +82,18 @@ const Schema = () => {
               schemaData={schemaData ? schemaData : SchemaInfo}
               onAccessInfoChange={handleAccessInfoChange}
               chainID={chainID}
+              isEncrypted={schemaData?.resolverContract ==
+                // @ts-ignore
+                CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
+                  ? true
+                  : isEncrypted}
             ></SchemaProfile>
 
             {tableData.length > 0 &&
             // @ts-ignore
             CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() !==
               schemaData?.resolverContract ? (
-              <div className="mt-10 mx-[10%]">
-                <div className="overflow-x-auto rounded-lg">
-                  <table className="w-screen-md table-fixed border-b border-gray">
-                    <thead className="bg-black">
-                      <tr>
-                        <th className=" py-2 text-white border-r border-gray">
-                          attestationUID
-                        </th>
-                        <th className=" py-2 text-white border-r border-gray">
-                          From Address
-                        </th>
-                        <th className=" py-2 text-white border-r border-gray">
-                          To Address
-                        </th>
-                        <th className=" py-2 text-white border-r border-gray">
-                          Type
-                        </th>
-                        <th className=" py-2 text-white">Age</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tableData.map((row, index) => (
-                        <tr
-                          key={index}
-                          className={`${
-                            index % 2 === 0 ? "bg-gray-100" : "bg-white"
-                          } text-center`}
-                        >
-                          <td className="py-2 border-r border-gray border-b border-gray">
-                            <div className="flex items-center justify-center">
-                              <EthereumAddress
-                                // @ts-ignore
-                                link={`/attestation?uid=${row.uid}&type=${row.type}`}
-                                // @ts-ignore
-                                address={row.uid}
-                              />
-                            </div>
-                          </td>
-                          <td className="py-2 border-r border-gray border-b border-gray">
-                            <div className="flex items-center justify-center">
-                              {/* @ts-ignore */}
-                              <EthereumAddress address={row.fromAddress} />
-                            </div>
-                          </td>
-                          <td className="py-2 border-r border-gray border-b border-gray">
-                            <div className="flex items-center justify-center">
-                              {/* @ts-ignore */}
-                              <EthereumAddress address={row.toAddress} />
-                            </div>
-                          </td>
-                          <td className="py-2 border-r border-gray border-b border-gray">
-                            <div className="flex flex-wrap items-center justify-center">
-                              <RiLinkUnlinkM className="ml-2" />
-                              {/* @ts-ignore */}
-                              <p className="px-2 py-2">{row.type}</p>
-                            </div>
-                          </td>
-                          <td className="py-2 border-b border-gray">
-                            <div className="flex flex-wrap items-center justify-center">
-                              <p className="px-2 py-2">
-                                {/* @ts-ignore */}
-                                {<TimeCreated createdAt={row.age} />}
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <AttestationsTable attestationsTableData={tableData} notSchemaUID={true}/>
             ) : accessInfo.viewAccess || accessInfo.attestAccess ? (
               <div className="grid grid-cols-3 gap-2 mx-auto">
                 {" "}

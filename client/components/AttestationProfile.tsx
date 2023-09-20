@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import EthereumAddress from "@/components/EthereumAddress";
 import DecodedData from "@/components/DecodedData";
 import TimeCreated from "./TimeCreated";
@@ -31,17 +31,22 @@ type AttestationProfileProps = {
       type: string;
       name: string;
       value: string;
+      blobs?: Blob[];
+      json?: any;
+      CIDs?: string[];
     }>;
     data: string;
     referencedAttestation: string;
     referencingAttestations: number;
   };
   type: string;
+  isEncrypted?: boolean;
 };
 
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
   attestationData,
   type,
+  isEncrypted,
 }) => {
   const [accessInfo, setAccessInfo] = useState({
     attestAccess: false,
@@ -49,6 +54,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     viewAccess: false,
   });
 
+  const [taken, setTaken] = useState(false);
   // Define a function to update the accessInfo state
   const handleAccessInfoChange = (newAccessInfo: any) => {
     setAccessInfo(newAccessInfo);
@@ -207,16 +213,30 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
               />
             </div>
           ) : // @ts-ignore
-          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() !=
-            attestationData?.resolver ? (
+          CONTRACTS.ACResolver[chainID].contract.toLowerCase() ==
+              attestationData?.resolver &&
+            isEncrypted &&
+            accessInfo.viewAccess ? (
             <div className="mx-auto text-center items-center border rounded-xl p-4">
               <div className="text-xl font-semibold">Decoded Data</div>
-              <DecodedData decodedData={attestationData.decodedData} />
+              <DecodedData
+                decodedData={attestationData.decodedData}
+                isEncrypted={isEncrypted}
+              />
+            </div>
+          ) : !isEncrypted && accessInfo.viewAccess ? (
+            <div className="mx-auto text-center items-center border rounded-xl p-4">
+              <div className="text-xl font-semibold">Decoded Data</div>
+              <DecodedData
+                decodedData={attestationData.decodedData}
+                isEncrypted={isEncrypted}
+              />
             </div>
           ) : (
             <div className="text-center mt-3">No access</div>
           )
         }
+
         {attestationData.revocable && (
           <div className="items-center flex flex-col ">
             <button

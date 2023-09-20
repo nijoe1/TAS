@@ -212,8 +212,8 @@ contract ContentSubscriptionResolver is SchemaResolver {
     }
 
 
-    function hasAccess(address sender, bytes32 schemaUID) external view returns (uint256) {
-        return (userSubscriptions[sender][schemaUID] > block.timestamp || schemas[schemaUID].contentCreators.contains(sender))?1:0;
+    function hasAccess(address sender, bytes32 schemaUID) external view returns (bool) {
+        return (userSubscriptions[sender][schemaUID] > block.timestamp || schemas[schemaUID].contentCreators.contains(sender));
     }
 
     function updatePrice(bytes32 schemaUID, uint256 newPrice)external{

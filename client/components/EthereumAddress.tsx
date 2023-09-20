@@ -32,6 +32,9 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
     if(inputString == "0x0000000000000000000000000000000000000000"){
       inputString = "ZERO_ADDRESS"
     }
+    if(inputString == "0x0000000000000000000000000000000000000000000000000000000000000000"){
+      inputString = "ZERO_BYTES32"
+    }
     if (inputString.length <= maxLength) {
       return inputString; // No need to shorten if it's already shorter than maxLength.
     }

@@ -7,10 +7,12 @@ import {
   applyAccessConditions,
   uploadFile,
   uploadFolder,
+  jsonCIDsUpload,
 } from "@/lib/lighthouse";
 
 interface FileUploadFormProps {
   isSubscription: boolean;
+  resolver?: string;
   chainID: number;
   schemaUID: string;
   type: string;
@@ -23,6 +25,7 @@ interface FileUploadFormProps {
 
 const FileUploadForm: React.FC<FileUploadFormProps> = ({
   isSubscription,
+  resolver,
   chainID,
   schemaUID,
   type,
@@ -66,6 +69,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
         } else {
           await handleEncryptedJsonUpload(file, false);
         }
+      } else if (formDataJson.fileType.endsWith("s")) {
+        await handleEncryptedFolderUpload(file);
       } else {
         await handleEncryptedFileUpload(file);
       }
@@ -153,14 +158,36 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
     handleInputChange(CIDs, type, "string[]");
   };
 
-  const handleEncryptedFolderUpload = async (files: any, type: any) => {
-    console.log(files);
+  const handleEncryptedFolderUpload = async (files: any) => {
     let key = localStorage.getItem(`API_KEY_${address}`);
+    let token = localStorage.getItem(`lighthouse-jwt-${address}`);
+    let fileArray = [];
+    for (const file of files) {
+      const CID = await uploadFileEncrypted(
+        [file],
+        key,
+        address,
+        token,
+        setOnProgress
+      );
 
-    let CIDs = await uploadFolder(files, type, key, setOnProgress);
+      let res = await applyAccessConditions(
+        CID[0].Hash,
+        chainID,
+        schemaUID,
+        address,
+        token,
+        resolver
+      );
+      fileArray.push(res.data.cid);
+    }
+    console.log(fileArray);
+
+    let ret = await jsonCIDsUpload(key, files[0].type, fileArray);
+    console.log(ret);
     setOnProgress(100);
 
-    handleInputChange(CIDs, type, "string[]");
+    handleInputChange(ret, type, "string[]");
   };
 
   const handleEncryptedFileUpload = async (file: any) => {
@@ -180,7 +207,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       chainID,
       schemaUID,
       address,
-      token
+      token,
+      resolver
     );
     setOnProgress(100);
     handleInputChange(res.data.cid, type, "string");
@@ -205,7 +233,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
           chainID,
           schemaUID,
           address,
-          token
+          token,
+          resolver
         );
         console.log("Access Controll Applied REsponse:  ", res);
         fileArray.push({
@@ -244,7 +273,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
         chainID,
         schemaUID,
         address,
-        token
+        token,
+        resolver
       );
       setOnProgress(100);
       handleInputChange(res.data.cid, type, "string");
@@ -262,7 +292,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
         chainID,
         schemaUID,
         address,
-        token
+        token,
+        resolver
       );
       console.log("Access Controll Applied REsponse:  ", res);
 
@@ -302,7 +333,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
         chainID,
         schemaUID,
         address,
-        token
+        token,
+        resolver
       );
       setOnProgress(100);
       handleInputChange(res.data.cid, type, "string");
@@ -466,7 +498,11 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
                 accept={getAcceptedFileTypes("image")}
                 onChange={async (e) => {
                   if (e.target.files) {
-                    await handleFolderUpload(e.target.files, type);
+                    if (isSubscription) {
+                      await handleEncryptedFolderUpload(e.target.files);
+                    } else {
+                      await handleFolderUpload(e.target.files, type);
+                    }
                   }
                 }}
               />
@@ -495,7 +531,11 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
                 accept={getAcceptedFileTypes("video")}
                 onChange={async (e) => {
                   if (e.target.files) {
-                    await handleFolderUpload(e.target.files, type);
+                    if (isSubscription) {
+                      await handleEncryptedFolderUpload(e.target.files);
+                    } else {
+                      await handleFolderUpload(e.target.files, type);
+                    }
                   }
                 }}
               />

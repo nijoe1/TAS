@@ -33,15 +33,16 @@ type SchemaDataProps = {
     viewAccess: boolean;
   }) => void;
   chainID: number;
+  isEncrypted:boolean;
 };
 
 const SchemaProfile: React.FC<SchemaDataProps> = ({
   schemaData,
   onAccessInfoChange,
   chainID,
+  isEncrypted
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [subscribeModalIsOpen, setSubscribeModalIsOpen] = useState(false);
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
 
@@ -87,6 +88,8 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
     onAccessInfoChange(newAccessInfo);
   };
 
+
+
   return (
     <div className={`flex-grow mx-auto `}>
       <div className="bg-white rounded-xl p-4 ">
@@ -95,6 +98,9 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
         </Typography>
         <Typography variant="h6" color="blue-gray">
           {getSchemaType(schemaData.resolverContract, chainID)}
+        </Typography>
+        <Typography variant="h6" color="blue-gray">
+          {isEncrypted?"Encrypted":"NonEncrypted"}
         </Typography>
         <Card className="mt-6 flex flex-col border rounded-lg items-center">
           <CardBody>
@@ -207,12 +213,9 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
               schema={schemaData.rawSchema}
               schemaUID={schemaData.schemaUID}
               isSubscription={
-                schemaData.resolverContract ==
-                // @ts-ignore
-                CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
-                  ? true
-                  : false
+                isEncrypted
               }
+              resolver={schemaData.resolverContract}
               isOpen={isAttestModalOpen}
               onClose={closeAttestModal}
             />

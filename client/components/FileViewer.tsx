@@ -8,17 +8,19 @@ import {
 import ActiveDealsComponent from "./DealsDetails";
 import Carousel from "react-elastic-carousel";
 interface FileViewerProps {
-  fileBlob: Blob[] | null;
+  filesBlobs: Blob[] | null;
   fileUri: string | null;
   fileType: string | null;
   CIDs?: string[];
+  encrypted?:boolean
 }
 
 const FileViewer: React.FC<FileViewerProps> = ({
-  fileBlob,
+  filesBlobs,
   fileUri,
   fileType,
   CIDs,
+  encrypted
 }) => {
   const [jsonContent, setJsonContent] = useState<any>(null);
   const [deals, setDeals] = useState([[]]);
@@ -42,7 +44,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const fetchJsonContent = async () => {
       console.log(fileType);
       try {
-        if ((fileBlob || fileUri) && fileType === "JSON") {
+        if ((filesBlobs || fileUri) && fileType === "JSON") {
           const response = await fetch(fileUri ? fileUri : "");
           const data = await response.json();
           setJsonContent(data);
@@ -69,8 +71,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
           }
           setFiles(filesCIDs);
           fetchDeals(filesCIDs);
-        } else {
+        } else if (CIDs && CIDs.length > 0 ) {
           fetchDeals(CIDs);
+        } else {
+          fetchDeals([fileUri]);
         }
       } catch (error) {
         console.error("Error fetching JSON content:", error);
@@ -78,11 +82,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
     };
 
     fetchJsonContent();
-  }, [fileBlob, fileType]);
+  }, [filesBlobs, fileType]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg my-auto mb-6 transition duration-300 transform hover:scale-105">
-      {(fileBlob || fileUri) && fileType ? (
+      {(filesBlobs || fileUri) && fileType ? (
         <div>
           {fileType === "JSON" && jsonContent && (
             <div className="mb-4">
@@ -90,11 +94,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
               <JsonViewer value={jsonContent} />
             </div>
           )}
-          {fileType === "Image" && fileBlob?.length == 1 && (
+          {fileType === "Image" && (
             <div className="flex flex-col items-center mx-auto">
               <img
                 src={
-                  fileUri || (fileBlob ? URL.createObjectURL(fileBlob[0]) : "")
+                  fileUri ||
+                  (filesBlobs ? URL.createObjectURL(filesBlobs[0]) : "")
                 }
                 alt="File"
                 className="mb-4 rounded-lg"
@@ -120,26 +125,28 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 </div>
               ))}
             </Carousel>
-          ) : fileType === "Image[]" && (
-            // @ts-ignore
-            <Carousel className="rounded-xl">
-              {fileBlob &&
-                fileBlob.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center mx-auto"
-                  >
-                    <img
-                      src={fileBlob ? URL.createObjectURL(file) : ""}
-                      alt="File"
-                      className="mb-4 rounded-lg"
-                    />
-                    <ActiveDealsComponent
-                      activeDeals={deals[index] || []} // Pass appropriate active deals for this file
-                    />
-                  </div>
-                ))}
-            </Carousel>
+          ) : (
+            fileType === "Image[]" && (
+              // @ts-ignore
+              <Carousel className="rounded-xl">
+                {filesBlobs &&
+                  filesBlobs.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center mx-auto"
+                    >
+                      <img
+                        src={filesBlobs ? URL.createObjectURL(file) : ""}
+                        alt="File"
+                        className="mb-4 rounded-lg"
+                      />
+                      <ActiveDealsComponent
+                        activeDeals={deals[index] || []} // Pass appropriate active deals for this file
+                      />
+                    </div>
+                  ))}
+              </Carousel>
+            )
           )}
 
           {fileType === "Video[]" && files.length > 0 ? (
@@ -156,33 +163,50 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 </div>
               ))}
             </Carousel>
-          ) : fileType === "Video[]" && (
-            // @ts-ignore
-            <Carousel className="rounded-xl">
-              {fileBlob &&
-                fileBlob.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center mx-auto"
-                  >
-                    <video className="h-full w-full rounded-lg" controls>
-                      <source src={fileBlob ? URL.createObjectURL(file) : ""} />
-                    </video>
-                    <ActiveDealsComponent
-                      activeDeals={deals[index] || []} // Pass appropriate active deals for this file
-                    />
-                  </div>
-                ))}
-            </Carousel>
+          ) : (
+            fileType === "Video[]" && (
+              // @ts-ignore
+              <Carousel className="rounded-xl">
+                {filesBlobs &&
+                  filesBlobs.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center mx-auto"
+                    >
+                      <video className="h-full w-full rounded-lg" controls>
+                        <source
+                          src={filesBlobs ? URL.createObjectURL(file) : ""}
+                        />
+                      </video>
+                      <ActiveDealsComponent
+                        activeDeals={deals[index] || []} // Pass appropriate active deals for this file
+                      />
+                    </div>
+                  ))}
+              </Carousel>
+            )
           )}
 
-          {fileType === "Video" && (
+          {fileType === "Video" && !encrypted ? (
             <div className="flex flex-col items-center h-full mb-4">
               <video className="h-full w-full rounded-lg" controls>
                 <source
                   src={
                     fileUri ||
-                    (fileBlob ? URL.createObjectURL(fileBlob[0]) : "")
+                    (filesBlobs ? URL.createObjectURL(filesBlobs[0]) : "")
+                  }
+                />
+              </video>
+              <ActiveDealsComponent
+                activeDeals={deals[0]}
+              ></ActiveDealsComponent>
+            </div>
+          ) : fileType === "Video" &&(
+            <div className="flex flex-col items-center h-full mb-4">
+              <video className="h-full w-full rounded-lg" controls>
+                <source
+                  src={
+                    (filesBlobs ? URL.createObjectURL(filesBlobs[0]) : "")
                   }
                 />
               </video>
@@ -196,7 +220,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
               <h2 className="text-xl mb-2">PDF Viewer</h2>
               <embed
                 src={
-                  fileUri || (fileBlob ? URL.createObjectURL(fileBlob[0]) : "")
+                  fileUri ||
+                  (filesBlobs ? URL.createObjectURL(filesBlobs[0]) : "")
                 }
                 type="application/pdf"
                 className="w-full h-96"

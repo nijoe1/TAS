@@ -18,9 +18,11 @@ interface SchemasTableProps {
     schemaType: any;
     revenue?: any;
     subscriptionEnds?: any;
+    role?:any
   }[];
   showRevenue?: boolean;
   subscription?: boolean;
+  showRole?: boolean;
   chainID?: number;
 }
 
@@ -28,6 +30,7 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
   schemaTableData,
   showRevenue,
   subscription,
+  showRole,
   chainID,
 }) => {
   const [context, setContext] = useState("");
@@ -104,14 +107,22 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                     <th className=" py-2 text-white border-r border-gray">
                       Schema Type
                     </th>
-                    <th className="px-4 py-2 text-white border-r border-gray mx-4">
-                      Attestations
-                    </th>
+                    {!showRole ? (
+                      <th className="px-4 py-2 text-white border-r border-gray mx-4">
+                        Attestations
+                      </th>
+                    ) : (
+                      <th className="px-4 py-2 text-white border-r border-gray mx-4">
+                        Role
+                      </th>
+                    )}
                     <th className=" py-2 text-white border-r border-gray">
                       Age
                     </th>
                     {showRevenue && (
-                      <th className="py-2 text-white mx-4">Taken Revenue</th>
+                      <th className="py-2 text-white border-r border-gray mx-4">
+                        Taken Revenue
+                      </th>
                     )}
                     <th className="px-3 py-2 text-white mx-4">
                       <VscFeedback />
@@ -177,12 +188,21 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                           </p>
                         </div>
                       </td>
-                      <td className="py-2 border-r border-gray border-b border-gray">
-                        <div className="flex items-center justify-center">
-                          {/* @ts-ignore */}
-                          <p>{row.attestations}</p>
-                        </div>
-                      </td>
+                      {!showRole ? (
+                        <td className="py-2 border-r border-gray border-b border-gray">
+                          <div className="flex items-center justify-center">
+                            {/* @ts-ignore */}
+                            <p>{row.attestations}</p>
+                          </div>
+                        </td>
+                      ) : (
+                        <td className="py-2 border-r border-gray border-b border-gray">
+                          <div className="flex items-center justify-center">
+                            {/* @ts-ignore */}
+                            <p>{row.role}</p>
+                          </div>
+                        </td>
+                      )}
                       <td className="py-2 border-r border-gray border-b border-gray">
                         <div className="flex items-center justify-center">
                           <p className="px-2 py-2">
@@ -200,7 +220,9 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                           <div className="flex items-center justify-center">
                             {row.revenue ? (
                               <p className="px-2 py-2">{`${row.revenue} ether`}</p>
-                            ):(<p className="px-2 py-2">{`0 ether`}</p>)}
+                            ) : (
+                              <p className="px-2 py-2">{`0 ether`}</p>
+                            )}
                           </div>
                         </td>
                       )}

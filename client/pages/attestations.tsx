@@ -15,13 +15,17 @@ const Attestations = () => {
 
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
+  const [totalOffChain, setTotalOffChain] = useState<number>(0);
+  const [totalOnChain, setTotalOnChain] = useState<number>(0);
 
   useEffect(() => {
     async function fetch() {
       let allAttestations = await getAllAttestations(chainID);
       setTaken(!taken);
       // @ts-ignore
-      setTableData(allAttestations);
+      setTableData(allAttestations.tableDt);
+      setTotalOffChain(allAttestations.offChain);
+      setTotalOnChain(allAttestations.onchain);
     }
     if (!taken && chainID) {
       fetch();
@@ -41,23 +45,34 @@ const Attestations = () => {
               <Typography color="black">
                 Showing the most recent attestations.
               </Typography>
-              <Typography color="black">Total Attestations:{"  "}</Typography>
-              <Typography className="ml-2" variant="h6" color="black">
-                169
-              </Typography>
-              <Typography color="black">Unique Attestors: {"  "}</Typography>
-              <Typography className="ml-2" variant="h6" color="black">
-                5016
-              </Typography>
-              <Typography color="black">
-                Offchain Attestations: {"  "}
-              </Typography>
-              <Typography className="ml-2 " variant="h6" color="black">
-                16981
-              </Typography>
+              <div className="border rounded-lg flex flex-col items-center mx-2 mt-3 mb-3">
+                <div className="flex flex-wrap mx-2 items-center text-center">
+                  <Typography color="black">
+                    Total Attestations:{"  "}
+                  </Typography>
+                  <Typography className="ml-2" variant="h6" color="black">
+                    {totalOffChain + totalOnChain}
+                  </Typography>
+                </div>
+                <div className="flex flex-wrap mx-2 ">
+                  <Typography color="black">
+                    OnChain Attestations: {"  "}
+                  </Typography>
+                  <Typography className="ml-2" variant="h6" color="black">
+                    {totalOnChain}
+                  </Typography>
+                </div>
+                <div className="flex flex-wrap mx-2 items-center text-center">
+                  <Typography color="black">
+                    Offchain Attestations: {"  "}
+                  </Typography>
+                  <Typography className="ml-2 " variant="h6" color="black">
+                    {totalOffChain}
+                  </Typography>
+                </div>
+              </div>
             </div>
-            <AttestationsTable attestationsTableData={tableData}/>
-            
+            <AttestationsTable attestationsTableData={tableData} />
           </div>
         </>
       ) : (

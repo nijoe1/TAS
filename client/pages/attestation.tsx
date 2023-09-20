@@ -4,12 +4,16 @@ import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
 import AttestationProfile from "@/components/AttestationProfile";
 import { useRouter } from "next/router";
-import { useChainId } from "wagmi";
-import { getAttestationData } from "@/lib/tas"
+import { useChainId, useAccount } from "wagmi";
+import { getAttestationData } from "@/lib/tas";
+import { getIsEncrypted } from "@/lib/tableland";
+import { getEncryptedFilesBlobs } from "@/lib/tas";
 
 const Attestation = () => {
+  const { address } = useAccount();
   const chainID = useChainId();
   const [taken, setTaken] = useState(false);
+  const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
   const [attestationData, setAttestationData] = useState();
   const router = useRouter();
   const uid = router?.query?.uid;
@@ -27,14 +31,25 @@ const Attestation = () => {
     console.log(newAccessInfo);
   };
 
-
   useEffect(() => {
     async function fetch() {
       // @ts-ignore
       let AttestationData = await getAttestationData(type, chainID, uid);
-      setTaken(!taken);
+
+      let encrypted = (await getIsEncrypted(
+        chainID,
+        AttestationData.schemaUID
+      )) as boolean;
+      setIsEncrypted(encrypted);
+      if (encrypted) {
+        AttestationData.decodedData = await getEncryptedFilesBlobs(
+          AttestationData.decodedData,
+          address as `0x${string}`
+        );
+      }
       // @ts-ignore
       setAttestationData(AttestationData);
+      setTaken(!taken);
     }
     if (!taken && uid && chainID) {
       fetch();
@@ -48,8 +63,13 @@ const Attestation = () => {
         <>
           <div className="flex flex-col items-center">
             <div className="mx-auto">
-              {/*  @ts-ignore */}
-              <AttestationProfile attestationData={attestationData} type={type} />
+              <AttestationProfile
+                // @ts-ignore
+                attestationData={attestationData}
+                // @ts-ignore
+                type={type}
+                isEncrypted={isEncrypted}
+              />
             </div>
           </div>
         </>

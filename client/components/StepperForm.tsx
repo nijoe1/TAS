@@ -92,18 +92,18 @@ const StepperForm: React.FC<{
 
   const steps = [
     {
-      title: "Sign Ceramic",
-      description: "Description of Step 1 here.",
-      buttonText: "Sign with Ceramic",
+      title: "Connect to Ceramic",
+      description: "To get access to gasless interactions.",
+      buttonText: "Connect to Ceramic",
     },
     {
       title: "Connect to Lighthouse",
-      description: "Description of Step 2 here.",
+      description: "To upload files on IPFS and Filecoin.",
       buttonText: "Connect to Lighthouse",
     },
     {
       title: "Create Lighthouse Token",
-      description: "Description of Step 3 here.",
+      description: "To encrypt your files with ease.",
       buttonText: "Create Lighthouse JWT",
     },
   ];

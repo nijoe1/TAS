@@ -9,6 +9,7 @@ import {
   getUserRecievedAttestations,
   getUserSubscriptions,
   getCreatedSchemasRevenue,
+  getAttestRevokeAccess,
 } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import {
@@ -25,7 +26,7 @@ import {
   parseInputString,
   parseBlobToJson,
 } from "@/lib/utils";
-import { decrypt } from "./lighthouse";
+import { decrypt, getIpfsGatewayUri } from "./lighthouse";
 import { getPrice } from "./contractReads";
 
 interface SchemaData {
@@ -70,6 +71,7 @@ export const getAllAttestations = async (chainID: number) => {
 
     // Extracting relevant information
     const schemaUid = body.sig.message.schema || null;
+    const refUID = body.sig.message.refUID || null;
     const toAddress = body.sig.message.recipient || null;
     const fromAddress = body.signer;
     const age = body.sig.message.time;
@@ -79,6 +81,7 @@ export const getAllAttestations = async (chainID: number) => {
 
     const entry = {
       uid: uid,
+      refUID: refUID,
       schemaUid: schemaUid,
       fromAddress: fromAddress,
       toAddress: toAddress,
@@ -88,12 +91,14 @@ export const getAllAttestations = async (chainID: number) => {
     };
     formattedEntries.push(entry);
   }
+  const totalOffchain = formattedEntries.length;
   // @ts-ignore
   const attestationTableInfo: any[] = [];
   attestations.forEach((inputObject: any, index: any) => {
     // Create a tableData entry
     const entry = {
       uid: inputObject.uid,
+      refUID: inputObject.refUID,
       schemaUid: inputObject.schemaUID,
       fromAddress: inputObject.attester,
       toAddress: inputObject.recipient,
@@ -105,9 +110,10 @@ export const getAllAttestations = async (chainID: number) => {
     // Push the entry to the tableData array
     attestationTableInfo.push(entry);
   });
+  const totalOnChain = attestationTableInfo.length;
 
   let tableDt = transformAndSortArrays(formattedEntries, attestationTableInfo);
-  return tableDt;
+  return { tableDt, onchain: totalOnChain, offChain: totalOffchain };
 };
 
 export const getAllUserAttestations = async (
@@ -123,6 +129,8 @@ export const getAllUserAttestations = async (
 
     // Extracting relevant information
     const schemaUid = body.sig.message.schema || null;
+    const refUID = body.sig.message.refUID || null;
+
     const toAddress = body.sig.message.recipient || null;
     const fromAddress = body.signer;
     const age = body.sig.message.time;
@@ -132,6 +140,7 @@ export const getAllUserAttestations = async (
 
     const entry = {
       uid: uid,
+      refUID: refUID,
       schemaUid: schemaUid,
       fromAddress: fromAddress,
       toAddress: toAddress,
@@ -147,6 +156,7 @@ export const getAllUserAttestations = async (
     // Create a tableData entry
     const entry = {
       uid: inputObject.uid,
+      refUID: inputObject.refUID,
       schemaUid: inputObject.schemaUID,
       fromAddress: inputObject.attester,
       toAddress: inputObject.recipient,
@@ -176,6 +186,8 @@ export const getAllUserRecievedAttestations = async (
 
     // Extracting relevant information
     const schemaUid = body.sig.message.schema || null;
+    const refUID = body.sig.message.refUID || null;
+
     const toAddress = body.sig.message.recipient || null;
     const fromAddress = body.signer;
     const age = body.sig.message.time;
@@ -185,6 +197,7 @@ export const getAllUserRecievedAttestations = async (
 
     const entry = {
       uid: uid,
+      refUID: refUID,
       schemaUid: schemaUid,
       fromAddress: fromAddress,
       toAddress: toAddress,
@@ -200,6 +213,7 @@ export const getAllUserRecievedAttestations = async (
     // Create a tableData entry
     const entry = {
       uid: inputObject.uid,
+      refUID: inputObject.refUID,
       schemaUid: inputObject.schemaUID,
       fromAddress: inputObject.attester,
       toAddress: inputObject.recipient,
@@ -243,7 +257,7 @@ export const getAttestationData = async (
         : true,
     revocable: attestation.revocable == "false" ? false : true,
     resolver: attestation.resolver,
-
+    refUID: attestation.refUID,
     schemaUID: attestation.schemaUID,
     from: attestation.attester,
     to: attestation.recipient,
@@ -285,7 +299,8 @@ export const getSchemas = async (chainID: number) => {
     // Push the entry to the tableData array
     tableData.push(entry);
   });
-  return tableData;
+  let size = tableData.length;
+  return { tableData, number: size };
 };
 
 export const getUserSchemasRevenue = async (
@@ -348,23 +363,34 @@ export const getUserCreatedSchemas = async (
   });
   schemas = await getAllUserCreatedSchemas(chainID, address);
   console.log(schemas);
-  schemas.forEach((inputObject: any, index: any) => {
+  schemas.forEach(async (inputObject: any, index: any) => {
     const schemaString = inputObject.schema;
     const schema = parseInputString(schemaString);
 
-    // Create a tableData entry
+    let typeOfRole =
+      inputObject?.admin_count > 0
+        ? "creator"
+        : inputObject?.attester_count > 0 && inputObject.revoker_count > 0
+        ? "Attester&Revoker"
+        : inputObject?.attester_count > 0
+        ? "Attester"
+        : inputObject?.revoker_count > 0
+        ? "Revoker"
+        : "Creator"; // Create a tableData entry
     const entry = {
       id: index + 1, // Incrementing ID
       uid: inputObject.schemaUID,
       schema,
       resolverAddress: inputObject.resolver,
-      attestations: inputObject.total,
+      attestations: 0,
+      role: typeOfRole,
       creationTimestamp: inputObject.creationTimestamp,
-      revenue: indexer[inputObject.schemaUID]
+      revenue: indexer[inputObject.schemaUID],
       // Add other properties as needed from the inputObject
     };
 
     // Push the entry to the tableData array
+
     tableData.push(entry);
   });
   return tableData;
@@ -423,12 +449,14 @@ export const getSchemaData = async (
       const toAddress = body.sig.message.recipient || null;
       const fromAddress = body.signer;
       const age = body.sig.message.time;
+      const refUID = body.sig.message.refUID;
       const uid =
         inputObject.content.tags.find((tag: any) => tag.slug === "uid")
           ?.title || null;
 
       const entry = {
         uid: uid,
+        refUID: refUID,
         fromAddress: fromAddress,
         toAddress: toAddress,
         age: age,
@@ -448,6 +476,7 @@ export const getSchemaData = async (
     // Create a tableData entry
     const entry = {
       uid: inputObject.uid,
+      refUID: inputObject.refUID,
       fromAddress: inputObject.attester,
       toAddress: inputObject.recipient,
       age: inputObject.creationTimestamp,
@@ -476,6 +505,7 @@ export const getSchemaData = async (
     | ((prevState: never[]) => never[])
     | {
         uid: any;
+        refUID: any;
         fromAddress: any;
         toAddress: any;
         age: any;
@@ -484,6 +514,7 @@ export const getSchemaData = async (
       }[]
     | {
         uid: any;
+        refUID: any;
         schemaUid: any; // Add other properties as needed from the inputObject
         // Add other properties as needed from the inputObject
         fromAddress: any;
@@ -521,4 +552,71 @@ export const getEncryptedJson = async (
     CIDs.push(file.CID);
   }
   return { json, filesBlob, CIDs };
+};
+
+export const getEncryptedFilesBlobs = async (
+  decodedData: Array<{
+    type: string;
+    name: string;
+    value: string;
+    blobs?: Blob[];
+    json?: any;
+    CIDs?: string[];
+  }>,
+  address: `0x${string}`
+) => {
+  let newRecords = [];
+  const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
+
+  for (const record of decodedData) {
+    record.json = undefined;
+    record.blobs = [];
+
+    if (
+      !["jsonCID", "imageCID", "videoCID", "imageCIDs", "videoCIDs"].includes(
+        record.name
+      )
+    ) {
+      newRecords.push(record);
+    } else if (record.name === "jsonCID") {
+      const blob = await decrypt(record.value, address, jwt);
+      const json = await parseBlobToJson(blob);
+      record.CIDs = [];
+      record.json = json;
+
+      const decryptPromises = json.files.map((file: { CID: any }) =>
+        decrypt(file.CID, address, jwt)
+      );
+
+      // Await the promises in order
+      for (const [index, promise] of decryptPromises.entries()) {
+        record.blobs[index] = await promise;
+        record.CIDs[index] = json.files[index].CID;
+      }
+    } else if (record.name === "imageCID" || record.name === "videoCID") {
+      let blob = await decrypt(record.value, address, jwt);
+      record.CIDs = [record.value];
+      record.blobs.push(blob);
+      newRecords.push(record);
+    } else {
+      try {
+        const response = await fetch(getIpfsGatewayUri(record.value[0]));
+        const data = await response.json();
+
+        let cids = [];
+        data.CIDs.map(async (CID: any) => {
+          let blob = await decrypt(CID, address, jwt);
+          record.blobs?.push(blob)
+          cids.push((CID));
+        });
+
+        record.CIDs = data.CIDs;
+        newRecords.push(record);
+      } catch (error) {
+        console.error("Error fetching and decrypting:", error);
+      }
+    }
+  }
+
+  return newRecords;
 };

@@ -6,16 +6,19 @@ import { RiLinkUnlinkM } from "react-icons/ri"; // Import the RiLinkUnlinkM icon
 interface AttestationsTableProps {
   attestationsTableData: {
     uid: string;
+    refUID: string;
     schemaUid: string;
     fromAddress: string;
     toAddress: string;
     type: string;
     age: string;
   }[];
+  notSchemaUID?: boolean;
 }
 
 const AttestationsTable: React.FC<AttestationsTableProps> = ({
   attestationsTableData,
+  notSchemaUID,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -43,14 +46,17 @@ const AttestationsTable: React.FC<AttestationsTableProps> = ({
                 <th className="py-2 text-white border-r border-gray">
                   attestationUID
                 </th>
+                <th className="py-2 text-white border-r border-gray">refUID</th>
+                {!notSchemaUID && (
+                  <th className="py-2 text-white border-r border-gray">
+                    schemaUID
+                  </th>
+                )}
                 <th className="py-2 text-white border-r border-gray">
-                  schemaUID
+                  Attester
                 </th>
                 <th className="py-2 text-white border-r border-gray">
-                  from Address
-                </th>
-                <th className="py-2 text-white border-r border-gray">
-                  to Address
+                  Recipient
                 </th>
                 <th className="py-2 text-white border-r border-gray">Type</th>
                 <th className="py-2 text-white">Age</th>
@@ -73,13 +79,26 @@ const AttestationsTable: React.FC<AttestationsTableProps> = ({
                     </div>
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">
-                    <div className="flex items-center justify-center">
-                      <EthereumAddress
-                        link={`/schema?schemaUID=${row.schemaUid}`}
-                        address={row.schemaUid}
-                      />
-                    </div>
+                    {row.refUID == "0x0000000000000000000000000000000000000000000000000000000000000000" ? (
+                      <div className="flex items-center justify-center">
+                        <EthereumAddress address={row.refUID} />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <EthereumAddress address={row.refUID} link={`/attestation?uid=${row.refUID}`} />
+                      </div>
+                    )}
                   </td>
+                  {!notSchemaUID && (
+                    <td className="py-2 border-r border-gray border-b border-gray">
+                      <div className="flex items-center justify-center">
+                        <EthereumAddress
+                          link={`/schema?schemaUID=${row.schemaUid}`}
+                          address={row.schemaUid}
+                        />
+                      </div>
+                    </td>
+                  )}
                   <td className="py-2 border-r border-gray border-b border-gray">
                     <div className="flex items-center justify-center">
                       <EthereumAddress

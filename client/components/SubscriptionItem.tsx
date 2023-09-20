@@ -54,6 +54,7 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
       // }
       setFileBlobs(res.filesBlob);
       setFileCIDs(res.CIDs)
+      console.log(res.CIDs)
       // @ts-ignore
       setFileType(getFileTypeFromAccept(res.json.files[0].type, res.filesBlob.length));
       setName(res.json.name);
@@ -82,7 +83,7 @@ const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ itemData }) => {
         <div className="mt-4">
           {fileBlobs && fileType ? (
             <FileViewer
-              fileBlob={fileBlobs}
+              filesBlobs={fileBlobs}
               fileType={fileType}
               fileUri={null}
               CIDs={fileCIDs}

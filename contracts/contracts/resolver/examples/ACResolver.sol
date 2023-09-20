@@ -143,7 +143,7 @@ contract ACResolver is SchemaResolver, AccessControl {
         return false;
     }
 
-    function hasAcccess(address sender, bytes32 schemaUID) external view returns(bool){
+    function hasAccess(address sender, bytes32 schemaUID) external view returns(bool){
         if((hasRole(role(schemaUID, "REVOKER"), sender) || (hasRole(keccak256(abi.encode(schemaUID, "ATTESTER")), sender)))){
             return true;
         }else if(!schemas[schemaUID].encrypted){

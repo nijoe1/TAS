@@ -158,6 +158,19 @@ export const getOffChainAttestationsForSchema = async (
   return data;
 };
 
+export const getOffChainAttestationsNumberForSchema = async (
+  chainID: number,
+  schemaUID: string
+) => {
+  // @ts-ignore
+  const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
+  const { data, error } = await orbis.getPosts({
+    tag: schemaUID,
+  });
+  console.log(data);
+  return data.length;
+};
+
 export const getUserOffChainAttestations = async (
   chainID: number,
   address: string
@@ -232,6 +245,7 @@ export const transformAndSortArrays = (array1: any[], array2: any[]) => {
   // Transform and format the sorted array
   const transformedArray = combinedArray.map((inputObject) => ({
     uid: inputObject.uid,
+    refUID: inputObject.refUID,
     schemaUid: inputObject.schemaUid,
     fromAddress: inputObject.fromAddress,
     toAddress: inputObject.toAddress,

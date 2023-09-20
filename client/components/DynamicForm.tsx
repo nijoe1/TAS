@@ -18,6 +18,7 @@ type DynamicFormModalProps = {
   schemaUID?: string;
   isSubscription: boolean;
   isOpen: boolean;
+  resolver?:string
   onClose: () => void;
 };
 
@@ -26,6 +27,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   schemaUID,
   isSubscription,
   isOpen,
+  resolver,
   onClose,
 }) => {
   const chainID = useChainId();
@@ -213,6 +215,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                   attribute.name == "videoCIDs" ? (
                   <FileUploadForm
                     isSubscription={isSubscription}
+                    resolver={resolver}
                     chainID={chainID}
                     // @ts-ignore
                     schemaUID={schemaUID}

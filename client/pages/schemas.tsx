@@ -13,6 +13,7 @@ const Schemas = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [taken, setTaken] = useState(false);
   const [tableData, setTableData] = useState([]);
+  const [total, setTotal] = useState(0)
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -33,7 +34,8 @@ const Schemas = () => {
       let tableData = await getSchemas(chainID);
       setTaken(!taken);
       // @ts-ignore
-      setTableData(tableData);
+      setTableData(tableData.tableData);
+      setTotal(tableData.number)
     }
     if (!taken && chainID) {
       fetch();
@@ -57,11 +59,7 @@ const Schemas = () => {
                   </Typography>
                   <Typography color="black">Total Schemas:{"  "}</Typography>
                   <Typography className="ml-2" variant="h6" color="black">
-                    169
-                  </Typography>
-                  <Typography color="black">Unique Creators: {"  "}</Typography>
-                  <Typography className="ml-2" variant="h6" color="black">
-                    5016
+                    {total}
                   </Typography>
                   <Button
                     type="button"
