@@ -10,7 +10,7 @@ import { CONTRACTS } from "@/constants/contracts";
 import { useAccount } from "wagmi";
 import Notification from "./Notification";
 
-import { getGroupPrice } from "@/lib/tableland";
+import { getSubscriptionPrice } from "@/lib/tableland";
 import { getPrice } from "@/lib/contractReads";
 type DynamicFormModalProps = {
   schemaUID?: string;
@@ -57,8 +57,9 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
 
   useEffect(() => {
     const fetch = async () => {
-      setPrice(Number(getPrice(await getGroupPrice(chainID, schemaUID))));
-      setVisiblePrice((getPrice(await getGroupPrice(chainID, schemaUID))))
+      let res = await getSubscriptionPrice(chainID, schemaUID)
+      setPrice(Number(getPrice(res)));
+      setVisiblePrice((getPrice(res)))
     };
     fetch();
   }, []);

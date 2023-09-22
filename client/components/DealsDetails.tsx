@@ -5,25 +5,31 @@ const activeDealsContainerStyle: React.CSSProperties = {
   backgroundColor: "black",
   color: "white",
   padding: "20px",
-  borderRadius: "10px", // Added rounded corners
+  borderRadius: "10px",
+  width: "auto",
+  boxSizing: "border-box",
 };
 
 const activeDealsHeadingStyle: React.CSSProperties = {
   fontWeight: "bold",
   fontSize: "1.2em",
+  marginBottom: "10px",
 };
 
 const selectDealStyle: React.CSSProperties = {
   backgroundColor: "white",
   color: "black",
-  padding: "5px",
+  padding: "10px",
   marginTop: "10px",
+  borderRadius: "5px",
+  width: "100%",
+  boxSizing: "border-box",
 };
 
 const dealLinkStyle: React.CSSProperties = {
   color: "white",
   textDecoration: "underline",
-  marginLeft: "5px", // Added margin between DealID and icon
+  marginLeft: "10px", // Added margin between DealID and icon
 };
 
 const poweredByStyle: React.CSSProperties = {
@@ -34,7 +40,7 @@ const poweredByStyle: React.CSSProperties = {
 
 const logoStyle: React.CSSProperties = {
   height: "15px", // Set the height of the logo to make it smaller
-  marginRight: "10px", // Adjust spacing between the logo and text
+  marginLeft: "10px", // Adjust spacing between the logo and text
 };
 
 const ActiveDealsComponent = ({ activeDeals }: { activeDeals: string[] }) => {
@@ -45,10 +51,10 @@ const ActiveDealsComponent = ({ activeDeals }: { activeDeals: string[] }) => {
   };
 
   return (
-    <div className="mt-3"style={activeDealsContainerStyle}>
+    <div className="mt-5 mb-1" style={activeDealsContainerStyle}>
       <h3 style={activeDealsHeadingStyle}>Active Deals</h3>
-      {selectedDeal != "" && (
-        <div className="mt-2 flex flex-col items-center">
+      {selectedDeal !== "" && (
+        <div className="flex flex-col items-center">
           <p className="flex flex-wrap">
             DealID {selectedDeal}
             <a
@@ -78,6 +84,7 @@ const ActiveDealsComponent = ({ activeDeals }: { activeDeals: string[] }) => {
       ) : (
         <p className="mt-3">Replication in progress.</p>
       )}
+      {/* Powered by section */}
       <div style={poweredByStyle}>
         <span>Powered by Lighthouse</span>
         <img

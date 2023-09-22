@@ -213,6 +213,7 @@ console.log(data)
   const age = body.sig.message.time;
   const revocable = body.sig.message.revocable ? "true" : "false";
   const schemaUID = body.sig.message.schema;
+  const refUID = body.sig.message.refUID;
   const expirationTime = body.sig.message.expirationTime;
   let info = await getSchemaInfo(chainID, schemaUID);
   console.log(info)
@@ -220,6 +221,7 @@ console.log(data)
     creationTimestamp: age,
     expirationTimel: "0",
     schemaUID: schemaUID,
+    refUID:refUID,
     attester: fromAddress,
     recipient: toAddress,
     revocable: revocable,

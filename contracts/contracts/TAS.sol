@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.19;
 
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-import { EIP1271Verifier } from "./eip1271/EIP1271Verifier.sol";
+import {EIP1271Verifier} from "./eip1271/EIP1271Verifier.sol";
 
-import { ISchemaResolver } from "./resolver/ISchemaResolver.sol";
+import {ISchemaResolver} from "./resolver/ISchemaResolver.sol";
 
-import { ITASIndexer } from "./interfaces/ITASIndexer.sol";
+import {ITASIndexer} from "./interfaces/ITASIndexer.sol";
 
 // prettier-ignore
 import {
@@ -37,9 +37,9 @@ import {
     RevocationRequestData
 } from "./ITAS.sol";
 
-import { Semver } from "./Semver.sol";
+import {Semver} from "./Semver.sol";
 
-import { ISchemaRegistry, SchemaRecord } from "./ISchemaRegistry.sol";
+import {ISchemaRegistry, SchemaRecord} from "./ISchemaRegistry.sol";
 
 /// @title TAS
 /// @notice The Tableland Attestation Service protocol.
@@ -73,7 +73,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     ISchemaRegistry private immutable _schemaRegistry;
 
     ITASIndexer private tableland;
-    
+
     // The global mapping between attestations and their UIDs.
     mapping(bytes32 uid => Attestation attestation) private _db;
 
@@ -81,17 +81,21 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     mapping(bytes32 data => uint64 timestamp) private _timestamps;
 
     // The global mapping between data and their revocation timestamps.
-    mapping(address revoker => mapping(bytes32 data => uint64 timestamp) timestamps) private _revocationsOffchain;
+    mapping(address revoker => mapping(bytes32 data => uint64 timestamp) timestamps)
+        private _revocationsOffchain;
 
     /// @dev Creates a new TAS instance.
     /// @param registry The address of the global schema registry.
-    constructor(ITASIndexer _tableland, ISchemaRegistry registry) Semver(0, 0, 1) EIP1271Verifier("TAS", "0.0.1") {
+    constructor(
+        ITASIndexer _tableland,
+        ISchemaRegistry registry
+    ) Semver(0, 0, 1) EIP1271Verifier("TAS", "0.0.1") {
         if (address(registry) == address(0)) {
             revert InvalidRegistry();
         }
 
         _schemaRegistry = registry;
-        
+
         tableland = _tableland;
     }
 
@@ -101,11 +105,14 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     }
 
     /// @inheritdoc ITAS
-    function attest(AttestationRequest calldata request) external payable returns (bytes32) {
+    function attest(
+        AttestationRequest calldata request
+    ) external payable returns (bytes32) {
         AttestationRequestData[] memory data = new AttestationRequestData[](1);
         data[0] = request.data;
 
-        return _attest(request.schema, data, msg.sender, msg.value, true).uids[0];
+        return
+            _attest(request.schema, data, msg.sender, msg.value, true).uids[0];
     }
 
     /// @inheritdoc ITAS
@@ -117,11 +124,20 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
         AttestationRequestData[] memory data = new AttestationRequestData[](1);
         data[0] = delegatedRequest.data;
 
-        return _attest(delegatedRequest.schema, data, delegatedRequest.attester, msg.value, true).uids[0];
+        return
+            _attest(
+                delegatedRequest.schema,
+                data,
+                delegatedRequest.attester,
+                msg.value,
+                true
+            ).uids[0];
     }
 
     /// @inheritdoc ITAS
-    function multiAttest(MultiAttestationRequest[] calldata multiRequests) external payable returns (bytes32[] memory) {
+    function multiAttest(
+        MultiAttestationRequest[] calldata multiRequests
+    ) external payable returns (bytes32[] memory) {
         // Since a multi-attest call is going to make multiple attestations for multiple schemas, we'd need to collect
         // all the returned UIDs into a single list.
         uint256 length = multiRequests.length;
@@ -198,12 +214,16 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
                 last = i == length - 1;
             }
 
-            MultiDelegatedAttestationRequest calldata multiDelegatedRequest = multiDelegatedRequests[i];
+            MultiDelegatedAttestationRequest
+                calldata multiDelegatedRequest = multiDelegatedRequests[i];
             AttestationRequestData[] calldata data = multiDelegatedRequest.data;
 
             // Ensure that no inputs are missing.
             uint256 dataLength = data.length;
-            if (dataLength == 0 || dataLength != multiDelegatedRequest.signatures.length) {
+            if (
+                dataLength == 0 ||
+                dataLength != multiDelegatedRequest.signatures.length
+            ) {
                 revert InvalidLength();
             }
 
@@ -252,17 +272,27 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     }
 
     /// @inheritdoc ITAS
-    function revokeByDelegation(DelegatedRevocationRequest calldata delegatedRequest) external payable {
+    function revokeByDelegation(
+        DelegatedRevocationRequest calldata delegatedRequest
+    ) external payable {
         _verifyRevoke(delegatedRequest);
 
         RevocationRequestData[] memory data = new RevocationRequestData[](1);
         data[0] = delegatedRequest.data;
 
-        _revoke(delegatedRequest.schema, data, delegatedRequest.revoker, msg.value, true);
+        _revoke(
+            delegatedRequest.schema,
+            data,
+            delegatedRequest.revoker,
+            msg.value,
+            true
+        );
     }
 
     /// @inheritdoc ITAS
-    function multiRevoke(MultiRevocationRequest[] calldata multiRequests) external payable {
+    function multiRevoke(
+        MultiRevocationRequest[] calldata multiRequests
+    ) external payable {
         // We are keeping track of the total available ETH amount that can be sent to resolvers and will keep deducting
         // from it to verify that there isn't any attempt to send too much ETH to resolvers. PlTASe note that unless
         // some ETH was stuck in the contract by accident (which shouldn't happen in normal conditions), it won't be
@@ -282,7 +312,13 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
             MultiRevocationRequest calldata multiRequest = multiRequests[i];
 
             // Ensure to deduct the ETH that was forwarded to the resolver during the processing of this batch.
-            availableValue -= _revoke(multiRequest.schema, multiRequest.data, msg.sender, availableValue, last);
+            availableValue -= _revoke(
+                multiRequest.schema,
+                multiRequest.data,
+                msg.sender,
+                availableValue,
+                last
+            );
         }
     }
 
@@ -306,12 +342,16 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
                 last = i == length - 1;
             }
 
-            MultiDelegatedRevocationRequest memory multiDelegatedRequest = multiDelegatedRequests[i];
+            MultiDelegatedRevocationRequest
+                memory multiDelegatedRequest = multiDelegatedRequests[i];
             RevocationRequestData[] memory data = multiDelegatedRequest.data;
 
             // Ensure that no inputs are missing.
             uint256 dataLength = data.length;
-            if (dataLength == 0 || dataLength != multiDelegatedRequest.signatures.length) {
+            if (
+                dataLength == 0 ||
+                dataLength != multiDelegatedRequest.signatures.length
+            ) {
                 revert InvalidLength();
             }
 
@@ -358,7 +398,9 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     }
 
     /// @inheritdoc ITAS
-    function multiRevokeOffchain(bytes32[] calldata data) external returns (uint64) {
+    function multiRevokeOffchain(
+        bytes32[] calldata data
+    ) external returns (uint64) {
         uint64 time = _time();
 
         uint256 length = data.length;
@@ -381,9 +423,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
         return time;
     }
 
-
     /// @inheritdoc ITAS
-    function getAttestation(bytes32 uid) external view returns (Attestation memory) {
+    function getAttestation(
+        bytes32 uid
+    ) external view returns (Attestation memory) {
         return _db[uid];
     }
 
@@ -424,7 +467,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
             AttestationRequestData memory request = data[i];
 
             // Ensure that either no expiration time was set or that it was set in the future.
-            if (request.expirationTime != NO_EXPIRATION_TIME && request.expirationTime <= _time()) {
+            if (
+                request.expirationTime != NO_EXPIRATION_TIME &&
+                request.expirationTime <= _time()
+            ) {
                 revert InvalidExpirationTime();
             }
 
@@ -478,7 +524,14 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
             tableland.AttestationInserted(attestation);
         }
 
-        res.usedValue = _resolveAttestations(schemaRecord, attestations, values, false, availableValue, last);
+        res.usedValue = _resolveAttestations(
+            schemaRecord,
+            attestations,
+            values,
+            false,
+            availableValue,
+            last
+        );
 
         return res;
     }
@@ -542,11 +595,22 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
             attestations[i] = attestation;
             values[i] = request.value;
 
-            tableland.AttestationRevokedUpdate(attestation.uid, revoker, attestation.revocationTime);
-
+            tableland.AttestationRevokedUpdate(
+                attestation.uid,
+                revoker,
+                attestation.revocationTime
+            );
         }
 
-        return _resolveAttestations(schemaRecord, attestations, values, true, availableValue, last);
+        return
+            _resolveAttestations(
+                schemaRecord,
+                attestations,
+                values,
+                true,
+                availableValue,
+                last
+            );
     }
 
     /// @dev Resolves a new attestation or a revocation of an existing attestation.
@@ -597,10 +661,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
         }
 
         if (isRevocation) {
-            if (!resolver.revoke{ value: value }(attestation)) {
+            if (!resolver.revoke{value: value}(attestation)) {
                 revert InvalidRevocation();
             }
-        } else if (!resolver.attest{ value: value }(attestation)) {
+        } else if (!resolver.attest{value: value}(attestation)) {
             revert InvalidAttestation();
         }
 
@@ -629,7 +693,15 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     ) private returns (uint256) {
         uint256 length = attestations.length;
         if (length == 1) {
-            return _resolveAttestation(schemaRecord, attestations[0], values[0], isRevocation, availableValue, last);
+            return
+                _resolveAttestation(
+                    schemaRecord,
+                    attestations[0],
+                    values[0],
+                    isRevocation,
+                    availableValue,
+                    last
+                );
         }
 
         ISchemaResolver resolver = schemaRecord.resolver;
@@ -676,10 +748,17 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
         }
 
         if (isRevocation) {
-            if (!resolver.multiRevoke{ value: totalUsedValue }(attestations, values)) {
+            if (
+                !resolver.multiRevoke{value: totalUsedValue}(
+                    attestations,
+                    values
+                )
+            ) {
                 revert InvalidRevocations();
             }
-        } else if (!resolver.multiAttest{ value: totalUsedValue }(attestations, values)) {
+        } else if (
+            !resolver.multiAttest{value: totalUsedValue}(attestations, values)
+        ) {
             revert InvalidAttestations();
         }
 
@@ -694,7 +773,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     /// @param attestation The input attestation.
     /// @param bump A bump value to use in case of a UID conflict.
     /// @return Attestation UID.
-    function _getUID(Attestation memory attestation, uint32 bump) public pure returns (bytes32) {
+    function _getUID(
+        Attestation memory attestation,
+        uint32 bump
+    ) public pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
@@ -711,7 +793,7 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
             );
     }
 
-    function getTime()external view returns(uint256){
+    function getTime() external view returns (uint256) {
         return _time();
     }
 
@@ -743,8 +825,13 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     /// @param revoker The revoking account.
     /// @param data The data to revoke.
     /// @param time The timestamp the data was revoked with.
-    function _revokeOffchain(address revoker, bytes32 data, uint64 time) private {
-        mapping(bytes32 data => uint64 timestamp) storage revocations = _revocationsOffchain[revoker];
+    function _revokeOffchain(
+        address revoker,
+        bytes32 data,
+        uint64 time
+    ) private {
+        mapping(bytes32 data => uint64 timestamp)
+            storage revocations = _revocationsOffchain[revoker];
 
         if (revocations[data] != 0) {
             revert AlreadyRevokedOffchain();
@@ -759,7 +846,10 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
     /// @param uidLists The provided lists of UIDs.
     /// @param uidsCount Total UIDs count.
     /// @return A merged and flatten list of all the UIDs.
-    function _mergeUIDs(bytes32[][] memory uidLists, uint256 uidsCount) private pure returns (bytes32[] memory) {
+    function _mergeUIDs(
+        bytes32[][] memory uidLists,
+        uint256 uidsCount
+    ) private pure returns (bytes32[] memory) {
         bytes32[] memory uids = new bytes32[](uidsCount);
 
         uint256 currentIndex = 0;

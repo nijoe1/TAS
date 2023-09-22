@@ -2,19 +2,18 @@
 
 pragma solidity 0.8.19;
 
-import { SchemaRegistrationInput } from "../ISchemaRegistry.sol";
+import {SchemaRegistrationInput} from "../ISchemaRegistry.sol";
 
-import { TablelandDeployments, ITablelandTables } from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
+import {TablelandDeployments, ITablelandTables} from "@tableland/evm/contracts/utils/TablelandDeployments.sol";
 
-import { SQLHelpers } from "@tableland/evm/contracts/utils/SQLHelpers.sol";
+import {SQLHelpers} from "@tableland/evm/contracts/utils/SQLHelpers.sol";
 
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title SchemaTablelandIndexer
 contract SchemaTablelandIndexer is Ownable {
-
     ITablelandTables private tablelandContract;
 
     string[] createTableStatements;
@@ -29,24 +28,28 @@ contract SchemaTablelandIndexer is Ownable {
 
     string private constant SCHEMA_TABLE_PREFIX = "schema";
 
-    string private constant SCHEMA_SCHEMA = "schemaUID text primary key, schema text, resolver text, revocable text, name text, description text, creator text, creationTimestamp text";
+    string private constant SCHEMA_SCHEMA =
+        "schemaUID text primary key, schema text, resolver text, revocable text, name text, description text, creator text, creationTimestamp text";
 
-    string private constant SCHEMA_CATEGORIES_TABLE_PREFIX = "schema_categories";
+    string private constant SCHEMA_CATEGORIES_TABLE_PREFIX =
+        "schema_categories";
 
-    string private constant SCHEMA_CATEGORIES_SCHEMA = "schemaUID text, category text";
+    string private constant SCHEMA_CATEGORIES_SCHEMA =
+        "schemaUID text, category text";
 
     /// @dev Creates a new SchemaRegistry instance.
     constructor() {
-
         tablelandContract = TablelandDeployments.get();
 
         createTableStatements.push(
             SQLHelpers.toCreateFromSchema(SCHEMA_SCHEMA, SCHEMA_TABLE_PREFIX)
         );
         createTableStatements.push(
-            SQLHelpers.toCreateFromSchema(SCHEMA_CATEGORIES_SCHEMA, SCHEMA_CATEGORIES_TABLE_PREFIX)
+            SQLHelpers.toCreateFromSchema(
+                SCHEMA_CATEGORIES_SCHEMA,
+                SCHEMA_CATEGORIES_TABLE_PREFIX
+            )
         );
-
 
         tableIDs = tablelandContract.create(
             address(this),
@@ -54,17 +57,17 @@ contract SchemaTablelandIndexer is Ownable {
         );
 
         tables.push(SQLHelpers.toNameFromId(SCHEMA_TABLE_PREFIX, tableIDs[0]));
-        tables.push(SQLHelpers.toNameFromId(SCHEMA_CATEGORIES_TABLE_PREFIX, tableIDs[1]));
-
+        tables.push(
+            SQLHelpers.toNameFromId(SCHEMA_CATEGORIES_TABLE_PREFIX, tableIDs[1])
+        );
     }
-
 
     function SchemaRegistered(
         SchemaRegistrationInput memory input,
         bytes32 schemaUID
     ) public onlyOwner {
         uint256 size = input.categories.length;
-        if(tableRowsCounter + size > 100000){
+        if (tableRowsCounter + size > 100000) {
             RenewTables();
         }
         mutate(
@@ -78,7 +81,9 @@ contract SchemaTablelandIndexer is Ownable {
                     ",",
                     SQLHelpers.quote(input.schema),
                     ",",
-                    SQLHelpers.quote(Strings.toHexString(address(input.schemaResolver))),
+                    SQLHelpers.quote(
+                        Strings.toHexString(address(input.schemaResolver))
+                    ),
                     ",",
                     SQLHelpers.quote(input.revocable ? "true" : "false"),
                     ",",
@@ -92,20 +97,20 @@ contract SchemaTablelandIndexer is Ownable {
                 )
             )
         );
-        for(uint i = 0; i < input.categories.length; i++){
+        for (uint i = 0; i < input.categories.length; i++) {
             mutate(
-            tableIDs[1],
-            SQLHelpers.toInsert(
-                SCHEMA_CATEGORIES_TABLE_PREFIX,
                 tableIDs[1],
-                "schemaUID, category",
-                string.concat(
-                    SQLHelpers.quote(bytes32ToString(schemaUID)),
-                    ",",
-                    SQLHelpers.quote(input.categories[i])
+                SQLHelpers.toInsert(
+                    SCHEMA_CATEGORIES_TABLE_PREFIX,
+                    tableIDs[1],
+                    "schemaUID, category",
+                    string.concat(
+                        SQLHelpers.quote(bytes32ToString(schemaUID)),
+                        ",",
+                        SQLHelpers.quote(input.categories[i])
+                    )
                 )
-            )
-        );
+            );
         }
         tableRowsCounter += size;
     }
@@ -124,13 +129,18 @@ contract SchemaTablelandIndexer is Ownable {
         return string(abi.encodePacked("0x", converted));
     }
 
-    function RenewTables()internal{
-        tableIDs = tablelandContract.create(address(this), createTableStatements);
+    function RenewTables() internal {
+        tableIDs = tablelandContract.create(
+            address(this),
+            createTableStatements
+        );
 
         tables.push(SQLHelpers.toNameFromId(SCHEMA_TABLE_PREFIX, tableIDs[0]));
-        tables.push(SQLHelpers.toNameFromId(SCHEMA_CATEGORIES_TABLE_PREFIX, tableIDs[1]));
+        tables.push(
+            SQLHelpers.toNameFromId(SCHEMA_CATEGORIES_TABLE_PREFIX, tableIDs[1])
+        );
 
-        tableRowsCounter = 0; 
+        tableRowsCounter = 0;
         tablesUpdates++;
     }
 

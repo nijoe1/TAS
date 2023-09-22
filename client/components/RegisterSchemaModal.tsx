@@ -334,10 +334,11 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                   <option value="imageCID">imageCID</option>
                   <option value="imageCIDs">imageCIDs</option>
 
-                  <option value="videoCID">VideoCID</option>
-                  <option value="videoCIDs">VideoCIDs</option>
+                  <option value="videoCID">videoCID</option>
+                  <option value="videoCIDs">videoCIDs</option>
 
-                  <option value="jsonCID">JSONCID</option>
+                  <option value="jsonCID">jsonCID</option>
+                  <option value="jsonCIDs">jsonCIDs</option>
                   {solidityTypes.map((type, typeIndex) => (
                     <option key={typeIndex} value={type}>
                       {type}

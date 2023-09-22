@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import { ISchemaResolver } from "./resolver/ISchemaResolver.sol";
+import {ISchemaResolver} from "./resolver/ISchemaResolver.sol";
 
 /// @notice A struct representing a record for a submitted schema.
 struct SchemaRecord {
@@ -24,9 +24,7 @@ struct SchemaRegistrationInput {
 /// @title ISchemaRegistry
 /// @notice The interface of global attestation schemas for the Tableland Attestation Service protocol.
 interface ISchemaRegistry {
-
-
-    function register(        
+    function register(
         SchemaRegistrationInput memory input
     ) external returns (bytes32);
 

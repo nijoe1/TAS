@@ -46,10 +46,14 @@ export function DashboardPage({}) {
 
   useEffect(() => {
     async function fetch(user: `0x${string}`) {
-      let allAttestations = await getAllUserAttestations(chainID, user);
+      let userr = user as string;
+      let allAttestations = await getAllUserAttestations(
+        chainID,
+        userr.toLowerCase() as `0x${string}`
+      );
       let allRecievedAttestations = await getAllUserRecievedAttestations(
         chainID,
-        user
+        userr.toLowerCase() as `0x${string}`
       );
       let createdSchemas = await getUserCreatedSchemas(chainID, user);
 
@@ -73,7 +77,7 @@ export function DashboardPage({}) {
     if (!taken && chainID && user) {
       fetch(user as `0x${string}`);
     }
-  },[]);
+  }, [router]);
 
   return (
     <div
@@ -82,7 +86,7 @@ export function DashboardPage({}) {
       <Navbar />
 
       <div className="flex flex-col items-center mt-10">
-        <ProfileCard onDataFetch={handleDataFetch}/>
+        <ProfileCard onDataFetch={handleDataFetch} />
         {isDataFetched && taken ? (
           <Tabs value="attestations" className="mx-auto mt-10">
             <TabsHeader

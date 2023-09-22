@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.4;
 
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /// @title Semver
 /// @notice A simple contract for managing contract versions.
@@ -31,7 +31,13 @@ contract Semver {
     function version() external view returns (string memory) {
         return
             string(
-                abi.encodePacked(Strings.toString(_major), ".", Strings.toString(_minor), ".", Strings.toString(_path))
+                abi.encodePacked(
+                    Strings.toString(_major),
+                    ".",
+                    Strings.toString(_minor),
+                    ".",
+                    Strings.toString(_path)
+                )
             );
     }
 }

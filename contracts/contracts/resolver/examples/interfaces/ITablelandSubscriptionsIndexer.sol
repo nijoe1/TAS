@@ -2,9 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-
 interface ITablelandSubscriptionsIndexer {
-
     function SchemaInfoInserted(
         bytes32 schemaUID,
         uint256 monthlySubscriptionPrice,
@@ -15,31 +13,26 @@ interface ITablelandSubscriptionsIndexer {
         bytes32 schemaUID,
         address[] memory contentCreators,
         uint256[] memory creatorsShares
-    )external;
+    ) external;
 
     function SchemaSubscriptionCreated(
         bytes32 schemaUID,
         address subscriber,
         uint256 subscriptionEndsAt
-    )external;
+    ) external;
 
     function SchemaSubscriptionUpdated(
         bytes32 schemaUID,
         address subscriber,
         uint256 subscriptionEndsAt
-    )external;
+    ) external;
 
-    function SchemaRevenueRecordCreated(
-        bytes32 schemaUID
-    )external;
+    function SchemaRevenueRecordCreated(bytes32 schemaUID) external;
 
     function SchemaRevenueUpdated(
         bytes32 schemaUID,
         uint256 totalClaimed
-    )external;
+    ) external;
 
-    function SchemaPriceUpdated(
-        bytes32 schemaUID,
-        uint256 newPrice
-    )external;
+    function SchemaPriceUpdated(bytes32 schemaUID, uint256 newPrice) external;
 }

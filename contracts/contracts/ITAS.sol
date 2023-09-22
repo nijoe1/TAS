@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import { ISchemaRegistry } from "./ISchemaRegistry.sol";
-import { Attestation, Signature } from "./Common.sol";
+import {ISchemaRegistry} from "./ISchemaRegistry.sol";
+import {Attestation, Signature} from "./Common.sol";
 
 /// @notice A struct representing the arguments of the attestation request.
 struct AttestationRequestData {
@@ -84,7 +84,6 @@ struct MultiDelegatedRevocationRequest {
 /// @title ITAS
 /// @notice TAS - Tableland Attestation Service interface.
 interface ITAS {
-
     /// @notice Returns the address of the global schema registry.
     /// @return The address of the global schema registry.
     function getSchemaRegistry() external view returns (ISchemaRegistry);
@@ -105,7 +104,9 @@ interface ITAS {
     ///             value: 0
     ///         }
     ///     })
-    function attest(AttestationRequest calldata request) external payable returns (bytes32);
+    function attest(
+        AttestationRequest calldata request
+    ) external payable returns (bytes32);
 
     /// @notice Attests to a specific schema via the provided ECDSA signature.
     /// @param delegatedRequest The arguments of the delegated attestation request.
@@ -170,7 +171,9 @@ interface ITAS {
     ///             value: 0
     ///         },
     ///     }])
-    function multiAttest(MultiAttestationRequest[] calldata multiRequests) external payable returns (bytes32[] memory);
+    function multiAttest(
+        MultiAttestationRequest[] calldata multiRequests
+    ) external payable returns (bytes32[] memory);
 
     /// @notice Attests to multiple schemas using via provided ECDSA signatures.
     /// @param multiDelegatedRequests The arguments of the delegated multi attestation requests. The requests should be
@@ -244,7 +247,9 @@ interface ITAS {
     ///         revoker: '0x244934dd3e31bE2c81f84ECf0b3E6329F5381992',
     ///         deadline: 1673891048
     ///     })
-    function revokeByDelegation(DelegatedRevocationRequest calldata delegatedRequest) external payable;
+    function revokeByDelegation(
+        DelegatedRevocationRequest calldata delegatedRequest
+    ) external payable;
 
     /// @notice Revokes existing attestations to multiple schemas.
     /// @param multiRequests The arguments of the multi revocation requests. The requests should be grouped by distinct
@@ -269,7 +274,9 @@ interface ITAS {
     ///             value: 0
     ///         },
     ///     }])
-    function multiRevoke(MultiRevocationRequest[] calldata multiRequests) external payable;
+    function multiRevoke(
+        MultiRevocationRequest[] calldata multiRequests
+    ) external payable;
 
     /// @notice Revokes existing attestations to multiple schemas via provided ECDSA signatures.
     /// @param multiDelegatedRequests The arguments of the delegated multi revocation attestation requests. The requests
@@ -321,17 +328,19 @@ interface ITAS {
     /// @notice Revokes the specified multiple bytes32 data.
     /// @param data The data to timestamp.
     /// @return The timestamp the data was revoked with.
-    function multiRevokeOffchain(bytes32[] calldata data) external returns (uint64);
-
+    function multiRevokeOffchain(
+        bytes32[] calldata data
+    ) external returns (uint64);
 
     /// @notice Returns an existing attestation by UID.
     /// @param uid The UID of the attestation to retrieve.
     /// @return The attestation data members.
-    function getAttestation(bytes32 uid) external view returns (Attestation memory);
+    function getAttestation(
+        bytes32 uid
+    ) external view returns (Attestation memory);
 
     /// @notice Checks whether an attestation exists.
     /// @param uid The UID of the attestation to retrieve.
     /// @return Whether an attestation exists.
     function isAttestationValid(bytes32 uid) external view returns (bool);
-
 }

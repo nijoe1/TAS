@@ -13,16 +13,10 @@ const LighthouseChains = {
   80001: {
     name: "Mumbai",
   },
-  5: {
-    name: "Goerli",
-  },
-  10: {
+  420: {
     name: "OptimismGoerli",
   },
-  11: {
-    name: "",
-  },
-  3124: {
+  314159: {
     name: "Calibration",
   },
 };
@@ -268,7 +262,7 @@ export const applyAccessConditions = async (
     {
       id: 1,
       chain: LighthouseChains[chainID].name,
-      method: "hasAcccess",
+      method: "hasAccess",
       standardContractType: "Custom",
       contractAddress: resolver,
       returnValueTest: {

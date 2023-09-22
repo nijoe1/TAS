@@ -560,39 +560,54 @@ export const getEncryptedFilesBlobs = async (
     name: string;
     value: string;
     blobs?: Blob[];
-    json?: any;
+    json?: any[];
     CIDs?: string[];
   }>,
   address: `0x${string}`
 ) => {
   let newRecords = [];
   const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
-
+  console.log(decodedData);
   for (const record of decodedData) {
-    record.json = undefined;
     record.blobs = [];
 
     if (
-      !["jsonCID", "imageCID", "videoCID", "imageCIDs", "videoCIDs"].includes(
-        record.name
-      )
+      ![
+        "jsonCID",
+        "jsonCIDs",
+        "imageCID",
+        "videoCID",
+        "imageCIDs",
+        "videoCIDs",
+      ].includes(record.name)
     ) {
       newRecords.push(record);
     } else if (record.name === "jsonCID") {
       const blob = await decrypt(record.value, address, jwt);
       const json = await parseBlobToJson(blob);
       record.CIDs = [];
-      record.json = json;
+      record.json = [json];
 
-      const decryptPromises = json.files.map((file: { CID: any }) =>
-        decrypt(file.CID, address, jwt)
-      );
-
-      // Await the promises in order
-      for (const [index, promise] of decryptPromises.entries()) {
-        record.blobs[index] = await promise;
-        record.CIDs[index] = json.files[index].CID;
+      for (const file of json.files) {
+        record.CIDs.push(file.CID);
+        let blob = await decrypt(file.CID, address, jwt);
+        record.blobs.push(blob);
       }
+      newRecords.push(record);
+    } else if (record.name === "jsonCIDs") {
+      const response = await fetch(getIpfsGatewayUri(record.value[0]));
+      const data = await response.json();
+
+      let cids = [];
+      data.CIDs.map(async (CID: any) => {
+        let blob = await decrypt(CID, address, jwt);
+        const json = await parseBlobToJson(blob);
+        record.json?.push(json);
+        record.blobs?.push(blob);
+        cids.push(CID);
+      });
+
+      newRecords.push(record);
     } else if (record.name === "imageCID" || record.name === "videoCID") {
       let blob = await decrypt(record.value, address, jwt);
       record.CIDs = [record.value];
@@ -606,8 +621,8 @@ export const getEncryptedFilesBlobs = async (
         let cids = [];
         data.CIDs.map(async (CID: any) => {
           let blob = await decrypt(CID, address, jwt);
-          record.blobs?.push(blob)
-          cids.push((CID));
+          record.blobs?.push(blob);
+          cids.push(CID);
         });
 
         record.CIDs = data.CIDs;
@@ -617,6 +632,7 @@ export const getEncryptedFilesBlobs = async (
       }
     }
   }
+  console.log(newRecords);
 
   return newRecords;
 };

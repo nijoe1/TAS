@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ImEyeBlocked ,ImEye, ImUnlocked, ImLock} from "react-icons/im";
+import { ImEyeBlocked, ImEye, ImUnlocked, ImLock } from "react-icons/im";
 import { MdDoNotDisturbAlt } from "react-icons/md";
 import { useChainId, useAccount, useContractRead } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts/index";
@@ -70,21 +70,22 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         )) as unknown as boolean;
         accessData.viewAccess = (Number(hasViewAccess) >
           0) as unknown as boolean;
-      } else if (resolverContract ==
+      } else if (
+        resolverContract ==
         // @ts-ignore
         CONTRACTS.ACResolver[chainid].contract.toLowerCase()
       ) {
-        let res = await getAttestRevokeAccess(chainid, address,uid);
+        let res = await getAttestRevokeAccess(chainid, address, uid);
         console.log(res);
         accessData.revokeAccess = res ? res.revokeAccess && isRevocable : false;
         accessData.attestAccess = res ? res.attestAccess : false;
-        accessData.viewAccess = (hasViewAccess2) ? true :false
+        accessData.viewAccess = hasViewAccess2 ? true : false;
       } else {
-        let res = await getAttestRevokeAccess(chainid, address,uid);
+        let res = await getAttestRevokeAccess(chainid, address, uid);
         console.log(res);
         accessData.revokeAccess = isRevocable;
         accessData.attestAccess = true;
-        accessData.viewAccess = true
+        accessData.viewAccess = true;
       }
       onAccessInfoChange(accessData);
 
@@ -100,36 +101,38 @@ const AccessBox: React.FC<AccessBoxProps> = ({
   }, [chainid, address]);
 
   return (
-<div className="border rounded-lg mx-auto p-4 flex items-center space-x-4">
-  {isSchema && (
-    <div className="flex items-center">
-      <span className="mr-2">Attest Access:</span>
-      {attestAccess ? (
-        <ImUnlocked className="p-1" size={20} />
-      ) : (
-        <ImLock className="p-1" size={20} />
-      )}
+    <div className="border rounded-lg mx-auto p-4 flex flex-wrap items-center space-x-4">
+      <div className=" mx-auto flex flex-wrap items-center space-x-4">
+        {isSchema && (
+          <div className="flex items-center">
+            <span className="mr-2">Attest Access:</span>
+            {attestAccess ? (
+              <ImUnlocked className="p-1" size={20} />
+            ) : (
+              <ImLock className="p-1" size={20} />
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <span className="mr-2">Revoke Access:</span>
+          {revokeAccess ? (
+            <ImUnlocked className="p-1" size={20} />
+          ) : (
+            <ImLock className="p-1" size={20} />
+          )}
+        </div>
+
+        <div className="flex items-center">
+          <span className="mr-2">View Access:</span>
+          {viewAccess ? (
+            <ImEye className="p-1" size={20} />
+          ) : (
+            <ImEyeBlocked className="p-1" size={20} />
+          )}
+        </div>
+      </div>
     </div>
-  )}
-
-  <div className="flex items-center">
-    <span className="mr-2">Revoke Access:</span>
-    {revokeAccess ? (
-      <ImUnlocked className="p-1" size={20} />
-    ) : (
-      <ImLock className="p-1" size={20} />
-    )}
-  </div>
-
-  <div className="flex items-center">
-    <span className="mr-2">View Access:</span>
-    {viewAccess ? (
-      <ImEye className="p-1" size={20} />
-    ) : (
-      <ImEyeBlocked className="p-1" size={20} />
-    )}
-  </div>
-</div>
   );
 };
 

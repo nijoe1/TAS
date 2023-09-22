@@ -109,12 +109,32 @@ const DecodedData: React.FC<DecodedDataProps> = ({
                           encrypted={isEncrypted}
                           fileUri={null}
                         />
+                      ) : getFileType(item.type) == "JSON" ? (
+                        <FileViewer
+                          filesBlobs={item.blobs}
+                          fileType={"JSON"}
+                          fileUri={null}
+                          encrypted={isEncrypted}
+                          CIDs={item.CIDs}
+                        />
+                      ) : getFileType(item.type) == "JSON[]" ? (
+                        <FileViewer
+                          filesBlobs={item.blobs}
+                          fileType={"JSON[]"}
+                          fileUri={null}
+                          encrypted={isEncrypted}
+                          CIDs={item.CIDs}
+                        />
                       ) : (
                         <FileViewer
                           filesBlobs={item.blobs}
                           fileType={getFileType(item.name)} // Use item.name to determine the file type
                           encrypted={isEncrypted}
-                          fileUri={getIpfsGatewayUri(item.name.endsWith("CIDs")?item.value[0]:item.value)}
+                          fileUri={getIpfsGatewayUri(
+                            item.name.endsWith("CIDs")
+                              ? item.value[0]
+                              : item.value
+                          )}
                         />
                       )}
                     </div>

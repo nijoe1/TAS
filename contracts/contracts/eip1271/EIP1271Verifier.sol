@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.19;
 
-import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import { Address } from "@openzeppelin/contracts/utils/Address.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 // prettier-ignore
 import {
@@ -14,7 +14,7 @@ import {
     RevocationRequestData
 } from "../ITAS.sol";
 
-import { DeadlineExpired, NO_EXPIRATION_TIME, Signature, InvalidSignature } from "../Common.sol";
+import {DeadlineExpired, NO_EXPIRATION_TIME, Signature, InvalidSignature} from "../Common.sol";
 
 /// @title EIP1271Verifier
 /// @notice EIP1271Verifier typed signatures verifier for EAS delegated attestations.
@@ -25,11 +25,13 @@ abstract contract EIP1271Verifier is EIP712 {
 
     // The hash of the data type used to relay calls to the attest function. It's the value of
     // keccak256("Attest(bytes32 schema,address recipient,uint64 expirationTime,bool revocable,bytes32 refUID,bytes data,uint256 value,uint256 nonce,uint64 deadline)").
-    bytes32 private constant ATTEST_TYPEHASH = 0xf83bb2b0ede93a840239f7e701a54d9bc35f03701f51ae153d601c6947ff3d3f;
+    bytes32 private constant ATTEST_TYPEHASH =
+        0xf83bb2b0ede93a840239f7e701a54d9bc35f03701f51ae153d601c6947ff3d3f;
 
     // The hash of the data type used to relay calls to the revoke function. It's the value of
     // keccak256("Revoke(bytes32 schema,bytes32 uid,uint256 value,uint256 nonce,uint64 deadline)").
-    bytes32 private constant REVOKE_TYPEHASH = 0x2d4116d8c9824e4c316453e5c2843a1885580374159ce8768603c49085ef424c;
+    bytes32 private constant REVOKE_TYPEHASH =
+        0x2d4116d8c9824e4c316453e5c2843a1885580374159ce8768603c49085ef424c;
 
     // The user readable name of the signing domain.
     string private _name;
@@ -39,7 +41,10 @@ abstract contract EIP1271Verifier is EIP712 {
 
     /// @dev Creates a new EIP1271Verifier instance.
     /// @param version The current major version of the signing domain
-    constructor(string memory name, string memory version) EIP712(name, version) {
+    constructor(
+        string memory name,
+        string memory version
+    ) EIP712(name, version) {
         _name = name;
     }
 
@@ -86,8 +91,13 @@ abstract contract EIP1271Verifier is EIP712 {
 
     /// @dev Verifies delegated attestation request.
     /// @param request The arguments of the delegated attestation request.
-    function _verifyAttest(DelegatedAttestationRequest memory request) internal {
-        if (request.deadline != NO_EXPIRATION_TIME && request.deadline <= _time()) {
+    function _verifyAttest(
+        DelegatedAttestationRequest memory request
+    ) internal {
+        if (
+            request.deadline != NO_EXPIRATION_TIME &&
+            request.deadline <= _time()
+        ) {
             revert DeadlineExpired();
         }
 
@@ -129,7 +139,10 @@ abstract contract EIP1271Verifier is EIP712 {
     /// @dev Verifies delegated revocation request.
     /// @param request The arguments of the delegated revocation request.
     function _verifyRevoke(DelegatedRevocationRequest memory request) internal {
-        if (request.deadline != NO_EXPIRATION_TIME && request.deadline <= _time()) {
+        if (
+            request.deadline != NO_EXPIRATION_TIME &&
+            request.deadline <= _time()
+        ) {
             revert DeadlineExpired();
         }
 
@@ -142,7 +155,16 @@ abstract contract EIP1271Verifier is EIP712 {
         }
 
         bytes32 hash = _hashTypedDataV4(
-            keccak256(abi.encode(REVOKE_TYPEHASH, request.schema, data.uid, data.value, nonce, request.deadline))
+            keccak256(
+                abi.encode(
+                    REVOKE_TYPEHASH,
+                    request.schema,
+                    data.uid,
+                    data.value,
+                    nonce,
+                    request.deadline
+                )
+            )
         );
         if (
             !SignatureChecker.isValidSignatureNow(

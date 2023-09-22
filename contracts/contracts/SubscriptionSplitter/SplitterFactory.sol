@@ -6,6 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SplitterFactory is Ownable {
     address public implementationAddress;
+
     // Constructor
     constructor(address _implementationAddress) {
         implementationAddress = _implementationAddress;
@@ -15,8 +16,8 @@ contract SplitterFactory is Ownable {
     function createSplitter(
         address[] memory payees,
         uint256[] memory shares
-    ) external returns(address splitterClone) {
-    // Create new resolver contract
+    ) external returns (address splitterClone) {
+        // Create new resolver contract
         splitterClone = Clones.clone(implementationAddress);
 
         (bool success, ) = splitterClone.call(
@@ -29,8 +30,9 @@ contract SplitterFactory is Ownable {
         require(success, "error deploying");
     }
 
-    
-    function changeImplementations(address _implementationAddress)public onlyOwner{
+    function changeImplementations(
+        address _implementationAddress
+    ) public onlyOwner {
         implementationAddress = _implementationAddress;
     }
 }

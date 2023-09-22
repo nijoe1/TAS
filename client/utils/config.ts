@@ -1,11 +1,7 @@
 import {
   polygonMumbai,
-  // polygonZkEvmTestnet,
-  goerli,
   optimismGoerli,
-  // filecoinHyperspace,
   filecoinCalibration,
-  // baseGoerli
 } from "wagmi/chains";
 
 export const ETH_CHAINS = [
@@ -20,30 +16,12 @@ export const ETH_CHAINS = [
       },
     },
   },
-  // polygonZkEvmTestnet,
-  {
-    ...goerli,
-    rpcUrls: {
-      public: {
-        http: [
-          "https://eth-goerli.g.alchemy.com/v2/KrBcDUxkHvNjkiyMe1l6kqvoI9hOb3vd",
-        ],
-      },
-      default: {
-        http: [
-          "https://eth-goerli.g.alchemy.com/v2/KrBcDUxkHvNjkiyMe1l6kqvoI9hOb3vd",
-        ],
-      },
-    },
-  },
   optimismGoerli,
   {
     ...filecoinCalibration,
     iconUrl:
       "https://gateway.lighthouse.storage/ipfs/QmXQMtADMsCqsYEvyuEA3PkFq2xtWAQetQFtkybjEXvk3Z",
   },
-  // filecoinHyperspace,
-  // baseGoerli,
 ];
 export const WALLET_CONNECT_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "";

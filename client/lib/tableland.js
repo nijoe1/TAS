@@ -1,42 +1,5 @@
 import axios from "axios";
-
-const tables = {
-  5: {
-    // SchemaRegistry
-    schema: "schema_5_1662",
-    // Tableland Attestation Service
-    attestation: "attestation_5_1663",
-    revocation: "revocation_5_1664",
-    // ContentSubscriptionsResolver
-    content_group: "group_5_1669",
-    content_admins: "creator_5_1670",
-    content_subscription: "subscription_5_1671",
-    group_revenue: "revenue_5_1672",
-    // ACResolver
-    attesters: "schema_attesters_5_1655",
-    revokers: "schema_revokers_5_1656",
-  },
-  80001: {
-    // SchemaRegistry
-    schema: "schema_80001_7433",
-    categories: "schema_categories_80001_7434",
-    // Tableland Attestation Service
-    attestation: "attestation_80001_7435",
-    revocation: "revocation_80001_7436",
-    info: "schema_info_80001_7441",
-    // ContentSubscriptionsResolver
-    content_group: "group_80001_7442",
-    content_admins: "creator_80001_7443",
-    content_subscription: "subscription_80001_7444",
-    group_revenue: "revenue_80001_7445",
-    // ACResolver
-    attesters: "schema_attesters_80001_7439",
-    revokers: "schema_revokers_80001_7440",
-
-    offChainTimestamp: "offChain_timestamp_80001_7437",
-    offChainRevocation: "offChain_revocation_80001_7438",
-  },
-};
+import {tables} from "@/lib/utils"
 
 const TablelandGateway =
   "https://testnets.tableland.network/api/v1/query?statement=";
@@ -81,23 +44,19 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
         ${tables[chainId].schema}.schema,
         ${tables[chainId].schema}.schemaUID,
         ${tables[chainId].schema}.creationTimestamp,
-        COUNT(${tables[chainId].attesters}.attester) AS attester_count,
-        COUNT(${tables[chainId].revokers}.revoker) AS revoker_count,
-        COUNT(${tables[chainId].info}.admin) AS admin_count
+        SUM(CASE WHEN ${tables[chainId].attesters}.attester = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS attester_count,
+        SUM(CASE WHEN ${tables[chainId].revokers}.revoker = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS revoker_count,
+        MAX(CASE WHEN ${tables[chainId].info}.admin = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS admin_count
     FROM
         ${tables[chainId].schema}
     LEFT JOIN
         ${tables[chainId].revokers}
     ON
-        ${tables[chainId].schema}.schemaUID = ${
-      tables[chainId].revokers
-    }.schemaUID
+        ${tables[chainId].schema}.schemaUID = ${tables[chainId].revokers}.schemaUID
     LEFT JOIN
         ${tables[chainId].attesters}
     ON
-        ${tables[chainId].schema}.schemaUID = ${
-      tables[chainId].attesters
-    }.schemaUID
+        ${tables[chainId].schema}.schemaUID = ${tables[chainId].attesters}.schemaUID
     LEFT JOIN
         ${tables[chainId].info}
     ON
@@ -324,19 +283,6 @@ export const getSchemaAttestations = async (chainId, schemaUID) => {
   }
 };
 
-export const getTotalAttestations = async (chainId, schemaUID) => {
-  const getAllSchemaAttestationsQuery =
-    TablelandGateway +
-    `SELECT COUNT(${tables[chainId].attestation}.uid) AS total
-    FROM ${tables[chainId].attestation}
-    WHERE ${tables[chainId].attestation}.schemaUID='${schemaUID}'`;
-  try {
-    const result = await axios.get(getAllSchemaAttestationsQuery);
-    return result.data[0].total;
-  } catch (err) {
-    return null;
-  }
-};
 
 export const getAttestation = async (chainId, uid) => {
   const getAttestationDataQuery =
@@ -423,7 +369,7 @@ export const getAttestRevokeAccess = async (chainId, address, schemaUID) => {
   }
 };
 
-export const getGroupPrice = async (chainId, schemaUID) => {
+export const getSubscriptionPrice = async (chainId, schemaUID) => {
   const getSchemaQuery =
     TablelandGateway +
     `SELECT ${tables[chainId].content_group}.monthlySubscriptionPrice AS Price FROM ${tables[chainId].content_group} WHERE

@@ -2,20 +2,19 @@
 
 pragma solidity 0.8.19;
 
-import { ISchemaResolver } from "./resolver/ISchemaResolver.sol";
+import {ISchemaResolver} from "./resolver/ISchemaResolver.sol";
 
-import { EMPTY_UID } from "./Common.sol";
+import {EMPTY_UID} from "./Common.sol";
 
-import { Semver } from "./Semver.sol";
+import {Semver} from "./Semver.sol";
 
-import { ISchemaRegistry, SchemaRecord, SchemaRegistrationInput } from "./ISchemaRegistry.sol";
+import {ISchemaRegistry, SchemaRecord, SchemaRegistrationInput} from "./ISchemaRegistry.sol";
 
 import {ISchemaTablelandIndexer} from "./interfaces/ISchemaTablelandIndexer.sol";
 
 /// @title SchemaRegistry
 /// @notice The global schema registry.
 contract SchemaRegistry is ISchemaRegistry, Semver {
-
     ISchemaTablelandIndexer tableland;
 
     error AlreadyExists();
@@ -24,9 +23,7 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
     mapping(bytes32 uid => SchemaRecord schemaRecord) private _registry;
 
     /// @dev Creates a new SchemaRegistry instance.
-    constructor(
-        ISchemaTablelandIndexer _tableland
-    ) Semver(0, 0, 1) {
+    constructor(ISchemaTablelandIndexer _tableland) Semver(0, 0, 1) {
         tableland = _tableland;
     }
 
@@ -48,10 +45,7 @@ contract SchemaRegistry is ISchemaRegistry, Semver {
         schemaRecord.uid = uid;
         _registry[uid] = schemaRecord;
 
-        tableland.SchemaRegistered(
-            input,
-            schemaRecord.uid
-        );
+        tableland.SchemaRegistered(input, schemaRecord.uid);
 
         return uid;
     }

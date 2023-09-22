@@ -142,3 +142,65 @@ export const parseBlobToJson = async (blob) => {
     throw new Error("Error parsing Blob as JSON: " + error.message);
   }
 };
+
+
+export const tables = {
+  314159: {
+    // SchemaRegistry
+    schema: "schema_314159_347",
+    categories: "schema_categories_314159_348",
+    // Tableland Attestation Service
+    attestation: "attestation_314159_349",
+    revocation: "revocation_314159_350",
+    offChainTimestamp: "offChain_timestamp_314159_351",
+    offChainRevocation: "offChain_revocation_314159_352",
+    // ContentSubscriptionsResolver
+    content_group: "group_314159_356",
+    content_admins: "creator_314159_357",
+    content_subscription: "subscription_314159_358",
+    group_revenue: "revenue_314159_359",
+    // ACResolver
+    info: "schema_info_314159_355",
+    attesters: "schema_attesters_314159_353",
+    revokers: "schema_revokers_314159_354",
+  },
+  80001: {
+    // SchemaRegistry
+    schema: "schema_80001_7469",
+    categories: "schema_categories_80001_7470",
+    // Tableland Attestation Service
+    attestation: "attestation_80001_7471",
+    revocation: "revocation_80001_7472",
+    offChainTimestamp: "offChain_timestamp_80001_7473",
+    offChainRevocation: "offChain_revocation_80001_7474",
+    // ContentSubscriptionsResolver
+    content_group: "group_80001_7478",
+    content_admins: "creator_80001_7479",
+    content_subscription: "subscription_80001_7480",
+    group_revenue: "revenue_80001_7481",
+    // ACResolver
+    attesters: "schema_attesters_80001_7475",
+    revokers: "schema_revokers_80001_7476",
+    info: "schema_info_80001_7477",
+  },
+
+  420: {
+    // SchemaRegistry
+    schema: "schema_420_230",
+    categories: "schema_categories_420_231",
+    // Tableland Attestation Service
+    attestation: "attestation_420_232",
+    revocation: "revocation_420_233",
+    offChainTimestamp: "offChain_timestamp_420_234",
+    offChainRevocation: "offChain_revocation_420_235",
+    // ContentSubscriptionsResolver
+    content_group: "group_420_239",
+    content_admins: "creator_420_240",
+    content_subscription: "subscription_420_241",
+    group_revenue: "revenue_420_242",
+    // ACResolver
+    attesters: "schema_attesters_420_236",
+    revokers: "schema_revokers_420_237",
+    info: "schema_info_420_238",
+  },
+};

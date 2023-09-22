@@ -6,7 +6,6 @@ import SchemaProfile from "@/components/SchemaProfile";
 import { useRouter } from "next/router";
 import { useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
-import SubscriptionItem from "@/components/SubscriptionItem";
 import { useAccount } from "wagmi";
 import { getSchemaData, SchemaInfo } from "@/lib/tas";
 import AttestationsTable from "@/components/AttestationsTable";
@@ -33,7 +32,7 @@ const Schema = () => {
   const [tableData, setTableData] = useState([]);
   const [schemaData, setSchemaData] = useState<SchemaData>();
   const [subscriptionResolver, setSubscriptionResolver] = useState();
-  const [isEncrypted, setIsEncrypted] = useState<boolean>(false)
+  const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
   const { address } = useAccount();
 
   const router = useRouter();
@@ -56,7 +55,7 @@ const Schema = () => {
       if (schemaUID) {
         let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
 
-        setIsEncrypted(await getIsEncrypted(chainID, schemaUID) as boolean)
+        setIsEncrypted((await getIsEncrypted(chainID, schemaUID)) as boolean);
         // @ts-ignore
         setTableData(res.tableDt);
         setSchemaData(res.schemaInfo ? res.schemaInfo : SchemaInfo);
@@ -82,42 +81,23 @@ const Schema = () => {
               schemaData={schemaData ? schemaData : SchemaInfo}
               onAccessInfoChange={handleAccessInfoChange}
               chainID={chainID}
-              isEncrypted={schemaData?.resolverContract ==
+              isEncrypted={
+                schemaData?.resolverContract ==
                 // @ts-ignore
                 CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
                   ? true
-                  : isEncrypted}
+                  : isEncrypted
+              }
             ></SchemaProfile>
 
-            {tableData.length > 0 &&
-            // @ts-ignore
-            CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() !==
-              schemaData?.resolverContract ? (
-              <AttestationsTable attestationsTableData={tableData} notSchemaUID={true}/>
-            ) : accessInfo.viewAccess || accessInfo.attestAccess ? (
-              <div className="grid grid-cols-3 gap-2 mx-auto">
-                {" "}
-                {/* Adjust the grid layout */}
-                {tableData.map((item, index) => (
-                  <SubscriptionItem
-                    key={index}
-                    itemData={{
-                      // @ts-ignore
-                      address: address,
-                      // @ts-ignore
-                      data: item.data,
-                      // @ts-ignore
-                      context: item.uid,
-                      // @ts-ignore
-                      from: item.fromAddress,
-                      // @ts-ignore
-                      age: item.age,
-                      // @ts-ignore
-                      type: item.type,
-                    }}
-                  />
-                ))}
-              </div>
+            {(tableData.length > 0 &&
+              // @ts-ignore
+              accessInfo.viewAccess) ||
+            accessInfo.attestAccess ? (
+              <AttestationsTable
+                attestationsTableData={tableData}
+                notSchemaUID={true}
+              />
             ) : (
               <div>No access</div>
             )}

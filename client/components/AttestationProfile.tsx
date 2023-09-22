@@ -14,10 +14,10 @@ import {
 } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
-import SubscriptionItem from "./SubscriptionItem";
 type AttestationProfileProps = {
   attestationData: {
     attestationUID: string;
+    refUID: string;
     context: string;
     created: string;
     expiration: string;
@@ -125,6 +125,15 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
               }
             />
             <Field
+              label="refUID"
+              value={
+                <EthereumAddress
+                  address={attestationData.refUID}
+                  link={`/attestation?uid=${attestationData.refUID}`}
+                />
+              }
+            />
+            <Field
               label="attester"
               value={
                 <EthereumAddress
@@ -172,10 +181,6 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
         {/* Left Box */}
         <div className="items-center rounded-lg border mx-auto text-center flex flex-col">
           <Field label="Referencing Attestations" value={0} />
-          <Field
-            label="Referenced Attestation"
-            value={attestationData.referencedAttestation}
-          />
         </div>
 
         {/* Right Box */}
@@ -189,34 +194,13 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 
         {
           // @ts-ignore
-          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() ==
-            attestationData?.resolver && accessInfo.viewAccess ? (
-            <div className="mx-auto flex flex-col items-center justify-center">
-              {" "}
-              {/* Adjust the grid layout */}
-              <SubscriptionItem
-                key={0}
-                itemData={{
-                  // @ts-ignore
-                  address: address,
-                  // @ts-ignore
-                  data: attestationData.data,
-                  // @ts-ignore
-                  context: attestationData.uid,
-                  // @ts-ignore
-                  from: attestationData.from,
-                  // @ts-ignore
-                  age: attestationData.created,
-                  // @ts-ignore
-                  type: type,
-                }}
-              />
-            </div>
-          ) : // @ts-ignore
-          CONTRACTS.ACResolver[chainID].contract.toLowerCase() ==
+          (CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() ==
+            attestationData?.resolver ||
+            // @ts-ignore
+            (CONTRACTS.ACResolver[chainID].contract.toLowerCase() ==
               attestationData?.resolver &&
-            isEncrypted &&
-            accessInfo.viewAccess ? (
+              isEncrypted)) &&
+          accessInfo.viewAccess ? (
             <div className="mx-auto text-center items-center border rounded-xl p-4">
               <div className="text-xl font-semibold">Decoded Data</div>
               <DecodedData
