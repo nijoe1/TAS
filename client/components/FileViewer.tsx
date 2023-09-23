@@ -43,6 +43,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
   useEffect(() => {
     const getFilesContent = async () => {
+      console.log(fileType, fileUri, filesBlobs, encrypted);
       try {
         if ((filesBlobs || fileUri) && fileType === "JSON") {
           const response = await fetch(
@@ -50,7 +51,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
           );
           const data = await response.json();
           setJsonContent([data]);
-          await fetchDeals([fileUri || ""]);
+          await fetchDeals([CIDs && CIDs[0] || ""]);
         }
 
         if (filesBlobs && (filesBlobs || fileUri) && fileType === "JSON[]") {
@@ -64,6 +65,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             })
           );
           setJsonContent(jsons);
+          console.log(CIDs)
           await fetchDeals(CIDs || []);
         }
 
@@ -102,6 +104,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
       } catch (error) {
         console.error("Error fetching JSON content:", error);
       }
+      console.log(fileType, encrypted);
     };
 
     getFilesContent();
@@ -130,11 +133,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
             </Carousel>
           )}
 
-          {fileType === "Image" && (
+          {fileType === "Image"  && (
             <ImageViewer
               fileSrc={
-                fileUri ||
-                (filesBlobs ? URL.createObjectURL(filesBlobs[0]) : "")
+                filesBlobs && filesBlobs.length > 0
+                  ? URL.createObjectURL(filesBlobs[0])
+                  : fileUri
+                  ? fileUri
+                  : ""
               }
               deals={deals[0]}
             />
@@ -197,8 +203,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
           {fileType === "Video" && !encrypted ? (
             <VideoViewer
               fileSrc={
-                fileUri ||
-                (filesBlobs ? URL.createObjectURL(filesBlobs[0]) : "")
+                // fileUri ||
+                filesBlobs ? URL.createObjectURL(filesBlobs[0]) : ""
               }
               deals={deals[0]}
             />

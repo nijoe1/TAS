@@ -3,7 +3,7 @@ import EthereumAddress from "@/components/EthereumAddress";
 import DecodedData from "@/components/DecodedData";
 import TimeCreated from "./TimeCreated";
 import Field from "@/components/Field";
-import { Typography } from "@material-tailwind/react";
+import { Card, Typography } from "@material-tailwind/react";
 import AccessBox from "./AccessBox";
 import {
   useContractWrite,
@@ -12,6 +12,8 @@ import {
   useWaitForTransaction,
   useAccount,
 } from "wagmi";
+import { getSchemaType } from "@/lib/contractReads";
+
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 type AttestationProfileProps = {
@@ -41,12 +43,14 @@ type AttestationProfileProps = {
   };
   type: string;
   isEncrypted?: boolean;
+  viewAccess?: boolean;
 };
 
 const AttestationProfile: React.FC<AttestationProfileProps> = ({
   attestationData,
   type,
   isEncrypted,
+  viewAccess,
 }) => {
   const [accessInfo, setAccessInfo] = useState({
     attestAccess: false,
@@ -63,7 +67,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 
   const { address } = useAccount();
 
-  const { config } = usePrepareContractWrite({
+  const { config,error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
     // @ts-ignore
@@ -102,164 +106,180 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
   });
 
   return (
-    <div className={`flex-grow mx-auto`}>
-      <div className="bg-white rounded-xl p-4">
-        <div className="border rounded-lg text-white rounded-lg bg-black mt-3 mx-auto flex flex-col items-center">
-          <Typography variant="h6">attestation Details</Typography>
-          <Typography className=" bold text-white rounded-lg mb-2 mt-1">{`${type}`}</Typography>
-        </div>
-        <div className="items-center flex flex-col text-center border rounded-lg mx-auto">
-          <Typography variant="h4">attestationUID</Typography>
-          <EthereumAddress address={attestationData.attestationUID} />
-        </div>
-        <div className="flex justify-between">
-          {/* Header */}
-          <div className="mb-4 mt-3 w-4/6 flex-col flex border rounded-lg items-center text-center">
-            <Field
-              label="schemaUID"
-              value={
-                <EthereumAddress
-                  address={attestationData.schemaUID}
-                  link={`/schema?schemaUID=${attestationData.schemaUID}`}
-                />
-              }
-            />
-            <Field
-              label="refUID"
-              value={
-                <EthereumAddress
-                  address={attestationData.refUID}
-                  link={`/attestation?uid=${attestationData.refUID}`}
-                />
-              }
-            />
-            <Field
-              label="attester"
-              value={
-                <EthereumAddress
-                  address={attestationData.from}
-                  link={`/dashboard?address=${attestationData.from}`}
-                />
-              }
-            />
-            <Field
-              label="recipient"
-              value={
-                attestationData.to ==
-                "0x0000000000000000000000000000000000000000" ? (
-                  <EthereumAddress address={attestationData.to} />
-                ) : (
+    <Card
+      color="white"
+      shadow={true}
+      className="mb-4 p-4 border border-black rounded-xl"
+    >
+      <div className={`flex flex-col mx-auto text-black`}>
+        <div className="bg-white rounded-xl p-4 flex flex-col mx-auto">
+          <div className="items-center flex flex-col text-center border rounded-lg mx-auto">
+            <Typography variant="h4">attestationUID</Typography>
+            <EthereumAddress address={attestationData.attestationUID} />
+          </div>
+          <div className="border rounded-lg text-white text-center rounded-lg bg-black mt-2 flex flex-col items-center mx-auto p-1">
+            <Typography className=" bold text-white rounded-lg ">{`${type}`}</Typography>
+          </div>
+          <div className="flex justify-between gap-2">
+            {/* Header */}
+            <div className="mb-2 mt-2 w-5/8 p-2 border rounded-lg ">
+              <Field
+                label="schemaUID"
+                value={
                   <EthereumAddress
-                    address={attestationData.to}
+                    address={attestationData.schemaUID}
+                    link={`/schema?schemaUID=${attestationData.schemaUID}`}
+                  />
+                }
+              />
+              <Field
+                label="refUID"
+                value={
+                  <EthereumAddress
+                    address={attestationData.refUID}
+                    link={`/attestation?uid=${attestationData.refUID}`}
+                  />
+                }
+              />
+              <Field
+                label="attester"
+                value={
+                  <EthereumAddress
+                    address={attestationData.from}
                     link={`/dashboard?address=${attestationData.from}`}
                   />
-                )
-              }
-            />
-            <Field
-              label="resolver"
-              value={<EthereumAddress address={attestationData.resolver} />}
-            />
-          </div>
-          <div className="w-2/6 mb-4 mt-3 items-center text-center border rounded-xl p-4">
-            <Field
-              label="created"
-              value={<TimeCreated createdAt={attestationData.created} />}
-            />
-            <Field label="expiration" value={attestationData.expiration} />
-            <Field
-              label="revoked"
-              value={attestationData.revoked ? "Yes" : "No"}
-            />
-            <Field
-              label="revocable"
-              value={attestationData.revocable ? "Yes" : "No"}
-            />
-          </div>
-        </div>
-
-        {/* Left Box */}
-        <div className="items-center rounded-lg border mx-auto text-center flex flex-col">
-          <Field label="Referencing Attestations" value={0} />
-        </div>
-
-        {/* Right Box */}
-        <AccessBox
-          uid={attestationData.schemaUID}
-          isSchema={false}
-          isRevocable={attestationData.revocable}
-          onAccessInfoChange={handleAccessInfoChange}
-          resolverContract={attestationData.resolver}
-        />
-
-        {
-          // @ts-ignore
-          (CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() ==
-            attestationData?.resolver ||
-            // @ts-ignore
-            (CONTRACTS.ACResolver[chainID].contract.toLowerCase() ==
-              attestationData?.resolver &&
-              isEncrypted)) &&
-          accessInfo.viewAccess ? (
-            <div className="mx-auto text-center items-center border rounded-xl p-4">
-              <div className="text-xl font-semibold">Decoded Data</div>
-              <DecodedData
-                decodedData={attestationData.decodedData}
-                isEncrypted={isEncrypted}
-              />
-            </div>
-          ) : !isEncrypted && accessInfo.viewAccess ? (
-            <div className="mx-auto text-center items-center border rounded-xl p-4">
-              <div className="text-xl font-semibold">Decoded Data</div>
-              <DecodedData
-                decodedData={attestationData.decodedData}
-                isEncrypted={isEncrypted}
-              />
-            </div>
-          ) : (
-            <div className="text-center mt-3">No access</div>
-          )
-        }
-
-        {attestationData.revocable && (
-          <div className="items-center flex flex-col ">
-            <button
-              disabled={attestationData.revoked}
-              onClick={() => {
-                if (type == "ONCHAIN") {
-                  // @ts-ignore
-                  write();
-                } else {
-                  // @ts-ignore
-                  RevokeOffChain();
                 }
-              }}
-              className={`text-white rounded-lg px-6 py-2 ${
-                !attestationData.revoked
-                  ? "hover:bg-white hover:text-black border bg-black border-black"
-                  : "bg-gray-600"
-              } mt-3`}
-            >
-              {attestationData.revoked
-                ? "already revoked"
-                : attestationData.revocable && type == "ONCHAIN"
-                ? "revoke"
-                : attestationData.revocable && type == "OFFCHAIN"
-                ? "revoke off-chain"
-                : "nonRevocable"}
-            </button>
-            <Notification
-              isLoading={isLoading}
-              isSuccess={isSuccess}
-              isError={isError}
-              wait={wait}
-              error={err}
-              success={succ}
-            />
+              />
+              <Field
+                label="recipient"
+                value={
+                  attestationData.to ==
+                  "0x0000000000000000000000000000000000000000" ? (
+                    <EthereumAddress address={attestationData.to} />
+                  ) : (
+                    <EthereumAddress
+                      address={attestationData.to}
+                      link={`/dashboard?address=${attestationData.from}`}
+                    />
+                  )
+                }
+              />
+              <Field
+                label="resolver"
+                value={<EthereumAddress address={attestationData.resolver} />}
+              />
+              <Field
+                label="Type"
+                value={
+                  <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
+                    {`${getSchemaType(attestationData.resolver, chainID)} (${
+                      !isEncrypted ? "Encrypted" : "NonEncrypted"
+                    })`}
+                  </p>
+                }
+              />
+            </div>
+            <div className="w-3/8 mb-4 mt-3 gap-1  border rounded-xl p-1">
+              <Field
+                label="created"
+                value={<TimeCreated createdAt={attestationData.created} />}
+              />
+              <Field
+                label="expiration"
+                value={
+                  <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
+                    {attestationData.expiration}
+                  </p>
+                }
+              />
+              <Field
+                label="revoked"
+                value={
+                  <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
+                    {`${attestationData.revoked ? "Yes" : "No"}`}
+                  </p>
+                }
+              />
+              <Field
+                label="revocable"
+                value={
+                  <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
+                    {`${attestationData.revocable ? "Yes" : "No"}`}
+                  </p>
+                }
+              />
+            </div>
           </div>
-        )}
+
+          {/* Left Box */}
+          <div className="items-center rounded-lg border mx-auto text-center flex flex-col mb-2">
+            <Field label="Referencing Attestations" value={0} />
+          </div>
+
+          {/* Right Box */}
+          <AccessBox
+            uid={attestationData.schemaUID}
+            isSchema={false}
+            isRevocable={attestationData.revocable}
+            onAccessInfoChange={handleAccessInfoChange}
+            resolverContract={attestationData.resolver}
+          />
+
+          {
+            // @ts-ignore
+            accessInfo.viewAccess && viewAccess ? (
+              <div className="flex flex-col mx-auto text-center items-center p-2 border rounded-xl mt-2">
+                <p className="text-xl font-semibold mb-1">Decoded Data</p>
+                <DecodedData
+                  decodedData={attestationData.decodedData}
+                  isEncrypted={isEncrypted}
+                />
+              </div>
+            ) : (
+              <div className="text-center mt-3">No access</div>
+            )
+          }
+
+          {attestationData.revocable && (
+            <div className="items-center flex flex-col ">
+              <button
+                disabled={attestationData.revoked}
+                onClick={() => {
+                  if (type == "ONCHAIN") {
+                    // @ts-ignore
+                    write();
+                  } else {
+                    // @ts-ignore
+                    RevokeOffChain();
+                  }
+                }}
+                className={`text-white rounded-lg px-6 py-2 ${
+                  !attestationData.revoked
+                    ? "hover:bg-white hover:text-black border bg-black border-black"
+                    : "bg-gray-600"
+                } mt-3`}
+              >
+                {attestationData.revoked
+                  ? "already revoked"
+                  : attestationData.revocable && type == "ONCHAIN"
+                  ? "revoke"
+                  : attestationData.revocable && type == "OFFCHAIN"
+                  ? "revoke off-chain"
+                  : "nonRevocable"}
+              </button>
+              <Notification
+                isLoading={isLoading}
+                isSuccess={isSuccess}
+                isError={isError}
+                wait={wait}
+                error={err}
+                success={succ}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Card>
   );
 };
 

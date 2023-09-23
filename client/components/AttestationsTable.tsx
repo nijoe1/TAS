@@ -39,7 +39,7 @@ const AttestationsTable: React.FC<AttestationsTableProps> = ({
   return (
     <div>
       {totalRows > 0 ? (
-        <div className="overflow-x-auto rounded-lg mt-10">
+        <div className="overflow-x-auto rounded-lg mt-2">
           <table className="min-w-full border border-gray-300">
             <thead className="bg-black">
               <tr>

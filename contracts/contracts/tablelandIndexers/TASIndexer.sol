@@ -105,8 +105,7 @@ contract TASIndexer is IERC721Receiver, Ownable {
     function AttestationInserted(
         Attestation memory attestation
     ) public onlyOwner {
-        string memory data = bytesToString(attestation.data);
-        require(strlen(data) <= 1024, "Tableland limitation");
+        require(strlen(attestation.dataBase64) <= 1024, "Tableland limitation");
         // Managing tableland rows limitation.
         if (tablesRowsCounter == 100000) {
             RenewTables();
@@ -136,7 +135,7 @@ contract TASIndexer is IERC721Receiver, Ownable {
                     ",",
                     SQLHelpers.quote(Strings.toHexString(attestation.attester)),
                     ",",
-                    SQLHelpers.quote(data)
+                    SQLHelpers.quote(attestation.dataBase64)
                 )
             )
         );
@@ -257,22 +256,6 @@ contract TASIndexer is IERC721Receiver, Ownable {
     }
 
     function bytes32ToString(bytes32 data) public pure returns (string memory) {
-        // Fixed buffer size for hexadecimal convertion
-        bytes memory converted = new bytes(data.length * 2);
-
-        bytes memory _base = "0123456789abcdef";
-
-        for (uint256 i = 0; i < data.length; i++) {
-            converted[i * 2] = _base[uint8(data[i]) / _base.length];
-            converted[i * 2 + 1] = _base[uint8(data[i]) % _base.length];
-        }
-
-        return string(abi.encodePacked("0x", converted));
-    }
-
-    function bytesToString(
-        bytes memory data
-    ) public pure returns (string memory) {
         // Fixed buffer size for hexadecimal convertion
         bytes memory converted = new bytes(data.length * 2);
 

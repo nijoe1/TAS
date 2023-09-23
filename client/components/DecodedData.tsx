@@ -25,6 +25,7 @@ const DecodedData: React.FC<DecodedDataProps> = ({
   };
 
   const getFileType = (name: string) => {
+    console.log(isEncrypted);
     if (name.endsWith("CIDs")) {
       const fileType = name.split("CID")[0];
       if (fileType === "image") return "Image[]";
@@ -57,23 +58,23 @@ const DecodedData: React.FC<DecodedDataProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap gap-2">
       {decodedData &&
         decodedData.map((item: any, index: any) => (
           <div
-            className="bg-black flex flex-col font-bold text-white mx-auto rounded-lg px-2 py-1 text-xs m-1"
+            className="bg-black flex flex-col items-center gap-1 text-center font-bold text-white mx-auto rounded-lg px-2 py-1 text-xs m-1"
             key={index}
           >
-            <span className="font-bold border rounded-lg mt-1 mb-1 p-1">
+            <span className="font-bold border rounded-lg   p-1">
               {item.type.toUpperCase()}
             </span>
-            <span className="font-bold border rounded-lg mb-1 p-1">
+            <span className="font-bold border rounded-lg  p-1">
               {item.name}
             </span>
             {!checkName(item.name) ? (
               <EthereumAddress
                 className="border-white text-center items-center bg-white p-1"
-                address={item.value}
+                address={item.value} stringLength={7}
               />
             ) : (
               <div
@@ -81,7 +82,7 @@ const DecodedData: React.FC<DecodedDataProps> = ({
                 onClick={() => openModal(item.value)} // Pass item.value instead of item.name
               >
                 <GrView
-                  className="text-white bg-white rounded-sm p-1 "
+                  className="text-white bg-white rounded-md p-1 "
                   color="green"
                   size={20}
                 />

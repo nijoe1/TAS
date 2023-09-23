@@ -69,16 +69,16 @@ export default function Home() {
               queries. Unlock trust and on-chain potential with
               attestations—simple yet potent building blocks.
             </p>
-            <div className="flex flex-wrap justify-center">
+            <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => handleLinkClick("/schemas")}
-                className="px-8 py-3 m-2 text-lg font-semibold rounded-full bg-black text-white hover:bg-white hover:text-black transition duration-300"
+                className="px-8 py-3 m-2 text-lg font-semibold rounded-md bg-black text-white hover:bg-white hover:text-black transition duration-300"
               >
                 Get Started
               </button>
               <button
                 onClick={() => handleLinkClick("https://github.com/nijoe1/tas")}
-                className="px-8 py-3 m-2 text-lg border rounded-full hover:bg-black hover:text-white transition duration-300"
+                className="px-8 py-3 m-2 text-lg border rounded-md hover:bg-black hover:text-white transition duration-300"
               >
                 Source Code
               </button>

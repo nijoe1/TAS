@@ -108,6 +108,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       token,
       setOnProgress
     );
+    console.log(CID[0].Hash)
 
     let res = await applyAccessConditions(
       CID[0].Hash,
@@ -128,8 +129,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       case "videoCID":
         return (
           <div className="flex flex-col">
-            <label htmlFor={`${type.slice(0, -3)}s Upload`} className="mb-1">
-              {`${type.slice(0, -3)}s Upload`}
+            <label htmlFor={`${type.slice(0, -3)} Upload`} className="mb-1">
+              {`${type.slice(0, -3)} Upload`}
             </label>
             {onProgress < 0 ? (
               <input

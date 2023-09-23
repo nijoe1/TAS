@@ -79,7 +79,7 @@ const TimeCreated: React.FC<TimeCreatedProps> = ({
   }, [currentTimestamp, createdAt]);
 
   return (
-    <div>{displayTime !== null ? <p>{displayTime}</p> : <p>Loading...</p>}</div>
+    <div className="flex text-bolder text-black px-2 py-1  rounded-full text-sm whitespace-nowrap">{displayTime !== null ? <p>{displayTime}</p> : <p>Loading...</p>}</div>
   );
 };
 

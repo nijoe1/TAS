@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Input, Progress, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { validateInput, transformFormData } from "@/lib/utils";
+import { validateInput, transformFormData, decodeBase64ToHex, encodeHexToBase64 } from "@/lib/utils";
 import {
   useContractWrite,
   usePrepareContractWrite,
@@ -12,13 +12,15 @@ import {
 import { CONTRACTS } from "@/constants/contracts";
 import Notification from "./Notification";
 import AttestOffChain from "./AttestOffChain";
+import AttestByDelegate from "./AttestByDelegate";
+
 import FileUploadForm from "./FileUploadForm";
 type DynamicFormModalProps = {
   schema: string;
   schemaUID?: string;
   isSubscription: boolean;
   isOpen: boolean;
-  resolver?:string
+  resolver?: string;
   onClose: () => void;
 };
 
@@ -39,6 +41,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
   const [formData, setFormData] = useState({});
   const [data, setData] = useState("");
+  const [base64Data,setBase64Data] = useState("")
 
   const [formErrors, setFormErrors] = useState({});
   const [open, setOpen] = useState(isOpen);
@@ -51,14 +54,14 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   const [referencedAttestation, setReferencedAttestation] = useState(
     "0x0000000000000000000000000000000000000000000000000000000000000000"
   );
-  const { config } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
     // @ts-ignore
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "attest",
     args: [
-      [schemaUID, [recipient, 0, isRevocable, referencedAttestation, data, 0]],
+      [schemaUID, [recipient, 0, isRevocable, referencedAttestation, data, base64Data, 0]],
     ],
     value: BigInt(0),
   });
@@ -87,8 +90,23 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     } catch {
       // Handle errors
     }
+  }, [data]);
+
+  useEffect(() => {
+    try {
+      prepareData();
+    } catch {
+      // Handle errors
+    }
   }, [formData]);
 
+  useEffect(() => {
+    try {
+      prepareData();
+    } catch {
+      // Handle errors
+    }
+  }, [isOffChain]);
   const handleInputChange = (
     newValue: any,
     attributeName: any,
@@ -106,7 +124,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         attributeName == "imageCIDs"
       ) {
         // For array attributes, update the attribute directly within the array
-        console.log(newValue)
+        console.log(newValue);
         updatedFormData[attributeName] = newValue;
       } else {
         if (
@@ -132,8 +150,8 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
   const prepareData = () => {
     const errors = {};
-    let empty;
-    schemaArray.forEach((attribute) => {
+    let empty = false;
+    for (const attribute of schemaArray) {
       // @ts-ignore
       const error = validateInput(formData[attribute.name], attribute.type);
       console.log(error, formData);
@@ -142,17 +160,17 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         errors[attribute.name] = error;
       }
       // @ts-ignore
-      if (formData[attribute.name] === undefined) {
+      if (!formData[attribute.name]) {
         empty = true;
       }
-    });
-
-    if (!empty) {
-      console.log("Form data:", formData); // Move the logging here
-      let encodedData = encoder.encodeData(transformFormData(formData, schema));
-      setData(encodedData);
-      console.log(formData, "  ", data);
     }
+
+    console.log("Form data:", formData, data); // Move the logging here
+    let encodedData = encoder.encodeData(transformFormData(formData, schema));
+    console.log(formData, "  ", encodedData);
+    let b64 = encodeHexToBase64(encodedData)
+    setData(encodedData);
+    setBase64Data(b64)
   };
 
   return (
@@ -220,7 +238,12 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                     // @ts-ignore
                     schemaUID={schemaUID}
                     type={attribute.name}
-                    handleInputChange={handleInputChange}
+                    handleInputChange={(newValue, attrName, attrType) => {
+                      handleInputChange(newValue, attrName, attrType);
+                      try {
+                        prepareData();
+                      } catch {}
+                    }}
                   />
                 ) : (
                   <div className="flex flex-col">
@@ -245,7 +268,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
             ))}
             <div className="flex flex-col">
               <label className="mb-1">
-                {"Attestation Recipient (Optional)"}
+                {"Attestation Recipient (Optional-address)"}
               </label>
               <Input
                 size="lg"
@@ -259,7 +282,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
             </div>
             <div className="flex flex-col">
               <label className="mb-1">
-                {"Reference Attestation (Optional)"}
+                {"Reference Attestation (Optional-bytes32)"}
               </label>
               <Input
                 size="lg"
@@ -301,16 +324,18 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
               </Typography>
             </div>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             {!isOffChain ? (
               <button
                 type="button"
                 onClick={() => {
-                  // @ts-ignore
-                  write();
+                  try {
+                    // @ts-ignore
+                    write();
+                  } catch {}
                   onClose;
                 }}
-                className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+                className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
               >
                 Attest
               </button>
@@ -328,7 +353,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
             )}
             <button
               type="button"
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
               onClick={onClose}
             >
               Cancel
@@ -339,7 +364,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
       <Notification
         isLoading={isLoading}
         isSuccess={isSuccess}
-        isError={isError}
+        isError={error ? true : false}
         wait={wait}
         error={err}
         success={succ}

@@ -4,12 +4,19 @@ import {
   useAccount,
   useSignTypedData,
   useContractRead,
+  usePrepareContractWrite,
+  useContractWrite,
+  useWaitForTransaction,
 } from "wagmi";
 import { recoverTypedDataAddress, hexToSignature } from "viem";
 // @ts-ignore
 import { Orbis } from "@orbisclub/orbis-sdk";
 import { CONTRACTS } from "@/constants/contracts/index";
-import { getTypedData, primaryType, types, getPostData } from "@/lib/offchain";
+import {
+  primaryType,
+  AttestTypes,
+  getAttestDelegateTypedData,
+} from "@/lib/offchain";
 import crypto from "crypto";
 import Notification from "./Notification";
 interface Signature {
@@ -18,7 +25,7 @@ interface Signature {
   s: `0x${string}`;
 }
 
-interface TypedData {
+interface AttestDelegateTypedData {
   domain: {
     name: string;
     version: string;
@@ -26,14 +33,15 @@ interface TypedData {
     verifyingContract: `0x${string}`;
   };
   message: {
-    version: number;
     schema: `0x${string}`;
     recipient: `0x${string}`;
-    time: number;
     expirationTime: number; // Change to number
     revocable: boolean;
     refUID: `0x${string}`;
     data: `0x${string}`;
+    value: string; // ETH amount as a string
+    nonce: string; // The nonce value
+    deadline: string; // The deadline value
   };
   primaryType: string;
   types: any; // Replace with the actual types
@@ -43,22 +51,22 @@ interface SignProps {
   version: string;
   schema: `0x${string}`;
   recipient: `0x${string}`;
-  time: number;
   expirationTime: number;
   revocable: boolean;
   refUID: `0x${string}`;
   AttestationData: `0x${string}`;
+  Base64Data: string;
 }
 
 const orbis = new Orbis();
 
-const AttestOffChain = ({
+const AttestByDelegate = ({
   schema,
   recipient,
-  time,
   revocable,
   refUID,
   AttestationData,
+  Base64Data,
 }: SignProps) => {
   const chainID = useChainId();
   const { address } = useAccount();
@@ -73,46 +81,44 @@ const AttestOffChain = ({
     s: "0x",
   });
 
-  const [typedData, setTypedData] = useState<TypedData | null>(null);
-  // @ts-ignore
-  const { data: currentTimestamp } = useContractRead({
+  const [typedData, setTypedData] = useState<AttestDelegateTypedData | null>(
+    null
+  );
+
+  const { config, error: errr } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
     // @ts-ignore
     abi: CONTRACTS.TAS[chainID].abi,
-    functionName: "getTime",
-  });
-
-  function randomUint32() {
-    const uuid = crypto.randomBytes(16).toString("hex");
-
-    const M = parseInt(uuid[14], 16);
-    const N = parseInt(uuid[19], 16);
-    const uint32Value = (M << 4) | N;
-    return uint32Value;
-  }
-
-  const { data: uid } = useContractRead({
-    // @ts-ignore
-    address: CONTRACTS.TAS[chainID].contract,
-    // @ts-ignore
-    abi: CONTRACTS.TAS[chainID].abi,
-    functionName: "_getUID",
+    functionName: "attestByDelegation",
     args: [
       [
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
         schema,
-        currentTimestamp,
-        0,
-        0,
-        refUID,
-        recipient,
+        [recipient, 0, revocable, refUID, AttestationData, Base64Data, 0],
+        [decodedSig.v, decodedSig.r, decodedSig.s],
         address,
-        revocable,
-        AttestationData,
+        0,
       ],
-      randomUint32(),
     ],
+    value: BigInt(0),
+  });
+  const {
+    write,
+    data: txdata,
+    isError: isErrorr,
+    isLoading: isLoadingg,
+    isSuccess: isSuccesss,
+  } = useContractWrite(config);
+
+  const {
+    data: res,
+    isError: err,
+    isLoading: wait,
+    isSuccess: succ,
+  } = useWaitForTransaction({
+    confirmations: 2,
+
+    hash: txdata?.hash,
   });
 
   // @ts-ignore
@@ -127,39 +133,17 @@ const AttestOffChain = ({
       // @ts-ignore
       primaryType: primaryType,
       // @ts-ignore
-      types: types,
+      types: AttestTypes,
     });
-
-  const createPostContent = () => {
-    const postContent = getPostData(
-      schema,
-      recipient,
-      revocable,
-      refUID,
-      AttestationData,
-      decodedSig.v,
-      decodedSig.r,
-      decodedSig.s,
-      // @ts-ignore
-      uid,
-      TAS,
-      chainID,
-      currentTimestamp?.toString() || "",
-      address
-    );
-
-    return postContent;
-  };
 
   useEffect(() => {
     if (!done) {
-      let tdata: TypedData = getTypedData(
+      let tdata: AttestDelegateTypedData = getAttestDelegateTypedData(
         schema,
         recipient,
         revocable,
         refUID,
         AttestationData,
-        Number(currentTimestamp ? currentTimestamp : time),
         chainID,
         TAS
       );
@@ -169,6 +153,7 @@ const AttestOffChain = ({
     if (data && !doneAttest) {
       setSignature(data);
       const res = hexToSignature(data as `0x${string}`);
+      console.log(res, data);
       setDecodedSig({ v: res.v, r: res.r, s: res.s });
     }
     if (decodedSig.v !== BigInt(0)) {
@@ -183,7 +168,6 @@ const AttestOffChain = ({
     revocable,
     refUID,
     AttestationData,
-    time,
     chainID,
     TAS,
     decodedSig,
@@ -191,68 +175,11 @@ const AttestOffChain = ({
     error,
   ]);
 
-  const createPost = async () => {
-    let content = createPostContent();
-    const post = {
-      title: `uid: ${uid}`,
-      body: `Off chain attestation for TAS protocol https://tas.vercel.app/attestation?uid=${uid}&type=OFFCHAIN.`,
-      data: content,
-      mentions: [],
-      tags: [
-        {
-          slug: "attester",
-          title: address,
-        },
-        {
-          slug: `attester/${address?.toLowerCase()}/${TAS}`,
-          title: "attester",
-        },
-        {
-          slug: `recipient/${address?.toLowerCase()}/${TAS}`,
-          title: "recipient",
-        },
-        {
-          slug: schema,
-          title: schema,
-        },
-        {
-          slug: "refUID",
-          title: refUID,
-        },
-        {
-          slug: "time",
-          title: currentTimestamp?.toString(),
-        },
-        {
-          slug: "uid",
-          title: uid?.toString(),
-        },
-        {
-          slug: uid?.toString(),
-          title: uid?.toString(),
-        },
-        {
-          slug: `address:${TAS}/chainID:${chainID}`,
-          title: `address:${TAS}/chainID:${chainID}`,
-        },
-      ],
-      context: uid?.toString(),
-      // Other properties based on your requirements
-    };
-    await orbis.isConnected();
-    const res = await orbis.createPost(post);
-    console.log(res);
-    if (res.status == 200) {
-      setSuccess(true);
-    } else {
-      setError(true);
-    }
-  };
-
   const handleSignAndCreate = async () => {
     // await recover();
     if (decodedSig.v !== BigInt(0)) {
-      await createPost();
+      // @ts-ignore
+      write();
     }
   };
 
@@ -290,4 +217,4 @@ const AttestOffChain = ({
   );
 };
 
-export default AttestOffChain;
+export default AttestByDelegate;

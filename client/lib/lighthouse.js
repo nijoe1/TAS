@@ -111,7 +111,7 @@ export const uploadFolder = async (files, type, apiKey, setUploadProgress) => {
   return [jsonCID.data.Hash];
 };
 
-export const jsonCIDsUpload = async(apiKey, type, CIDs)=>{
+export const jsonCIDsUpload = async (apiKey, type, CIDs) => {
   // Create JSON object
   const json = {
     type: type,
@@ -136,7 +136,7 @@ export const jsonCIDsUpload = async(apiKey, type, CIDs)=>{
     dealParams
   );
   return [jsonCID.data.Hash];
-}
+};
 
 /* Deploy file along with encryption */
 export const uploadFileEncrypted = async (
@@ -236,13 +236,15 @@ export const generateLighthouseJWT = async (address, signEncryption) => {
 
 export const decrypt = async (cid, address, jwt) => {
   const conditions = await lighthouse.getAccessConditions(cid);
-
+  let decrypted;
   const { error, shards } = await recoverShards(address, cid, jwt, 3);
-
-  const { masterKey } = await recoverKey(shards);
-
-  const fileType = "application/json";
-  const decrypted = await lighthouse.decryptFile(cid, masterKey, fileType);
+  try {
+    const { masterKey } = await recoverKey(shards);
+    const fileType = "application/json";
+    decrypted = await lighthouse.decryptFile(cid, masterKey, fileType);
+  } catch {
+    console.log("error in decription")
+  }
   /*
     Response: blob
   */
@@ -257,7 +259,7 @@ export const applyAccessConditions = async (
   jwt,
   resolver
 ) => {
-  console.log(resolver)
+  console.log(resolver, chainID, uid);
   const conditions = [
     {
       id: 1,
@@ -294,6 +296,6 @@ export const applyAccessConditions = async (
     jwt,
     keyShards
   );
-  console.log(isSuccess)
+  console.log(isSuccess);
   return response;
 };

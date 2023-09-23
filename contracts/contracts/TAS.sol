@@ -489,7 +489,8 @@ contract TAS is ITAS, Semver, EIP1271Verifier {
                 recipient: request.recipient,
                 attester: attester,
                 revocable: request.revocable,
-                data: request.data
+                data: request.data,
+                dataBase64: request.dataBase64
             });
 
             // Look for the first non-existing UID (and use a bump seed/nonce in the rare case of a conflict).

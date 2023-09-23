@@ -27,7 +27,7 @@ const Notification: React.FC<NotificationProps> = ({
       setStarted(false);
     }
 
-    if (success) {
+    if (success || isError) {
       const timeout = setTimeout(() => {
         setIsVisible(false);
       }, 3000);
@@ -51,7 +51,7 @@ const Notification: React.FC<NotificationProps> = ({
   const notificationText = isLoading
     ? "Confirm Transaction..."
     : isError
-    ? "Transaction rejected"
+    ? "Transaction will fail Attest off chain or Add less data"
     : wait && !success
     ? "Wait until transaction is confirmed"
     : success

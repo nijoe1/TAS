@@ -33,7 +33,7 @@ export const getPostData = (
 
   const domain = {
     name: "TAS",
-    version: "1",
+    version: "0.0.1",
     chainId: chainId,
     verifyingContract: verifyingContract,
   };
@@ -84,7 +84,7 @@ export const getDomain = (
 ) => {
   const domain = {
     name: "TAS",
-    version: "1",
+    version: "0.0.1",
     chainId: chainID, // Ethereum chain ID
     verifyingContract: verifyingContract, // Contract address
   } as const;
@@ -103,6 +103,20 @@ export const types = {
     { name: "revocable", type: "bool" },
     { name: "refUID", type: "bytes32" },
     { name: "data", type: "bytes" },
+  ],
+} as const;
+
+export const AttestTypes = {
+  Attest: [
+    { name: "schema", type: "bytes32" },
+    { name: "recipient", type: "address" },
+    { name: "expirationTime", type: "uint64" },
+    { name: "revocable", type: "bool" },
+    { name: "refUID", type: "bytes32" },
+    { name: "data", type: "bytes" },
+    { name: "value", type: "uint256" },
+    { name: "nonce", type: "uint256" },
+    { name: "deadline", type: "uint64" },
   ],
 } as const;
 
@@ -132,6 +146,36 @@ export const getTypedData = (
     message: message,
     primaryType: primaryType,
     types: types,
+  };
+  return typedData;
+};
+
+export const getAttestDelegateTypedData = (
+  schema: `0x${string}`,
+  Recipient: `0x${string}`,
+  revocable: boolean,
+  refUID: `0x${string}`,
+  data: `0x${string}`,
+  chainID: number,
+  verifyingContract: `0x${string}`
+) => {
+  let domain = getDomain(chainID, verifyingContract);
+  let message = {
+    schema: schema,
+    recipient: Recipient,
+    expirationTime: 0, // Unix timestamp as a string
+    revocable: revocable, // Specify whether it's revocable or not
+    refUID: refUID,
+    data: data,
+    value: "0", // ETH amount as a string
+    nonce: "0", // The nonce value
+    deadline: "0", // The deadline value
+  } as const;
+  const typedData = {
+    domain: domain,
+    message: message,
+    primaryType: primaryType,
+    types: AttestTypes,
   };
   return typedData;
 };
@@ -178,7 +222,7 @@ export const getUserOffChainAttestations = async (
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
   const { data, error } = await orbis.getPosts({
-    tag: `attester/${address}`,
+    tag: `attester/${address?.toLowerCase()}/${TAS}`,
   });
   console.log(data);
   return data;
@@ -191,7 +235,7 @@ export const getUserOffChainRecievedAttestations = async (
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
   const { data, error } = await orbis.getPosts({
-    tag: `recipient/${address}`,
+    tag: `recipient/${address?.toLowerCase()}/${TAS}`,
   });
   console.log(data);
   return data;
@@ -204,7 +248,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
     context: `${uid}`,
     tag: uid,
   });
-console.log(data)
+  console.log(data);
   const body = JSON.parse(JSON.stringify(data[0].content.data));
 
   // Extracting relevant information
@@ -216,12 +260,12 @@ console.log(data)
   const refUID = body.sig.message.refUID;
   const expirationTime = body.sig.message.expirationTime;
   let info = await getSchemaInfo(chainID, schemaUID);
-  console.log(info)
+  console.log(info);
   const entry = {
     creationTimestamp: age,
     expirationTimel: "0",
     schemaUID: schemaUID,
-    refUID:refUID,
+    refUID: refUID,
     attester: fromAddress,
     recipient: toAddress,
     revocable: revocable,
@@ -232,7 +276,7 @@ console.log(data)
     // @ts-ignore
     resolver: info.resolver,
     // @ts-ignore
-    schema: info.schema
+    schema: info.schema,
   };
   return entry;
 };

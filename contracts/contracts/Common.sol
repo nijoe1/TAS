@@ -34,6 +34,7 @@ struct Attestation {
     address attester; // The attester/sender of the attestation.
     bool revocable; // Whether the attestation is revocable.
     bytes data; // Custom attestation data.
+    string dataBase64;
 }
 
 /// @notice A helper function to work with unchecked iterators in loops.

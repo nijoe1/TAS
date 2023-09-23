@@ -28,7 +28,7 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
     }, 500);
   };
 
-  function shortenString(inputString:any, maxLength:any) {
+  function shortenString(inputString:any, maxLength:any,dots:boolean) {
     if(inputString == "0x0000000000000000000000000000000000000000"){
       inputString = "ZERO_ADDRESS"
     }
@@ -40,20 +40,24 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
     }
 
     const firstPart = inputString.slice(0, maxLength );
+    if(dots){
+      return firstPart +"..."
+    }else{
+      return firstPart 
 
-    return firstPart + ".."
+    }
   }
 
   return (
     <span
-      className={` flex text center text-bolder text-black px-2 py-1 mx-auto rounded-full text-xxs whitespace-nowrap ${className}`}
+      className={` flex  text-bolder text-black ml-2 p-1 rounded-full text-xxs whitespace-nowrap ${className}`}
     >
       {copied ? (
         <div>
-          <p>copied!</p> <p>{stringLength? shortenString(formattedAddress, stringLength): shortenString(formattedAddress, 30)}</p>
+          <p>copied!</p> <p>{stringLength? shortenString(formattedAddress, stringLength,false): shortenString(formattedAddress, 30,true)}</p>
         </div>
       ) : (
-        stringLength? shortenString(formattedAddress, stringLength): shortenString(formattedAddress, 30)
+        stringLength? shortenString(formattedAddress, stringLength,false): shortenString(formattedAddress, 30,true)
       )}
 
       <div className="flex ">

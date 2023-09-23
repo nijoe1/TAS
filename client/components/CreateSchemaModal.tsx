@@ -4,8 +4,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import RegisterSchemaModal from "./RegisterSchemaModal";
 import RegisterSubscriptionSchemaModal from "./RegisterSubscriptionSchemaModal";
 import RegisterACSchemaModal from "./RegisterACSchemaModal";
-// import 'react-tagsinput/react-tagsinput.css'
-// import "@/styles/globals.css"
+
 type RegisterSchemaModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -19,7 +18,12 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 }) => {
   const [type, setType] = useState("Select schema type");
 
-  const schemaTypes = ["Select schema type", "Standard", "Subscription", "Access-Control"];
+  const schemaTypes = [
+    "Select schema type",
+    "Standard",
+    "Subscription",
+    "Access-Control",
+  ];
 
   const [open, setOpen] = useState(false);
 
@@ -31,16 +35,16 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     >
       <Card
         color="white"
-        shadow={false}
-        className="mb-4 p-4 border border-black rounded-xl"
+        shadow={true}
+        className="mb-4 p-4 border border-black rounded-xl flex items-center"
       >
         <div className="mb-4">
           <Typography variant="h4" color="black">
             Select Schema Type
           </Typography>
         </div>
-        <form className="mt-4">
-          <div className="mb-1 ">
+        <form className="mt-4 flex flex-col items-center text-center mx-auto">
+          <div className="mb-1 flex flex-col items-center mx-auto">
             <div className="mb-1 flex">
               <Tooltip
                 placement="right-start"
@@ -59,7 +63,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                   setOpen(!open);
                 }
               }}
-              className="attribute-select rounded-full px-4 py-2 border border-black mr-20"
+              className=" rounded-md px-4 py-2 border border-black "
             >
               {schemaTypes.map((type, typeIndex) => (
                 <option key={typeIndex} value={type}>
@@ -72,8 +76,8 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 isOpen={open}
                 onClose={function (): void {
                   setOpen(!open);
-                  onClose()
-                  setType("Select schema type")
+                  onClose();
+                  setType("Select schema type");
                 }}
                 onCreate={function (schemaData: any): void {
                   setOpen(!open);
@@ -85,8 +89,8 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 isOpen={open}
                 onClose={function (): void {
                   setOpen(!open);
-                  onClose()
-                  setType("Select schema type")
+                  onClose();
+                  setType("Select schema type");
                 }}
                 onCreate={function (schemaData: any): void {
                   setOpen(!open);
@@ -98,8 +102,8 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 isOpen={open}
                 onClose={function (): void {
                   setOpen(!open);
-                  onClose()
-                  setType("Select schema type")
+                  onClose();
+                  setType("Select schema type");
                 }}
                 onCreate={function (schemaData: any): void {
                   setOpen(!open);
@@ -110,7 +114,7 @@ const CreateSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <div className="flex justify-end">
             <button
               type="button"
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
               onClick={onClose}
             >
               Cancel

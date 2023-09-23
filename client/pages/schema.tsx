@@ -10,6 +10,7 @@ import { useAccount } from "wagmi";
 import { getSchemaData, SchemaInfo } from "@/lib/tas";
 import AttestationsTable from "@/components/AttestationsTable";
 import { getIsEncrypted } from "@/lib/tableland";
+import { Card } from "@material-tailwind/react";
 
 interface SchemaData {
   schemaUID: string;
@@ -54,8 +55,16 @@ const Schema = () => {
     async function fetch() {
       if (schemaUID) {
         let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
+        let resp = (await getIsEncrypted(chainID, schemaUID)) as boolean;
+        resp =
+          schemaData?.resolverContract ==
+          // @ts-ignore
+          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
+            ? true
+            : resp;
+        console.log(resp, "  : in shema");
 
-        setIsEncrypted((await getIsEncrypted(chainID, schemaUID)) as boolean);
+        setIsEncrypted(resp);
         // @ts-ignore
         setTableData(res.tableDt);
         setSchemaData(res.schemaInfo ? res.schemaInfo : SchemaInfo);
@@ -77,18 +86,19 @@ const Schema = () => {
       {taken ? (
         <>
           <div className="flex flex-col items-center">
-            <SchemaProfile
-              schemaData={schemaData ? schemaData : SchemaInfo}
-              onAccessInfoChange={handleAccessInfoChange}
-              chainID={chainID}
-              isEncrypted={
-                schemaData?.resolverContract ==
-                // @ts-ignore
-                CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
-                  ? true
-                  : isEncrypted
-              }
-            ></SchemaProfile>
+            
+              <SchemaProfile
+                schemaData={schemaData ? schemaData : SchemaInfo}
+                onAccessInfoChange={handleAccessInfoChange}
+                chainID={chainID}
+                isEncrypted={
+                  schemaData?.resolverContract ==
+                  // @ts-ignore
+                  CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
+                    ? true
+                    : isEncrypted
+                }
+              ></SchemaProfile>
 
             {(tableData.length > 0 &&
               // @ts-ignore

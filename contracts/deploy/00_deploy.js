@@ -9,7 +9,7 @@ const wallet = new ethers.Wallet(private_key, ethers.provider);
 
 module.exports = async ({ deployments }) => {
   const { deploy } = deployments;
-  console.log("Wallet+ Ethereum Address:", wallet.address);
+  // console.log("Wallet+ Ethereum Address:", wallet.address);
 
   // //deploy SchemaRegistry
   // const SchemaTablelandIndexer = await deploy("SchemaTablelandIndexer", {

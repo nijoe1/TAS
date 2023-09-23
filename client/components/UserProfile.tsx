@@ -122,8 +122,13 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
               {userProfile?.details?.profile?.description}
             </Typography>
           </CardBody>
-          <CardFooter className="flex justify-center  pt-1">
-            {update && <FaEdit onClick={toggleModal} />}
+          <CardFooter className="flex justify-center  pt-3">
+            {update && (
+              <div className="flex flex-wrap gap-1">
+                <p className="cursor-pointer" onClick={toggleModal}>edit profile:</p>
+                <FaEdit className="cursor-pointer mt-1" onClick={toggleModal} />
+              </div>
+            )}
 
             <div>
               {isModalOpen && (
@@ -185,7 +190,7 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
                     </div>
                     <div className="flex flex-col items-center">
                       <button
-                        className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+                        className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
                         onClick={handleUpdateProfile}
                       >
                         Update

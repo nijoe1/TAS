@@ -69,18 +69,12 @@ contract ContentSubscriptionResolver is SchemaResolver {
     function registerSubscriptionSchema(
         address[] memory contentCreators,
         uint256[] memory creatorsShares,
-        string[] memory categories,
         uint256 monthlySubscriptionPrice,
-        string memory schemaName,
-        string memory schemaDescription
+        SchemaRegistrationInput memory input
     ) external {
         require(monthlySubscriptionPrice > 0);
         // Register the schema and get its UID
-        bytes32 schemaUID = registerSchema(
-            schemaName,
-            schemaDescription,
-            categories
-        );
+        bytes32 schemaUID = registerSchema(input);
 
         SchemaInfo storage Schema = schemas[schemaUID];
 
@@ -113,21 +107,11 @@ contract ContentSubscriptionResolver is SchemaResolver {
     }
 
     function registerSchema(
-        string memory schemaName,
-        string memory schemaDescription,
-        string[] memory categories
+        SchemaRegistrationInput memory input
     ) internal returns (bytes32 schemaUID) {
-        // Register the schema and get its UID
-        schemaUID = schemaRegistry.register(
-            SchemaRegistrationInput(
-                schema,
-                schemaName,
-                schemaDescription,
-                categories,
-                schemaResolver,
-                revocable
-            )
-        );
+        input.schemaResolver = schemaResolver;
+        input.revocable = false;
+        schemaUID = schemaRegistry.register(input);
     }
 
     /**

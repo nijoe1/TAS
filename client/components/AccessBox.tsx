@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ImEyeBlocked, ImEye, ImUnlocked, ImLock } from "react-icons/im";
-import { MdDoNotDisturbAlt } from "react-icons/md";
 import { useChainId, useAccount, useContractRead } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts/index";
 import { getAttestAccess, getAttestRevokeAccess } from "@/lib/tableland";
+import { Router } from "next/router";
 
 type AccessBoxProps = {
   uid: string;
@@ -45,7 +45,7 @@ const AccessBox: React.FC<AccessBoxProps> = ({
     address: CONTRACTS.ACResolver[chainid].contract,
     // @ts-ignore
     abi: CONTRACTS.ACResolver[chainid].abi,
-    functionName: "hasAcccess",
+    functionName: "hasAccess",
     args: [address, uid],
   });
 
@@ -67,9 +67,8 @@ const AccessBox: React.FC<AccessBoxProps> = ({
           chainid,
           uid,
           address
-        )) as unknown as boolean;
-        accessData.viewAccess = (Number(hasViewAccess) >
-          0) as unknown as boolean;
+        )) as boolean
+        accessData.viewAccess = hasViewAccess || accessData.attestAccess?true:false
       } else if (
         resolverContract ==
         // @ts-ignore
@@ -98,10 +97,10 @@ const AccessBox: React.FC<AccessBoxProps> = ({
     if (chainid && !fetched) {
       fetch();
     }
-  }, [chainid, address]);
+  }, [chainid, address, Router]);
 
   return (
-    <div className="border rounded-lg mx-auto p-4 flex flex-wrap items-center space-x-4">
+    <div className="border rounded-lg mx-auto p-4 flex flex-wrap text-black items-center space-x-4">
       <div className=" mx-auto flex flex-wrap items-center space-x-4">
         {isSchema && (
           <div className="flex items-center">

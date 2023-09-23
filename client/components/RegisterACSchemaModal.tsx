@@ -29,7 +29,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const [schemaName, setSchemaName] = useState("");
   const [schemaDescription, setSchemaDescription] = useState("");
   const [attributes, setAttributes] = useState([
-    { type: "Select Type", name: "", isArray: false },
+    { type: "Select Type", name: "", isArray: false, readonly: false },
   ]);
   const [rawSchema, setRawSchema] = useState();
   const [categories, setCategories] = useState({ tags: [] });
@@ -94,17 +94,22 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
       updatedAttributes[index]["type"] = "string";
       updatedAttributes[index]["name"] = value;
-      // @ts-ignore
       updatedAttributes[index]["readonly"] = true;
-    }else if(value === "videoCIDs" || value === "imageCIDs" || value === "jsonCIDs"){
-      updatedAttributes[index]["type"] = "string[]";
+      updatedAttributes[index]["isArray"] = false;
+
+    } else if (
+      value === "videoCIDs" ||
+      value === "imageCIDs" ||
+      value === "jsonCIDs"
+    ) {
+      updatedAttributes[index]["type"] = "string";
+      updatedAttributes[index]["isArray"] = true;
+
       updatedAttributes[index]["name"] = value;
-      // @ts-ignore
       updatedAttributes[index]["readonly"] = true;
     } else {
       updatedAttributes[index]["type"] = value;
       updatedAttributes[index]["name"] = "";
-      // @ts-ignore
       updatedAttributes[index]["readonly"] = false;
     }
 
@@ -121,7 +126,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const addAttribute = () => {
     setAttributes([
       ...attributes,
-      { type: "Select Type", name: "", isArray: false },
+      { type: "Select Type", name: "", isArray: false ,readonly:false},
     ]);
     generateAttributeString();
   };
@@ -179,16 +184,19 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       <Card
         color="white"
         shadow={false}
-        className="mb-4 p-4 border border-black rounded-xl"
+        className="mb-4 p-4 border border-black rounded-xl card-container" // Added card-container class
+        style={{ maxHeight: "80vh", overflowY: "auto" }} // Added style for max height and scroll
       >
+        
         <div className="mb-4">
           <Typography variant="h4" color="black">
-            Create Schema
+            Create Access Control Schema
           </Typography>
           <Typography variant="h6" color="black">
             Add fields below that are relevant to your use case.
           </Typography>
         </div>
+        
         <form className="mt-4">
           <div className="mb-1 ">
             <div className="mb-1 flex">
@@ -244,7 +252,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <TagsInput
               inputProps={{ placeholder: "Add category" }}
               onlyUnique={true}
-              className="background-color-white"
+              className="background-color-white flex"
               value={categories.tags}
               onChange={handleTagChange}
             />
@@ -264,7 +272,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
             <TagsInput
-              className="background-color-white"
+              className="background-color-white flex"
               inputProps={{ placeholder: "Add attester" }}
               onlyUnique={true}
               value={attestersTags.tags}
@@ -289,13 +297,24 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <TagsInput
               inputProps={{ placeholder: "Add revoker" }}
               onlyUnique={true}
-              className="background-color-white"
+              className="background-color-white flex"
               value={revokersTags.tags}
               onChange={handleRevokersChange}
               validationRegex={ethereumAddressRegex} // Set the Ethereum address validation regex
             />
           </div>
+          <div className="mb-1 flex">
+            <Tooltip
+              placement="right-start"
+              content="describe your schema useCase"
+            >
+              <label htmlFor="picture" className="text-black font-medium">
+                Schema Fields
+              </label>
+            </Tooltip>
 
+            <FaInfoCircle className="mt-1 ml-2" />
+          </div>
           {attributes.map((attr, index) => (
             <div
               key={index}
@@ -347,14 +366,21 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <div className="flex justify-center items-center gap-2 ">
                 <input
                   type="checkbox"
+                  readOnly={attributes[index]["readonly"]}
                   checked={attr.isArray}
-                  onChange={() => handleCheckboxChange(index)}
+                  onChange={() => {
+                    if (!attributes[index]["readonly"])
+                      handleCheckboxChange(index);
+                  }}
                   className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ml-2 cursor-pointer"
                 />
                 <Typography
                   className="cursor-pointer focus:ring-blue-500 focus:ring-2 "
                   color="black"
-                  onClick={() => handleCheckboxChange(index)}
+                  onClick={() => {
+                    if (!attributes[index]["readonly"])
+                      handleCheckboxChange(index);
+                  }}
                 >
                   Array
                 </Typography>{" "}
@@ -384,8 +410,8 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               add field
             </Typography>
           </div>
-          <div className="mt-4">
-            <Typography variant="h6" color="black">
+          <div className="mt-4 flex">
+            <Typography className="ml-2"variant="h6" color="black">
               Generated schema :
             </Typography>
             <Typography color="black">{rawSchema}</Typography>
@@ -410,7 +436,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               encrypted
             </Typography>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
             <button
               type="button"
               // @ts-ignore
@@ -418,13 +444,13 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 // @ts-ignore
                 write();
               }}
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Submit
             </button>
             <button
               type="button"
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
               onClick={onClose}
             >
               Cancel

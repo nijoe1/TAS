@@ -28,7 +28,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
   const chainID = useChainId();
   const [months, setMonths] = useState(1);
   const [price, setPrice] = useState(0);
-  const [visiblePrice, setVisiblePrice] = useState("0")
+  const [visiblePrice, setVisiblePrice] = useState("0");
   const [open, setOpen] = useState(isOpen);
 
   const { config } = usePrepareContractWrite({
@@ -38,7 +38,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     abi: CONTRACTS.SubscriptionResolver[chainID].abi,
     functionName: "subscribe",
     args: [schemaUID, months],
-    value: BigInt(price*10 ** 18 * months),
+    value: BigInt(price * 10 ** 18 * months),
   });
   const { write, data, isLoading, isSuccess, isError } =
     useContractWrite(config);
@@ -57,9 +57,10 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
 
   useEffect(() => {
     const fetch = async () => {
-      let res = await getSubscriptionPrice(chainID, schemaUID)
+      let res = await getSubscriptionPrice(chainID, schemaUID);
+      console.log(res)
       setPrice(Number(getPrice(res)));
-      setVisiblePrice((getPrice(res)))
+      setVisiblePrice(getPrice(res));
     };
     fetch();
   }, []);
@@ -86,9 +87,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
         </Typography>
         <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96 flex flex-col items-center mx-auto">
           <div className="mb-4 flex flex-col items-center mx-auto gap-6">
-            <label className="mt-1 font-normal">
-              Months
-            </label>
+            <label className="mt-1 font-normal">Months</label>
             <Input
               type="number"
               size="lg"
@@ -104,13 +103,13 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
             <button
               type="button"
               onClick={write}
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
             >
               Subscribe
             </button>
             <button
               type="button"
-              className="bg-black text-white rounded-full px-6 py-2 hover:bg-white hover:text-black border border-black"
+              className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
               onClick={onClose}
             >
               Cancel

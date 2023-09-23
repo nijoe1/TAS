@@ -117,3 +117,33 @@ body {
 .react-tagsinput-tag a::before {
   content: " ×";
 }
+
+/* Add this CSS to your stylesheet */
+
+.card-container {
+  overflow-y: auto;
+  max-height: 80vh; /* Set a maximum height for the card to enable scrolling */
+}
+
+.card-container::-webkit-scrollbar {
+  width: 10px; /* Width of the scrollbar */
+}
+
+.card-container::-webkit-scrollbar-track {
+  background: #dbdada; /* Color of the scrollbar track */
+  border-radius: 4px; /* Rounded corners of the thumb */
+  border-color: #000;
+}
+
+.card-container::-webkit-scrollbar-thumb {
+  background: #000000; /* Color of the scrollbar thumb */
+  border-radius: 4px; /* Rounded corners of the thumb */
+  border-color: #000;
+
+}
+
+.card-container::-webkit-scrollbar-thumb:hover {
+  background: #000000; /* Color of the scrollbar thumb on hover */
+  border-color: #000;
+  cursor: pointer; /* Change cursor to pointer on hover */
+}

@@ -46,8 +46,9 @@ export const transformFormData = (formData, schema) => {
     return { type, name };
   });
 
-  for (const [name, value] of Object.entries(formData)) {
-    const type = getTypeForAttribute(name, schemaArray);
+  for (const attribute of schemaArray) {
+    const { name, type } = attribute;
+    const value = formData[name];
     transformedData.push({ name, value, type });
   }
 
@@ -123,7 +124,7 @@ export const getFileTypeFromAccept = (acceptValue, size) => {
   for (const [key, value] of Object.entries(allowedFileTypes)) {
     if (acceptValues.includes(key)) {
       if (size > 1) {
-        return `${value}[]`
+        return `${value}[]`;
       } else {
         return value;
       }
@@ -143,6 +144,29 @@ export const parseBlobToJson = async (blob) => {
   }
 };
 
+// Function to encode hex string to Base64
+export const encodeHexToBase64 = (hexString) => {
+  const cleanedHex = hexString.startsWith("0x")
+    ? hexString.slice(2)
+    : hexString;
+  const bytes = new Uint8Array(
+    cleanedHex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+  );
+  return btoa(String.fromCharCode.apply(null, bytes));
+};
+
+// Function to decode Base64 to hex string
+export const decodeBase64ToHex = (base64String) => {
+  const binaryString = atob(base64String);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const hexString = Array.from(bytes)
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+  return `0x${hexString}`;
+};
 
 export const tables = {
   314159: {
@@ -155,10 +179,10 @@ export const tables = {
     offChainTimestamp: "offChain_timestamp_314159_351",
     offChainRevocation: "offChain_revocation_314159_352",
     // ContentSubscriptionsResolver
-    content_group: "group_314159_356",
-    content_admins: "creator_314159_357",
-    content_subscription: "subscription_314159_358",
-    group_revenue: "revenue_314159_359",
+    content_group: "group_314159_363",
+    content_admins: "creator_314159_364",
+    content_subscription: "subscription_314159_365",
+    group_revenue: "revenue_314159_366",
     // ACResolver
     info: "schema_info_314159_355",
     attesters: "schema_attesters_314159_353",
@@ -166,22 +190,22 @@ export const tables = {
   },
   80001: {
     // SchemaRegistry
-    schema: "schema_80001_7469",
-    categories: "schema_categories_80001_7470",
+    schema: "schema_80001_7509",
+    categories: "schema_categories_80001_7510",
     // Tableland Attestation Service
-    attestation: "attestation_80001_7471",
-    revocation: "revocation_80001_7472",
-    offChainTimestamp: "offChain_timestamp_80001_7473",
-    offChainRevocation: "offChain_revocation_80001_7474",
+    attestation: "attestation_80001_7511",
+    revocation: "revocation_80001_7512",
+    offChainTimestamp: "offChain_timestamp_80001_7513",
+    offChainRevocation: "offChain_revocation_80001_7514",
     // ContentSubscriptionsResolver
-    content_group: "group_80001_7478",
-    content_admins: "creator_80001_7479",
-    content_subscription: "subscription_80001_7480",
-    group_revenue: "revenue_80001_7481",
+    content_group: "group_80001_7518",
+    content_admins: "creator_80001_7519",
+    content_subscription: "subscription_80001_7520",
+    group_revenue: "revenue_80001_7521",
     // ACResolver
-    attesters: "schema_attesters_80001_7475",
-    revokers: "schema_revokers_80001_7476",
-    info: "schema_info_80001_7477",
+    attesters: "schema_attesters_80001_7515",
+    revokers: "schema_revokers_80001_7516",
+    info: "schema_info_80001_7517",
   },
 
   420: {
@@ -194,10 +218,10 @@ export const tables = {
     offChainTimestamp: "offChain_timestamp_420_234",
     offChainRevocation: "offChain_revocation_420_235",
     // ContentSubscriptionsResolver
-    content_group: "group_420_239",
-    content_admins: "creator_420_240",
-    content_subscription: "subscription_420_241",
-    group_revenue: "revenue_420_242",
+    content_group: "group_420_243",
+    content_admins: "creator_420_244",
+    content_subscription: "subscription_420_245",
+    group_revenue: "revenue_420_246",
     // ACResolver
     attesters: "schema_attesters_420_236",
     revokers: "schema_revokers_420_237",

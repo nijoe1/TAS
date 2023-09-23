@@ -11,14 +11,14 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 10000,
-        // details: { yul: false },
+        runs: 200,
+        details: { yul: false },
       },
     },
   },
   // defaultNetwork: "calibration",
-  defaultNetwork: "optimism_goerli",
-  // defaultNetwork: "mumbai",
+  // defaultNetwork: "optimism_goerli",
+  defaultNetwork: "mumbai",
 
   networks: {
     goerli: {
@@ -45,9 +45,9 @@ module.exports = {
   etherscan: {
 
     // Mumbai
-    // apiKey: "JYMKRTHHFUSX4X11I1NQRNW6X7K2FJFJUU",
+    apiKey: "JYMKRTHHFUSX4X11I1NQRNW6X7K2FJFJUU",
     // Optimism Goerli
-    apiKey: "MPZZXTM8AFBE965THC1C7JPUA4BUA348KD",
+    // apiKey: "MPZZXTM8AFBE965THC1C7JPUA4BUA348KD",
     customChains: [],
   },
   paths: {

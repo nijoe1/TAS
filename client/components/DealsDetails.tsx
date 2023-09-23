@@ -66,7 +66,7 @@ const ActiveDealsComponent = ({ activeDeals }: { activeDeals: string[] }) => {
           </p>
         </div>
       )}
-      {activeDeals.length > 0 ? (
+      {activeDeals && activeDeals.length > 0 ? (
         <div>
           <select
             value={selectedDeal}

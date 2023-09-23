@@ -4,14 +4,13 @@ import { useRouter } from "next/router";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
-import { useAccount, useChainId, } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import StepperForm from "@/components/StepperForm";
-import { useConnect } from 'wagmi'
+import { useConnect } from "wagmi";
 
 const navLinks = [
   { text: "Attestations", href: "/attestations" },
   { text: "Schemas", href: "/schemas" },
-  { text: "Exclusive Content", href: "/" },
   { text: "Dashboard", href: "/dashboard" },
 ];
 
@@ -39,13 +38,13 @@ const CustomNavbar = () => {
   };
   const connect = useConnect({
     onSuccess(data) {
-      console.log('Connect', data)
+      console.log("Connect", data);
     },
-  })
+  });
 
   useEffect(() => {
-    if(!address){
-      connect
+    if (!address) {
+      connect;
     }
     const check = async () => {
       console.log(chainID);
@@ -62,7 +61,7 @@ const CustomNavbar = () => {
         changeChain
       ) {
         setCurrentChainID(chainID);
-        window.location.reload();
+        window.location.href = "/";
       }
       setChangeChain(true);
     };
@@ -76,7 +75,7 @@ const CustomNavbar = () => {
           <Image
             src="/logo.png"
             alt="TAS Logo"
-            onClick={()=>handleLinkClick("/")}
+            onClick={() => handleLinkClick("/")}
             width={125}
             height={37}
             className="rounded-lg cursor-pointer"
@@ -89,7 +88,8 @@ const CustomNavbar = () => {
               <Button
                 onClick={() => handleLinkClick(item.href)}
                 size="lg"
-                className="hover:bg-gray-200 hover:text-black hover:rounded-md w-full mx-1"
+                color="white"
+                className="hover:bg-gray-200 text-lg p-1 hover:text-black hover:rounded-md w-full mx-1"
               >
                 {item.text}
               </Button>

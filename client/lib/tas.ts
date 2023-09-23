@@ -25,6 +25,7 @@ import {
   decodeSchema,
   parseInputString,
   parseBlobToJson,
+  decodeBase64ToHex,
 } from "@/lib/utils";
 import { decrypt, getIpfsGatewayUri } from "./lighthouse";
 import { getPrice } from "./contractReads";
@@ -245,7 +246,8 @@ export const getAttestationData = async (
   }
 
   const encoder = new SchemaEncoder(attestation.schema);
-  const data = transformDecodedData(encoder.decodeData(attestation.data));
+  const data = decodeBase64ToHex(attestation.data)
+  const TransformedData = transformDecodedData(encoder.decodeData(data));
   return {
     // @ts-ignore
     attestationUID: uid,
@@ -261,10 +263,10 @@ export const getAttestationData = async (
     schemaUID: attestation.schemaUID,
     from: attestation.attester,
     to: attestation.recipient,
-    decodedData: data,
+    decodedData: TransformedData,
     referencedAttestation: "No reference",
     referencingAttestation: 0,
-    data: attestation.data,
+    data: data,
     context: uid,
   };
 };
@@ -535,25 +537,6 @@ export const getSchemaData = async (
   return { tableDt, schemaInfo };
 };
 
-export const getEncryptedJson = async (
-  schema: string,
-  data: `0x${string}`,
-  address: `0x${string}`
-) => {
-  const encoder = new SchemaEncoder(schema);
-  const ipfsCID = transformDecodedData(encoder.decodeData(data))[0].value;
-  const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
-  const blob = await decrypt(ipfsCID, address, jwt);
-  const json = await parseBlobToJson(blob);
-  let filesBlob = [];
-  let CIDs = [];
-  for (const file of json.files) {
-    filesBlob.push(await decrypt(file.CID, address, jwt));
-    CIDs.push(file.CID);
-  }
-  return { json, filesBlob, CIDs };
-};
-
 export const getEncryptedFilesBlobs = async (
   decodedData: Array<{
     type: string;
@@ -585,27 +568,21 @@ export const getEncryptedFilesBlobs = async (
     } else if (record.name === "jsonCID") {
       const blob = await decrypt(record.value, address, jwt);
       const json = await parseBlobToJson(blob);
-      record.CIDs = [];
+      record.CIDs = [record.value];
       record.json = [json];
-
-      for (const file of json.files) {
-        record.CIDs.push(file.CID);
-        let blob = await decrypt(file.CID, address, jwt);
-        record.blobs.push(blob);
-      }
+      record.blobs.push(blob);
       newRecords.push(record);
     } else if (record.name === "jsonCIDs") {
       const response = await fetch(getIpfsGatewayUri(record.value[0]));
       const data = await response.json();
 
-      let cids = [];
       data.CIDs.map(async (CID: any) => {
         let blob = await decrypt(CID, address, jwt);
         const json = await parseBlobToJson(blob);
         record.json?.push(json);
         record.blobs?.push(blob);
-        cids.push(CID);
       });
+      record.CIDs = data.CIDs;
 
       newRecords.push(record);
     } else if (record.name === "imageCID" || record.name === "videoCID") {
