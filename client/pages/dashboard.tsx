@@ -21,7 +21,7 @@ import { useChainId, useAccount } from "wagmi";
 import { useRouter } from "next/router";
 import AttestationsTable from "@/components/AttestationsTable";
 import SchemasTable from "@/components/SchemasTable";
-import UserDataTable from "@/components/userDataTable";
+import UserDataTable from "@/components/UserDataTable";
 
 export function DashboardPage({}) {
   const [isDataFetched, setIsDataFetched] = useState(false);

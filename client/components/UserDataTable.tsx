@@ -22,7 +22,7 @@ type fileObject = {
   lastUpdate: number;
   encryption: boolean;
 };
-interface userDataTableProps {
+interface UserDataTableProps {
   userDataTableData: fileObject[];
   balance: {
     dataLimit: number;
@@ -30,7 +30,7 @@ interface userDataTableProps {
   };
 }
 
-const userDataTable: React.FC<userDataTableProps> = ({
+const UserDataTable: React.FC<UserDataTableProps> = ({
   userDataTableData,
   balance,
 }) => {
@@ -248,7 +248,7 @@ const userDataTable: React.FC<userDataTableProps> = ({
   );
 };
 
-export default userDataTable;
+export default UserDataTable;
 
 interface FileViewerProps {
   filesBlobs: Blob[] | null;
