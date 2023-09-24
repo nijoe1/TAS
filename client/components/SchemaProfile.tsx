@@ -293,9 +293,8 @@ const BorderedBox: React.FC<BorderedBoxProps> = ({ strings }) => {
           </Typography>
           <div className="border p-4 rounded-md   flex flex-wrap gap-2 mx-auto">
             {strings.map((str, index) => (
-              <div className="flex flex-col  mx-auto">
+              <div key={index} className="flex flex-col mx-auto">
                 <span
-                  key={index}
                   className="bg-black rounded-md text-center text-white font-bold p-1"
                   style={{ flex: "1 0 30%", minWidth: "100px" }}
                 >
