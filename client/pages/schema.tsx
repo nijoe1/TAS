@@ -16,6 +16,7 @@ interface SchemaData {
   schemaUID: string;
   name: string;
   description: string;
+  categories:string[];
   created: string;
   creator: string;
   resolverContract: string;
@@ -78,7 +79,7 @@ const Schema = () => {
     if (!taken && schemaUID && chainID) {
       fetch();
     }
-  }, [schemaUID, chainID, address]);
+  }, [schemaUID, chainID, address,router]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>

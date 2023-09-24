@@ -17,7 +17,7 @@ import { FaEdit } from "react-icons/fa";
 
 const orbis = new Orbis();
 
-export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
+export function ProfileCard({ onDataFetch }: { onDataFetch: (isUser:boolean) => void }) {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -44,7 +44,7 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
   };
 
   const handleSimpleFileUpload = async (file: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
+    let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
     // Upload file and get encrypted CID
     const CID = await uploadFile(file, key, setOnProgress);
     setOnProgress(100);
@@ -65,39 +65,43 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: () => void }) {
   useEffect(() => {
     const fetch = async () => {
       await orbis.isConnected();
-
+      let temp
       let userDid = router.query.address;
       if (!userDid) {
         setUpdate(true);
-      } else if (userDid == address) {
-        setUpdate(true);
+        temp = true
+      } else if (userDid == address?.toLowerCase()) {
+        setUpdate(false);
+        temp = false
       } else {
         setUpdate(false);
+        temp = false
       }
+      let user
       if (!userDid) {
         // If address is null, get it from local storage
-        userDid = localStorage.getItem("userdid") || "";
+        user = localStorage.getItem("userdid") || "";
         console.log(userDid);
       } else {
-        userDid = `did:pkh:eip155:1:${userDid}`;
+        user = `did:pkh:eip155:1:${userDid}`;
       }
 
-      if (!userDid) {
+      if (!user) {
         return; // Handle the case when userDid is still null
       }
 
-      const { data, error } = await orbis.getProfile(userDid);
+      const { data, error } = await orbis.getProfile(user);
 
       if (data) {
         setUserProfile(data);
         setFetched(true);
-        onDataFetch(); // Invoke the callback when data is fetched
+        onDataFetch(temp); // Invoke the callback when data is fetched
       } else if (error) {
         console.error("Error fetching user profile: ", error);
       }
     };
     fetch();
-  }, []);
+  }, [router]);
 
   return (
     <div>

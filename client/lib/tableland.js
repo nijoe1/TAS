@@ -1,5 +1,5 @@
 import axios from "axios";
-import {tables} from "@/lib/utils"
+import { tables } from "@/lib/utils";
 
 const TablelandGateway =
   "https://testnets.tableland.network/api/v1/query?statement=";
@@ -44,19 +44,29 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
         ${tables[chainId].schema}.schema,
         ${tables[chainId].schema}.schemaUID,
         ${tables[chainId].schema}.creationTimestamp,
-        SUM(CASE WHEN ${tables[chainId].attesters}.attester = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS attester_count,
-        SUM(CASE WHEN ${tables[chainId].revokers}.revoker = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS revoker_count,
-        MAX(CASE WHEN ${tables[chainId].info}.admin = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS admin_count
+        SUM(CASE WHEN ${
+          tables[chainId].attesters
+        }.attester = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS attester_count,
+        SUM(CASE WHEN ${
+          tables[chainId].revokers
+        }.revoker = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS revoker_count,
+        MAX(CASE WHEN ${
+          tables[chainId].info
+        }.admin = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS admin_count
     FROM
         ${tables[chainId].schema}
     LEFT JOIN
         ${tables[chainId].revokers}
     ON
-        ${tables[chainId].schema}.schemaUID = ${tables[chainId].revokers}.schemaUID
+        ${tables[chainId].schema}.schemaUID = ${
+      tables[chainId].revokers
+    }.schemaUID
     LEFT JOIN
         ${tables[chainId].attesters}
     ON
-        ${tables[chainId].schema}.schemaUID = ${tables[chainId].attesters}.schemaUID
+        ${tables[chainId].schema}.schemaUID = ${
+      tables[chainId].attesters
+    }.schemaUID
     LEFT JOIN
         ${tables[chainId].info}
     ON
@@ -166,7 +176,7 @@ export const getIsEncrypted = async (chainId, schemaUID) => {
 
   try {
     const result = await axios.get(getAllSchemasQuery);
-    console.log("DFsdfsdfsdf:df:      ",result)
+    console.log("DFsdfsdfsdf:df:      ", result);
     if (result.data.length == 0) {
       return false;
     } else {
@@ -181,9 +191,19 @@ export const getIsEncrypted = async (chainId, schemaUID) => {
 export const getAttestations = async (chainId) => {
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].attestation}.uid , ${tables[chainId].attestation}.attester , ${tables[chainId].attestation}.schemaUID , ${tables[chainId].attestation}.creationTimestamp , ${tables[chainId].attestation}.data , ${tables[chainId].attestation}.recipient , ${tables[chainId].attestation}.expirationTime , ${tables[chainId].attestation}.refUID
-       FROM ${tables[chainId].attestation}
-       ORDER BY ${tables[chainId].attestation}.creationTimestamp DESC`;
+    `SELECT 
+        ${tables[chainId].attestation}.uid , 
+        ${tables[chainId].attestation}.attester , 
+        ${tables[chainId].attestation}.schemaUID , 
+        ${tables[chainId].attestation}.creationTimestamp , 
+        ${tables[chainId].attestation}.data , 
+        ${tables[chainId].attestation}.recipient , 
+        ${tables[chainId].attestation}.expirationTime , 
+        ${tables[chainId].attestation}.refUID
+    FROM 
+        ${tables[chainId].attestation}
+    ORDER BY 
+        ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
     console.log(result);
@@ -200,18 +220,45 @@ export const getUserAttestations = async (chainId, address) => {
   }
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].attestation}.uid , ${
-      tables[chainId].attestation
-    }.attester , ${tables[chainId].attestation}.schemaUID , ${
-      tables[chainId].attestation
-    }.creationTimestamp , ${tables[chainId].attestation}.data , ${
-      tables[chainId].attestation
-    }.recipient , ${tables[chainId].attestation}.expirationTime , ${
-      tables[chainId].attestation
-    }.refUID
-       FROM ${tables[chainId].attestation}
-       WHERE ${tables[chainId].attestation}.attester='${address?.toLowerCase()}'
-       ORDER BY ${tables[chainId].attestation}.creationTimestamp DESC`;
+    `SELECT 
+        ${tables[chainId].attestation}.uid , 
+        ${tables[chainId].attestation}.attester , 
+        ${tables[chainId].attestation}.schemaUID , 
+        ${tables[chainId].attestation}.creationTimestamp , 
+        ${tables[chainId].attestation}.data , 
+        ${tables[chainId].attestation}.recipient , 
+        ${tables[chainId].attestation}.expirationTime , 
+        ${tables[chainId].attestation}.refUID
+    FROM
+        ${tables[chainId].attestation}
+    WHERE 
+        ${tables[chainId].attestation}.attester='${address?.toLowerCase()}'
+    ORDER BY 
+        ${tables[chainId].attestation}.creationTimestamp DESC`;
+  try {
+    const result = await axios.get(getAllSchemaAttestationsQuery);
+    console.log(result);
+    return result.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const getReferencedAttestations = async (chainId, attestationUID) => {
+  if (!attestationUID) {
+    return null;
+  }
+  const getAllSchemaAttestationsQuery =
+    TablelandGateway +
+    `SELECT 
+        ${tables[chainId].attestation}.uid
+    FROM
+        ${tables[chainId].attestation}
+    WHERE 
+    ${tables[chainId].attestation}.refUID='${attestationUID?.toLowerCase()}'
+    ORDER BY 
+        ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
     console.log(result);
@@ -228,20 +275,21 @@ export const getUserRecievedAttestations = async (chainId, address) => {
   }
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].attestation}.uid , ${
-      tables[chainId].attestation
-    }.attester , ${tables[chainId].attestation}.schemaUID , ${
-      tables[chainId].attestation
-    }.creationTimestamp , ${tables[chainId].attestation}.data , ${
-      tables[chainId].attestation
-    }.recipient , ${tables[chainId].attestation}.expirationTime , ${
-      tables[chainId].attestation
-    }.refUID
-       FROM ${tables[chainId].attestation}
-       WHERE ${
-         tables[chainId].attestation
-       }.recipient='${address?.toLowerCase()}'
-       ORDER BY ${tables[chainId].attestation}.creationTimestamp DESC`;
+    `SELECT 
+        ${tables[chainId].attestation}.uid , 
+        ${tables[chainId].attestation}.attester , 
+        ${tables[chainId].attestation}.schemaUID , 
+        ${tables[chainId].attestation}.creationTimestamp , 
+        ${tables[chainId].attestation}.data , 
+        ${tables[chainId].attestation}.recipient , 
+        ${tables[chainId].attestation}.expirationTime , 
+        ${tables[chainId].attestation}.refUID
+    FROM 
+        ${tables[chainId].attestation}
+    WHERE 
+        ${tables[chainId].attestation}.recipient='${address?.toLowerCase()}'
+    ORDER BY 
+        ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
     console.log(result);
@@ -255,7 +303,20 @@ export const getUserRecievedAttestations = async (chainId, address) => {
 export const getSchema = async (chainId, schemaUID) => {
   const getSchemaQuery =
     TablelandGateway +
-    `SELECT * FROM ${tables[chainId].schema} WHERE ${tables[chainId].schema}.schemaUID='${schemaUID}'`;
+    `SELECT 
+          s.name,
+          s.description,
+          s.schema,
+          s.resolver,
+          s.creationTimestamp,
+          s.creator,
+          json_group_array(json_object('category', c.category)) as categories
+      FROM 
+          ${tables[chainId].schema} s
+      LEFT JOIN 
+          ${tables[chainId].categories} c ON s.schemaUID = c.schemaUID
+      WHERE 
+          s.schemaUID = '${schemaUID}'`;
   try {
     const result = await axios.get(getSchemaQuery);
     console.log(result);
@@ -269,10 +330,20 @@ export const getSchema = async (chainId, schemaUID) => {
 export const getSchemaAttestations = async (chainId, schemaUID) => {
   const getAllSchemaAttestationsQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].attestation}.uid , ${tables[chainId].attestation}.attester , ${tables[chainId].attestation}.creationTimestamp , ${tables[chainId].attestation}.data , ${tables[chainId].attestation}.recipient , ${tables[chainId].attestation}.expirationTime , ${tables[chainId].attestation}.refUID  
-    FROM ${tables[chainId].attestation} 
-    WHERE ${tables[chainId].attestation}.schemaUID=%27${schemaUID}%27
-    ORDER BY ${tables[chainId].attestation}.creationTimestamp DESC`;
+    `SELECT 
+        ${tables[chainId].attestation}.uid , 
+        ${tables[chainId].attestation}.attester , 
+        ${tables[chainId].attestation}.creationTimestamp , 
+        ${tables[chainId].attestation}.data , 
+        ${tables[chainId].attestation}.recipient , 
+        ${tables[chainId].attestation}.expirationTime , 
+        ${tables[chainId].attestation}.refUID  
+    FROM 
+        ${tables[chainId].attestation} 
+    WHERE 
+        ${tables[chainId].attestation}.schemaUID=%27${schemaUID}%27
+    ORDER BY 
+        ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
     console.log(result);
@@ -283,21 +354,30 @@ export const getSchemaAttestations = async (chainId, schemaUID) => {
   }
 };
 
-
 export const getAttestation = async (chainId, uid) => {
   const getAttestationDataQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].schema}.resolver , ${tables[chainId].revocation}.revocable , ${tables[chainId].schema}.schema , ${tables[chainId].schema}.schemaUID ,
-
-    ${tables[chainId].attestation}.attester , ${tables[chainId].attestation}.creationTimestamp , ${tables[chainId].attestation}.data , ${tables[chainId].attestation}.recipient , ${tables[chainId].attestation}.expirationTime , ${tables[chainId].attestation}.refUID ,
-      
-    ${tables[chainId].revocation}.revocationTime , ${tables[chainId].revocation}.revoker 
-    
-    FROM ${tables[chainId].attestation} , ${tables[chainId].schema} , ${tables[chainId].revocation}
-
-    WHERE ${tables[chainId].attestation}.uid=%27${uid}%27 AND 
-    ${tables[chainId].attestation}.uid = ${tables[chainId].revocation}.uid AND
-     ${tables[chainId].attestation}.schemaUID = ${tables[chainId].schema}.schemaUID`;
+    `SELECT 
+        ${tables[chainId].schema}.resolver , 
+        ${tables[chainId].revocation}.revocable , 
+        ${tables[chainId].schema}.schema , 
+        ${tables[chainId].schema}.schemaUID ,
+        ${tables[chainId].attestation}.attester , 
+        ${tables[chainId].attestation}.creationTimestamp , 
+        ${tables[chainId].attestation}.data , 
+        ${tables[chainId].attestation}.recipient , 
+        ${tables[chainId].attestation}.expirationTime , 
+        ${tables[chainId].attestation}.refUID ,
+        ${tables[chainId].revocation}.revocationTime , 
+        ${tables[chainId].revocation}.revoker   
+    FROM 
+        ${tables[chainId].attestation} , 
+        ${tables[chainId].schema} , 
+        ${tables[chainId].revocation}
+    WHERE 
+        ${tables[chainId].attestation}.uid=%27${uid}%27 AND 
+        ${tables[chainId].attestation}.uid = ${tables[chainId].revocation}.uid AND
+        ${tables[chainId].attestation}.schemaUID = ${tables[chainId].schema}.schemaUID`;
   try {
     const result = await axios.get(getAttestationDataQuery);
     console.log(result);
@@ -312,11 +392,15 @@ export const getAttestAccess = async (chainId, schemaUID, address) => {
   if (address) {
     const getSchemaQuery =
       TablelandGateway +
-      `SELECT COUNT(${tables[chainId].content_admins}.attester) AS NUM FROM ${
-        tables[chainId].content_admins
-      } WHERE
-     ${tables[chainId].content_admins}.schemaUID='${schemaUID}' AND
-     ${tables[chainId].content_admins}.attester='${address.toLowerCase()}'`;
+      `SELECT 
+            COUNT(${tables[chainId].content_admins}.attester) AS NUM 
+        FROM 
+            ${tables[chainId].content_admins} 
+        WHERE
+            ${tables[chainId].content_admins}.schemaUID='${schemaUID}' AND
+            ${
+              tables[chainId].content_admins
+            }.attester='${address.toLowerCase()}'`;
     try {
       const result = await axios.get(getSchemaQuery);
       return result.data[0].NUM > 0;
@@ -372,8 +456,12 @@ export const getAttestRevokeAccess = async (chainId, address, schemaUID) => {
 export const getSubscriptionPrice = async (chainId, schemaUID) => {
   const getSchemaQuery =
     TablelandGateway +
-    `SELECT ${tables[chainId].content_group}.monthlySubscriptionPrice AS Price FROM ${tables[chainId].content_group} WHERE
-     ${tables[chainId].content_group}.schemaUID='${schemaUID}'`;
+    `SELECT 
+        ${tables[chainId].content_group}.monthlySubscriptionPrice AS Price 
+      FROM 
+          ${tables[chainId].content_group} 
+      WHERE
+          ${tables[chainId].content_group}.schemaUID='${schemaUID}'`;
   try {
     const result = await axios.get(getSchemaQuery);
     console.log(result.data);

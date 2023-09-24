@@ -38,7 +38,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     abi: CONTRACTS.SubscriptionResolver[chainID].abi,
     functionName: "subscribe",
     args: [schemaUID, months],
-    value: BigInt(price * 10 ** 18 * months),
+    value: BigInt(price  * months),
   });
   const { write, data, isLoading, isSuccess, isError } =
     useContractWrite(config);
@@ -83,7 +83,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
           {`Price per month: ${visiblePrice}`}
         </Typography>
         <Typography color="gray" className="mt-1 font-normal">
-          {`total : ${price * months} ethers for ${months} months`}
+          {`total : ${price/10**18 * months} ethers for ${months} months`}
         </Typography>
         <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96 flex flex-col items-center mx-auto">
           <div className="mb-4 flex flex-col items-center mx-auto gap-6">

@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Card, Input, Progress, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { validateInput, transformFormData, decodeBase64ToHex, encodeHexToBase64 } from "@/lib/utils";
+import {
+  validateInput,
+  transformFormData,
+  decodeBase64ToHex,
+  encodeHexToBase64,
+} from "@/lib/utils";
 import {
   useContractWrite,
   usePrepareContractWrite,
@@ -41,7 +46,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
 
   const [formData, setFormData] = useState({});
   const [data, setData] = useState("");
-  const [base64Data,setBase64Data] = useState("")
+  const [base64Data, setBase64Data] = useState("");
 
   const [formErrors, setFormErrors] = useState({});
   const [open, setOpen] = useState(isOpen);
@@ -61,7 +66,10 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "attest",
     args: [
-      [schemaUID, [recipient, 0, isRevocable, referencedAttestation, data, base64Data, 0]],
+      [
+        schemaUID,
+        [recipient, 0, isRevocable, referencedAttestation, data, base64Data, 0],
+      ],
     ],
     value: BigInt(0),
   });
@@ -168,9 +176,9 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     console.log("Form data:", formData, data); // Move the logging here
     let encodedData = encoder.encodeData(transformFormData(formData, schema));
     console.log(formData, "  ", encodedData);
-    let b64 = encodeHexToBase64(encodedData)
+    let b64 = encodeHexToBase64(encodedData);
     setData(encodedData);
-    setBase64Data(b64)
+    setBase64Data(b64);
   };
 
   return (
@@ -349,6 +357,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                 revocable={isRevocable}
                 refUID={referencedAttestation as `0x${string}`}
                 AttestationData={data as `0x${string}`}
+                AttestationBase64={base64Data}
               />
             )}
             <button

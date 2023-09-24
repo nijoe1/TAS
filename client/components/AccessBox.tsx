@@ -94,13 +94,13 @@ const AccessBox: React.FC<AccessBoxProps> = ({
       setViewAccess(accessData.viewAccess);
       setFetched(!fetched);
     };
-    if (chainid && !fetched) {
+    if (chainid && address) {
       fetch();
     }
-  }, [chainid, address, Router]);
+  }, [chainid, address, Router,hasViewAccess2,hasViewAccess]);
 
   return (
-    <div className="border rounded-lg mx-auto p-4 flex flex-wrap text-black items-center space-x-4">
+    <div className="border border-black rounded-lg mx-auto p-4 flex flex-wrap text-black items-center space-x-4">
       <div className=" mx-auto flex flex-wrap items-center space-x-4">
         {isSchema && (
           <div className="flex items-center">

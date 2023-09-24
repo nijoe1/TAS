@@ -16,6 +16,7 @@ type SchemaDataProps = {
     schemaUID: string;
     name: string;
     description: string;
+    categories: string[];
     created: string;
     creator: string;
     resolverContract: string;
@@ -69,11 +70,12 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   };
   function subscribe(): void {}
 
-  const formattedDescription = formatDescription(schemaData.description);
-
   function splitTextIntoChunks(text: any, chunkSize: any) {
-    const regex = new RegExp(`.{1,${chunkSize}}`, "g");
-    return text.match(regex) || [];
+    if (text) {
+      const regex = new RegExp(`.{1,${chunkSize}}`, "g");
+      return text.match(regex) || [];
+    }
+    return [];
   }
 
   const [accessInfo, setAccessInfo] = useState({
@@ -98,7 +100,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
         <div className="bg-white rounded-xl p-4 ">
           <Card className="flex flex-col border rounded-lg items-center">
             <CardBody>
-              <div className="border rounded-lg items-center text-center mx-auto p-2">
+              <div className="border rounded-lg flex flex-col items-center text-center mx-auto p-2">
                 <Typography variant="h5" color="black">
                   {"SchemaUID"}
                 </Typography>
@@ -107,7 +109,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
               <Typography
                 variant="h5"
                 color="black"
-                className="mb-2 text-center"
+                className="mb-2 mt-2 text-center"
               >
                 {`${schemaData.name}`}
               </Typography>
@@ -121,12 +123,16 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                   )
                 )}
               </div>
+
+              {schemaData.categories && (
+                <BorderedBox strings={schemaData.categories}></BorderedBox>
+              )}
             </CardBody>
           </Card>
 
-          <div className="flex justify-between mt-2 gap-2">
+          <div className="flex min-w-full justify-between mt-2 ">
             {/* Left Box */}
-            <div className="w-5/8  border rounded-xl p-2 mx-auto  overflow-x-auto">
+            <div className="border rounded-xl p-2  overflow-x-auto">
               <Field
                 label="Created"
                 value={<TimeCreated createdAt={schemaData.created} />}
@@ -152,7 +158,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                 value={
                   <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
                     {`${getSchemaType(schemaData.resolverContract, chainID)} (${
-                      isEncrypted ? "Encrypted" : "NonEncrypted"
+                      isEncrypted ? "Encrypted" : "Unencrypted"
                     })`}
                   </p>
                 }
@@ -160,7 +166,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
             </div>
 
             {/* Right Box */}
-            <div className="w-3/8  text-center flex-flex-col items-center border rounded-xl p-4 mx-auto ">
+            <div className="text-center flex-flex-col items-center border rounded-xl p-4  ">
               <p className="font-extrabold text-center text-black px-2 py-1 rounded-full text-md whitespace-nowrap ">
                 Schema
               </p>
@@ -242,30 +248,64 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
 export default SchemaProfile;
 
 function formatDescription(description: string) {
-  const maxLength = 32; // Maximum characters per line
-  const words = description.split(" "); // Split the text into words
+  if (description) {
+    const maxLength = 32; // Maximum characters per line
+    const words = description.split(" "); // Split the text into words
 
-  let currentLine = "";
-  let formattedDescription = [];
+    let currentLine = "";
+    let formattedDescription = [];
 
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i];
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
 
-    if (currentLine.length + word.length <= maxLength) {
-      // Add the word to the current line if it doesn't exceed the maximum length
-      if (currentLine !== "") {
-        currentLine += " "; // Add a space if it's not the first word on the line
+      if (currentLine.length + word.length <= maxLength) {
+        // Add the word to the current line if it doesn't exceed the maximum length
+        if (currentLine !== "") {
+          currentLine += " "; // Add a space if it's not the first word on the line
+        }
+        currentLine += word;
+      } else {
+        // If adding the word would exceed the maximum length, start a new paragraph
+        formattedDescription.push(currentLine);
+        currentLine = word; // Start a new paragraph with the current word
       }
-      currentLine += word;
-    } else {
-      // If adding the word would exceed the maximum length, start a new paragraph
-      formattedDescription.push(currentLine);
-      currentLine = word; // Start a new paragraph with the current word
     }
+
+    // Add the last paragraph
+    formattedDescription.push(currentLine);
+
+    return formattedDescription;
   }
-
-  // Add the last paragraph
-  formattedDescription.push(currentLine);
-
-  return formattedDescription;
+  return undefined;
 }
+
+interface BorderedBoxProps {
+  strings: string[];
+}
+
+const BorderedBox: React.FC<BorderedBoxProps> = ({ strings }) => {
+  return (
+    <div>
+      {strings.length > 0 && (
+        <div className="flex flex-col item-center text-center ">
+          <Typography variant="h5" color="black" className=" mt-2 text-center">
+            Categories
+          </Typography>
+          <div className="border p-4 rounded-md   flex flex-wrap gap-2 mx-auto">
+            {strings.map((str, index) => (
+              <div className="flex flex-col  mx-auto">
+                <span
+                  key={index}
+                  className="bg-black rounded-md text-center text-white font-bold p-1"
+                  style={{ flex: "1 0 30%", minWidth: "100px" }}
+                >
+                  {str}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

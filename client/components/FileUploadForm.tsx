@@ -48,7 +48,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
     acceptedFileTypes[fileType] || "";
 
   const handleSimpleFileUpload = async (file: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
+    let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
     // Upload file and get encrypted CID
     const CID = await uploadFile(file, key, setOnProgress);
     setOnProgress(100);
@@ -57,7 +57,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
 
   const handleFolderUpload = async (files: any, type: any) => {
     console.log(files);
-    let key = localStorage.getItem(`API_KEY_${address}`);
+    let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
 
     let CIDs = await uploadFolder(files, type, key, setOnProgress);
     setOnProgress(100);
@@ -66,7 +66,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
   };
 
   const handleEncryptedFolderUpload = async (files: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
+    let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
     let token = localStorage.getItem(`lighthouse-jwt-${address}`);
     let fileArray = [];
     for (const file of files) {
@@ -98,7 +98,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
   };
 
   const handleEncryptedFileUpload = async (file: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
+    let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
     let token = localStorage.getItem(`lighthouse-jwt-${address}`);
     // Upload file and get encrypted CID
     const CID = await uploadFileEncrypted(

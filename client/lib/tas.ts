@@ -10,6 +10,7 @@ import {
   getUserSubscriptions,
   getCreatedSchemasRevenue,
   getAttestRevokeAccess,
+  getReferencedAttestations,
 } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import {
@@ -19,6 +20,7 @@ import {
   getOffChainAttestationsForSchema,
   getUserOffChainAttestations,
   getUserOffChainRecievedAttestations,
+  getOffChainAttestationReferences,
 } from "@/lib/offchain";
 import {
   transformDecodedData,
@@ -27,10 +29,11 @@ import {
   parseBlobToJson,
   decodeBase64ToHex,
 } from "@/lib/utils";
-import { decrypt, getIpfsGatewayUri } from "./lighthouse";
+import { decrypt, getIpfsGatewayUri, getUserDataInfo } from "./lighthouse";
 import { getPrice } from "./contractReads";
 
 interface SchemaData {
+  categories: string[];
   schemaUID: string;
   name: string;
   description: string;
@@ -47,6 +50,7 @@ interface SchemaData {
 }
 
 export const SchemaInfo: SchemaData = {
+  categories: [],
   schemaUID: "",
   name: "",
   description: "",
@@ -246,8 +250,16 @@ export const getAttestationData = async (
   }
 
   const encoder = new SchemaEncoder(attestation.schema);
-  const data = decodeBase64ToHex(attestation.data)
-  const TransformedData = transformDecodedData(encoder.decodeData(data));
+  let data = "";
+  if (attestation.data) {
+    data = decodeBase64ToHex(attestation.data);
+  }
+  let TransformedData;
+  try {
+    TransformedData = transformDecodedData(encoder.decodeData(data));
+  } catch {
+    TransformedData = undefined;
+  }
   return {
     // @ts-ignore
     attestationUID: uid,
@@ -264,11 +276,30 @@ export const getAttestationData = async (
     from: attestation.attester,
     to: attestation.recipient,
     decodedData: TransformedData,
-    referencedAttestation: "No reference",
+    referencedInAttestations: <any>[],
     referencingAttestation: 0,
     data: data,
     context: uid,
   };
+};
+
+export const getAttestationReferencedAttestations = async (
+  chainID: number,
+  uid: string
+) => {
+  let attestations: { uid: string; type: string }[] = [];
+  let offChainReferences = await getOffChainAttestationReferences(uid);
+  let onChainReferences = await getReferencedAttestations(chainID, uid);
+  for (const onchain of onChainReferences) {
+    attestations.push({ uid: onchain.uid, type: "OFFCHAIN" });
+  }
+  for (const offchain of offChainReferences) {
+    const uid =
+      offchain.content.tags.find((tag: any) => tag.slug === "uid")?.title ||
+      null;
+    attestations.push({ uid: uid, type: "OFFCHAIN" });
+  }
+  return attestations;
 };
 
 export const getSchemas = async (chainID: number) => {
@@ -462,7 +493,7 @@ export const getSchemaData = async (
         fromAddress: fromAddress,
         toAddress: toAddress,
         age: age,
-        data: body.sig.message.data.toLowerCase(),
+        data: body.sig.message.base64Data,
         type: "OFFCHAIN",
       };
       formattedEntries.push(entry);
@@ -503,6 +534,11 @@ export const getSchemaData = async (
   schemaInfo.rawSchema = schema.schema;
   schemaInfo.revocable = schema.revocable === "true" ? true : false;
   schemaInfo.created = schema.creationTimestamp;
+  let cat = [];
+  for (const category of schema.categories) {
+    cat.push(category.category);
+  }
+  schemaInfo.categories = cat;
   let tableDt:
     | ((prevState: never[]) => never[])
     | {
@@ -551,65 +587,75 @@ export const getEncryptedFilesBlobs = async (
   let newRecords = [];
   const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
   console.log(decodedData);
-  for (const record of decodedData) {
-    record.blobs = [];
+  if (decodedData) {
+    for (const record of decodedData) {
+      record.blobs = [];
 
-    if (
-      ![
-        "jsonCID",
-        "jsonCIDs",
-        "imageCID",
-        "videoCID",
-        "imageCIDs",
-        "videoCIDs",
-      ].includes(record.name)
-    ) {
-      newRecords.push(record);
-    } else if (record.name === "jsonCID") {
-      const blob = await decrypt(record.value, address, jwt);
-      const json = await parseBlobToJson(blob);
-      record.CIDs = [record.value];
-      record.json = [json];
-      record.blobs.push(blob);
-      newRecords.push(record);
-    } else if (record.name === "jsonCIDs") {
-      const response = await fetch(getIpfsGatewayUri(record.value[0]));
-      const data = await response.json();
-
-      data.CIDs.map(async (CID: any) => {
-        let blob = await decrypt(CID, address, jwt);
+      if (
+        ![
+          "jsonCID",
+          "jsonCIDs",
+          "imageCID",
+          "videoCID",
+          "imageCIDs",
+          "videoCIDs",
+        ].includes(record.name)
+      ) {
+        newRecords.push(record);
+      } else if (record.name === "jsonCID") {
+        const blob = await decrypt(record.value, address, jwt);
         const json = await parseBlobToJson(blob);
-        record.json?.push(json);
-        record.blobs?.push(blob);
-      });
-      record.CIDs = data.CIDs;
-
-      newRecords.push(record);
-    } else if (record.name === "imageCID" || record.name === "videoCID") {
-      let blob = await decrypt(record.value, address, jwt);
-      record.CIDs = [record.value];
-      record.blobs.push(blob);
-      newRecords.push(record);
-    } else {
-      try {
+        console.log(json);
+        record.CIDs = [record.value];
+        record.json = [json];
+        record.blobs.push(blob);
+        newRecords.push(record);
+      } else if (record.name === "jsonCIDs") {
         const response = await fetch(getIpfsGatewayUri(record.value[0]));
         const data = await response.json();
 
-        let cids = [];
         data.CIDs.map(async (CID: any) => {
           let blob = await decrypt(CID, address, jwt);
+          const json = await parseBlobToJson(blob);
+          record.json?.push(json);
           record.blobs?.push(blob);
-          cids.push(CID);
         });
-
         record.CIDs = data.CIDs;
+
         newRecords.push(record);
-      } catch (error) {
-        console.error("Error fetching and decrypting:", error);
+      } else if (record.name === "imageCID" || record.name === "videoCID") {
+        let blob = await decrypt(record.value, address, jwt);
+        record.CIDs = [record.value];
+        record.blobs.push(blob);
+        newRecords.push(record);
+      } else {
+        try {
+          const response = await fetch(getIpfsGatewayUri(record.value[0]));
+          const data = await response.json();
+
+          let cids = [];
+          data.CIDs.map(async (CID: any) => {
+            let blob = await decrypt(CID, address, jwt);
+            record.blobs?.push(blob);
+            cids.push(CID);
+          });
+
+          record.CIDs = data.CIDs;
+          newRecords.push(record);
+        } catch (error) {
+          console.error("Error fetching and decrypting:", error);
+        }
       }
     }
   }
   console.log(newRecords);
 
   return newRecords;
+};
+
+export const getUserDataInformation = async (address: `0x${string}`) => {
+  let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
+
+  let data = await getUserDataInfo(address, key);
+  return data;
 };

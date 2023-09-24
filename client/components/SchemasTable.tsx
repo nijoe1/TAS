@@ -221,13 +221,13 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                             {row.revenue ? (
                               <p className="px-2 py-2">{`${row.revenue} ether`}</p>
                             ) : (
-                              <p className="px-2 py-2">{`0 ether`}</p>
+                              <p className="px-2 py-2">{`NaN`}</p>
                             )}
                           </div>
                         </td>
                       )}
                       <td className="py-2 border-b border-gray">
-                        <div className="flex items-center justify-center cursor-pointer">
+                        <div className="flex items-center justify-center cursor-pointer z-50">
                           <PiChatDotsFill
                             className="bolder"
                             onClick={() => {

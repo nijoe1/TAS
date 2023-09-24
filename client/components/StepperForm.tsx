@@ -40,7 +40,7 @@ const StepperForm: React.FC<{
   const [tokenClicked, setTokenClicked] = useState(false);
 
   const generateLighthouseApiKey = async (address: any) => {
-    let key = localStorage.getItem(`API_KEY_${address}`);
+    let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
     if (!key) {
       const verificationMessage = (
         await axios.get(
@@ -52,7 +52,7 @@ const StepperForm: React.FC<{
       });
       const API_KEY = await lighthouse.getApiKey(address, signed);
       if (API_KEY.data.apiKey) {
-        localStorage.setItem(`API_KEY_${address}`, API_KEY.data.apiKey);
+        localStorage.setItem(`API_KEY_${address?.toLowerCase()}`, API_KEY.data.apiKey);
         nextStep();
       } else {
         setApiClicked(!apiClicked);
@@ -83,12 +83,6 @@ const StepperForm: React.FC<{
     }
   };
 
-  // const closeIt = async()=>{
-  //   let jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
-  //   const connected = await orbis.isConnected();
-  //   let key = localStorage.getItem(`API_KEY_${address}`);
-  //   return(jwt && connected && key)
-  // }
 
   const steps = [
     {

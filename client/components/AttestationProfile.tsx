@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { PiListDuotone } from "react-icons/pi";
+import { SiZeromq } from "react-icons/si";
 import EthereumAddress from "@/components/EthereumAddress";
 import DecodedData from "@/components/DecodedData";
 import TimeCreated from "./TimeCreated";
@@ -38,7 +40,10 @@ type AttestationProfileProps = {
       CIDs?: string[];
     }>;
     data: string;
-    referencedAttestation: string;
+    referencedInAttestations: Array<{
+      uid: string;
+      type: string;
+    }>;
     referencingAttestations: number;
   };
   type: string;
@@ -67,7 +72,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 
   const { address } = useAccount();
 
-  const { config,error } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
     // @ts-ignore
@@ -109,20 +114,20 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     <Card
       color="white"
       shadow={true}
-      className="mb-4 p-4 border border-black rounded-xl"
+      className="mb-4 p-4 border  border border-black-black rounded-xl"
     >
       <div className={`flex flex-col mx-auto text-black`}>
         <div className="bg-white rounded-xl p-4 flex flex-col mx-auto">
-          <div className="items-center flex flex-col text-center border rounded-lg mx-auto">
+          <div className="items-center flex flex-col text-center border border-black rounded-lg mx-auto">
             <Typography variant="h4">attestationUID</Typography>
             <EthereumAddress address={attestationData.attestationUID} />
           </div>
-          <div className="border rounded-lg text-white text-center rounded-lg bg-black mt-2 flex flex-col items-center mx-auto p-1">
+          <div className="border border-black rounded-lg text-white text-center rounded-lg bg-black mt-2 flex flex-col items-center mx-auto p-1">
             <Typography className=" bold text-white rounded-lg ">{`${type}`}</Typography>
           </div>
           <div className="flex justify-between gap-2">
             {/* Header */}
-            <div className="mb-2 mt-2 w-5/8 p-2 border rounded-lg ">
+            <div className="mb-2 mt-2 w-5/8 p-2 border border-black rounded-lg ">
               <Field
                 label="schemaUID"
                 value={
@@ -173,13 +178,13 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
                 value={
                   <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
                     {`${getSchemaType(attestationData.resolver, chainID)} (${
-                      !isEncrypted ? "Encrypted" : "NonEncrypted"
+                      isEncrypted ? "Encrypted" : "Unencrypted"
                     })`}
                   </p>
                 }
               />
             </div>
-            <div className="w-3/8 mb-4 mt-3 gap-1  border rounded-xl p-1">
+            <div className="w-3/8 mb-4 mt-3 gap-1  border border-black rounded-xl p-1">
               <Field
                 label="created"
                 value={<TimeCreated createdAt={attestationData.created} />}
@@ -212,8 +217,14 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
           </div>
 
           {/* Left Box */}
-          <div className="items-center rounded-lg border mx-auto text-center flex flex-col mb-2">
-            <Field label="Referencing Attestations" value={0} />
+          <div className="items-center rounded-lg border border-black mx-auto text-center flex flex-col mb-2">
+            <Field
+              notshow={true}
+              label="Referenced in Attestations"
+              value={
+                <Modal data={attestationData.referencedInAttestations}></Modal>
+              }
+            />
           </div>
 
           {/* Right Box */}
@@ -227,8 +238,8 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 
           {
             // @ts-ignore
-            accessInfo.viewAccess && viewAccess ? (
-              <div className="flex flex-col mx-auto text-center items-center p-2 border rounded-xl mt-2">
+            accessInfo.viewAccess ? (
+              <div className="flex flex-col mx-auto text-center items-center p-2 border border-black rounded-xl mt-2">
                 <p className="text-xl font-semibold mb-1">Decoded Data</p>
                 <DecodedData
                   decodedData={attestationData.decodedData}
@@ -255,7 +266,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
                 }}
                 className={`text-white rounded-lg px-6 py-2 ${
                   !attestationData.revoked
-                    ? "hover:bg-white hover:text-black border bg-black border-black"
+                    ? "hover:bg-white hover:text-black border border-black bg-black border border-black-black"
                     : "bg-gray-600"
                 } mt-3`}
               >
@@ -284,3 +295,57 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 };
 
 export default AttestationProfile;
+
+interface AttestationData {
+  uid: string;
+  type: string;
+}
+
+interface ModalProps {
+  data: AttestationData[];
+}
+
+const Modal: React.FC<ModalProps> = ({ data }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <div>
+      {!isModalOpen && data.length > 0 ? (
+        <PiListDuotone
+          className="cursor-pointer ml-1"
+          onClick={handleOpenModal}
+        ></PiListDuotone>
+      ) : (
+        data.length == 0 && <SiZeromq className=" ml-1"></SiZeromq>
+      )}
+
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <div>
+              {data.map(({ uid, type }) => (
+                <div key={uid}>
+                  <EthereumAddress
+                    address={uid}
+                    link={`/attestation?uid=${uid}&type=${type}`}
+                  />
+                </div>
+              ))}
+            </div>
+            <span className="close cursor-pointer" onClick={handleCloseModal}>
+              &times;
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

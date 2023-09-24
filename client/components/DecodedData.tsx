@@ -74,7 +74,8 @@ const DecodedData: React.FC<DecodedDataProps> = ({
             {!checkName(item.name) ? (
               <EthereumAddress
                 className="border-white text-center items-center bg-white p-1"
-                address={item.value} stringLength={7}
+                address={item.value}
+                stringLength={7}
               />
             ) : (
               <div
@@ -144,6 +145,11 @@ const DecodedData: React.FC<DecodedDataProps> = ({
               )}
           </div>
         ))}
+      {decodedData.length == 0 && (
+        <div>
+          <p>Error in attested data</p>
+        </div>
+      )}
     </div>
   );
 };

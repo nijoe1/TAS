@@ -25,6 +25,92 @@ const CustomNavbar = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [changeChain, setChangeChain] = useState(true);
 
+  const [divCount, setDivCount] = useState(3); // Number of black divs to render
+
+  useEffect(() => {
+    const handleResize = () => {
+      const windowWidth = window.innerWidth;
+
+      if (windowWidth >= 1350) {
+        setDivCount(4); // Display 2 divs
+      } else if (windowWidth >= 1180 && windowWidth <= 1349) {
+        setDivCount(3); // Display 1 div
+      } else if (windowWidth >= 800 && windowWidth <= 749) {
+        setDivCount(2); // Display 1 div
+      } else {
+        setDivCount(1); // Display 1 div
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    // Listen for window resize events
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  });
+
+  let blackDivs;
+  if (divCount === 4) {
+    blackDivs = (
+      <>
+        <div className="w-7/40 ml-8" style={{ height: "50%" }}>
+          <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
+        </div>
+
+        <div className="w-4/40 ml-8" style={{ height: "50%" }}>
+          <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+        </div>
+
+        <div className="w-5/40 ml-8" style={{ height: "50%" }}>
+          <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
+        </div>
+      </>
+    );
+  } else if (divCount === 3) {
+    blackDivs = (
+      <div>
+        <div className="w-full ml-8 flex flex-wrap items-center">
+          <div className="w-1/3" style={{ height: "33.33%" }}>
+            <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+          </div>
+
+          <div className="w-1/3" style={{ height: "33.33%" }}>
+            <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+          </div>
+        </div>
+
+        <div className="w-1/3 ml-8" style={{ height: "33.33%" }}>
+          <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
+        </div>
+      </div>
+    );
+  } else if (divCount === 2) {
+    blackDivs = (
+      <div>
+        <div className="w-full flex flex-col items-center">
+          <div className="w-1/3" style={{ height: "33.33%" }}>
+            <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+          </div>
+
+          <div className="w-1/3" style={{ height: "33.33%" }}>
+            <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+          </div>
+          <div className="w-1/3" style={{ height: "33.33%" }}>
+            <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    );
+  } else if (divCount === 1) {
+    // No black divs
+    blackDivs = null;
+  }
+
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -70,8 +156,8 @@ const CustomNavbar = () => {
 
   return (
     <div>
-      <div className="bg-black  py-2 border flex items-center mb-3">
-        <div className="w-1/40 flex rounded-xl ml-4">
+      <div className={`bg-black py-2 border  flex ${divCount==1? "flex-col gap-2":""} items-center mb-3`}>
+        <div className="w-4/40 flex rounded-xl ml-4 z-50">
           <Image
             src="/logo.png"
             alt="TAS Logo"
@@ -81,7 +167,9 @@ const CustomNavbar = () => {
             className="rounded-lg cursor-pointer"
           />
         </div>
-        <div className="w-8/10 flex flex-wrap rounded-xl mx-auto gap-4">
+        {blackDivs}
+
+        <div className="w-13/40 flex flex-wrap rounded-xl mx-auto gap-4">
           {/* Navigation Links */}
           {navLinks.map((item, index) => (
             <Link key={index} href={item.href}>
@@ -96,7 +184,7 @@ const CustomNavbar = () => {
             </Link>
           ))}
         </div>
-        <div className="w-7/40 flex rounded-xl mr-4 ">
+        <div className="w-7/40 flex rounded-xl mr-4">
           <ConnectButton />
         </div>
       </div>

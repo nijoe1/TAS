@@ -11,6 +11,7 @@ export const getPostData = (
   revocable: boolean,
   refUID: `0x${string}`,
   data: `0x${string}`,
+  AttestationBase64:string,
   signatureV: BigInt,
   signatureR: string,
   signatureS: string,
@@ -53,6 +54,7 @@ export const getPostData = (
         schema: message.schema,
         refUID: message.refUID,
         data: message.data,
+        base64Data : AttestationBase64
       },
       types: {
         Attest: [
@@ -189,6 +191,14 @@ export const getOffChainAttestations = async (chainID: number) => {
   return data;
 };
 
+export const getOffChainAttestationReferences = async (refUID: string) => {
+  // @ts-ignore
+  const { data, error } = await orbis.getPosts({
+    tag: `refUID/${refUID}`,
+  });
+  return data;
+};
+
 export const getOffChainAttestationsForSchema = async (
   chainID: number,
   schemaUID: string
@@ -260,7 +270,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
   const refUID = body.sig.message.refUID;
   const expirationTime = body.sig.message.expirationTime;
   let info = await getSchemaInfo(chainID, schemaUID);
-  console.log(info);
+  console.log(body.sig.message);
   const entry = {
     creationTimestamp: age,
     expirationTimel: "0",
@@ -271,7 +281,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
     revocable: revocable,
     expirationTime: expirationTime,
     age: age,
-    data: body.sig.message.data.toLowerCase(),
+    data: body.sig.message.base64Data,
     revoker: "0x0000000000000000000000000000000000000000",
     // @ts-ignore
     resolver: info.resolver,

@@ -8,14 +8,16 @@ type EthereumAddressProps = {
   address: string;
   className?: string; // Allow the className prop to be optional
   link?: string;
-  stringLength?:number;
+  stringLength?: number;
+  copy?: boolean;
 };
 
 const EthereumAddress: React.FC<EthereumAddressProps> = ({
   address,
   className,
   link,
-  stringLength
+  stringLength,
+  copy,
 }) => {
   const formattedAddress = `${address}`;
   const [copied, setCopied] = useState(false);
@@ -28,23 +30,25 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
     }, 500);
   };
 
-  function shortenString(inputString:any, maxLength:any,dots:boolean) {
-    if(inputString == "0x0000000000000000000000000000000000000000"){
-      inputString = "ZERO_ADDRESS"
+  function shortenString(inputString: any, maxLength: any, dots: boolean) {
+    if (inputString == "0x0000000000000000000000000000000000000000") {
+      inputString = "ZERO_ADDRESS";
     }
-    if(inputString == "0x0000000000000000000000000000000000000000000000000000000000000000"){
-      inputString = "ZERO_BYTES32"
+    if (
+      inputString ==
+      "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ) {
+      inputString = "ZERO_BYTES32";
     }
     if (inputString.length <= maxLength) {
       return inputString; // No need to shorten if it's already shorter than maxLength.
     }
 
-    const firstPart = inputString.slice(0, maxLength );
-    if(dots){
-      return firstPart +"..."
-    }else{
-      return firstPart 
-
+    const firstPart = inputString.slice(0, maxLength);
+    if (dots) {
+      return firstPart + "...";
+    } else {
+      return firstPart;
     }
   }
 
@@ -54,19 +58,31 @@ const EthereumAddress: React.FC<EthereumAddressProps> = ({
     >
       {copied ? (
         <div>
-          <p>copied!</p> <p>{stringLength? shortenString(formattedAddress, stringLength,false): shortenString(formattedAddress, 30,true)}</p>
+          <p>copied!</p>{" "}
+          <p>
+            {stringLength
+              ? shortenString(formattedAddress, stringLength, false)
+              : shortenString(formattedAddress, 30, true)}
+          </p>
         </div>
+      ) : stringLength ? (
+        shortenString(formattedAddress, stringLength, false)
       ) : (
-        stringLength? shortenString(formattedAddress, stringLength,false): shortenString(formattedAddress, 30,true)
+        shortenString(formattedAddress, 30, true)
       )}
 
       <div className="flex ">
-        <Tooltip
-          placement="right-start"
-          content="add a relevant name to your schema"
-        >
-          <FiCopy className="cursor-pointer ml-1" onClick={copyToClipboard}></FiCopy>
-        </Tooltip>
+        {!copy && (
+          <Tooltip
+            placement="right-start"
+            content="add a relevant name to your schema"
+          >
+            <FiCopy
+              className="cursor-pointer ml-1"
+              onClick={copyToClipboard}
+            ></FiCopy>
+          </Tooltip>
+        )}
         {link && (
           <Link href={`${link}`}>
             <HiExternalLink className="cursor-pointer ml-1"></HiExternalLink>

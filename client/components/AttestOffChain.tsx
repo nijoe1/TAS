@@ -48,6 +48,7 @@ interface SignProps {
   revocable: boolean;
   refUID: `0x${string}`;
   AttestationData: `0x${string}`;
+  AttestationBase64: string;
 }
 
 const orbis = new Orbis();
@@ -59,6 +60,7 @@ const AttestOffChain = ({
   revocable,
   refUID,
   AttestationData,
+  AttestationBase64,
 }: SignProps) => {
   const chainID = useChainId();
   const { address } = useAccount();
@@ -137,6 +139,7 @@ const AttestOffChain = ({
       revocable,
       refUID,
       AttestationData,
+      AttestationBase64,
       decodedSig.v,
       decodedSig.r,
       decodedSig.s,
@@ -216,7 +219,7 @@ const AttestOffChain = ({
           title: schema,
         },
         {
-          slug: "refUID",
+          slug: `refUID/${refUID}`,
           title: refUID,
         },
         {

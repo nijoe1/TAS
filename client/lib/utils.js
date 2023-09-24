@@ -118,6 +118,28 @@ const allowedFileTypes = {
   "text/csv": "CSV",
 };
 
+export const bytesToMB = (bytes) => {
+  if (bytes === 0) return '0 MB';
+
+  const megabyte = 1024 * 1024; // 1 MB = 1024 KB = 1024 * 1024 bytes
+  const kilobyte = 1024; // 1 KB = 1024 bytes
+
+  if (bytes < kilobyte) {
+    return `${bytes} bytes`;
+  } else if (bytes < megabyte) {
+    const sizeInKB = bytes / kilobyte;
+    return `${sizeInKB.toFixed(1)} KB`;
+  } else {
+    const sizeInMB = bytes / megabyte;
+    if(sizeInMB / megabyte*1024 >= 1){
+      return `${(sizeInMB / megabyte*1024).toFixed(1)} GB`;
+
+    }
+    const roundedSizeInMB = Math.round(sizeInMB * 10000) / 10000; // Round to 4 decimal places
+    return `${roundedSizeInMB.toFixed(1)} MB`;
+  }
+}
+
 export const getFileTypeFromAccept = (acceptValue, size) => {
   const acceptValues = acceptValue.split(",").map((val) => val.trim());
 

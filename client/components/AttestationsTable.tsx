@@ -40,7 +40,7 @@ const AttestationsTable: React.FC<AttestationsTableProps> = ({
     <div>
       {totalRows > 0 ? (
         <div className="overflow-x-auto rounded-lg mt-2">
-          <table className="min-w-full border border-gray-300">
+          <table className="max-w-full border border-gray-300">
             <thead className="bg-black">
               <tr>
                 <th className="py-2 text-white border-r border-gray">
@@ -85,7 +85,7 @@ const AttestationsTable: React.FC<AttestationsTableProps> = ({
                       </div>
                     ) : (
                       <div className="flex items-center justify-center">
-                        <EthereumAddress address={row.refUID} link={`/attestation?uid=${row.refUID}`} />
+                        <EthereumAddress address={row.refUID} link={`/attestation?uid=${row.refUID}&type=ONCHAIN`} />
                       </div>
                     )}
                   </td>

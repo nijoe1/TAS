@@ -38,6 +38,19 @@ export const getIpfsCID = (ipfsCIDLink) => {
   return ipfsCIDLink.replace(LIGHTHOUSE_IPFS_GATEWAY, "");
 };
 
+export const getUserDataInfo = async (address, apiKey) => {
+  const balance = await lighthouse.getBalance(address);
+  let uploads;
+  try {
+    uploads = await lighthouse.getUploads(apiKey);
+  } catch {
+    return { balance: balance.data, uploads: [] };
+  }
+  console.log(uploads.data.fileList[0])
+
+  return { balance: balance.data, uploads: uploads.data.fileList };
+};
+
 export const uploadFile = async (file, apiKey, setUploadProgress) => {
   const progressCallback = (progressData) => {
     const percentageDone =
@@ -160,6 +173,7 @@ export const uploadFileEncrypted = async (
     progressCallback,
     dealParams
   );
+  console.log("blablabla");
 
   const { masterKey, keyShards } = await generate();
 
@@ -243,7 +257,7 @@ export const decrypt = async (cid, address, jwt) => {
     const fileType = "application/json";
     decrypted = await lighthouse.decryptFile(cid, masterKey, fileType);
   } catch {
-    console.log("error in decription")
+    console.log("error in decription");
   }
   /*
     Response: blob

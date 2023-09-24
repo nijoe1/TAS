@@ -6,11 +6,13 @@ import moment from "moment";
 interface TimeCreatedProps {
   createdAt: any;
   subscription?: boolean;
+  realTime?:boolean
 }
 
 const TimeCreated: React.FC<TimeCreatedProps> = ({
   createdAt,
   subscription,
+  realTime
 }) => {
   const chainID = useChainId();
   const [displayTime, setDisplayTime] = useState(null);
@@ -22,7 +24,33 @@ const TimeCreated: React.FC<TimeCreatedProps> = ({
     functionName: "getTime",
   });
 
+  function calculateTimeDifference(passedTimestamp:number) {
+    const currentTimestamp = Date.now();
+    const difference = currentTimestamp - passedTimestamp;
+  
+    const seconds = Math.floor(difference / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+  
+    if (days > 0) {
+      return `${days} day${days !== 1 ? 's' : ''} ago`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    } else if (minutes > 0) {
+      return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+    } else {
+      return `${seconds} second${seconds !== 1 ? 's' : ''} ago`;
+    }
+  }
+
   useEffect(() => {
+    if(realTime){
+      let res = calculateTimeDifference(createdAt)
+      // @ts-ignore
+      setDisplayTime(res)
+      return
+    }
     if (currentTimestamp) {
       const currentTimestampNumber = Number(currentTimestamp.toString()); // Convert BigInt to number
       const createdAtNumber = parseInt(createdAt, 10); // Parse the createdAt string to a number
