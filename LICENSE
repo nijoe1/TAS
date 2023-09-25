@@ -2,15 +2,20 @@ MIT License
 
 Copyright (c) 2023 Nick Lionis
 
-This project is based on the Ethereum Attestation Service (EAS) protocol, and modifications have been made to integrate Tableland for decentralized SQL indexing.
+This project is based on the Ethereum Attestation Service (EAS) protocol, 
+and modifications have been made to integrate Tableland for decentralized 
+SQL indexing.
 
 EAS Protocol License
-The original EAS protocol is licensed under the [MIT License](https://github.com/ethereum-attestation-service/eas-contracts/blob/master/LICENSE) 
+The original EAS protocol is licensed under the MIT License
 
 Modifications and Integration
-This project, developed by Nick Lionis, adapts the EAS protocol to utilize Tableland for decentralized SQL indexing, enhancing scalability and efficiency. The EAS protocol has been tailored to seamlessly integrate with Tableland's decentralized indexing features.
+This project, developed by Nick Lionis, adapts the EAS protocol to utilize 
+Tableland for decentralized SQL indexing, enhancing scalability and efficiency. 
+The EAS protocol has been tailored to seamlessly integrate with Tableland's 
+decentralized indexing features.
 
-For specific modification details, refer to the code [README](https://github.com/nijoe1/TAS/blob/main/README.md) file. 
+For specific modification details, refer to the code README file. 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
