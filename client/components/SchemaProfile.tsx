@@ -33,6 +33,7 @@ type SchemaDataProps = {
     revokeAccess: boolean; // Replace with your actual data
     viewAccess: boolean;
   }) => void;
+  toggleShowAttestations: () => void;
   chainID: number;
   isEncrypted: boolean;
 };
@@ -42,10 +43,12 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   onAccessInfoChange,
   chainID,
   isEncrypted,
+  toggleShowAttestations,
 }) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
+  const [showAttestations, setShowAttestations] = useState(true);
 
   const openModal = () => {
     setModalIsOpen(true);
@@ -182,7 +185,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
               resolverContract={schemaData.resolverContract}
             />
           </div>
-          <div className="flex flex-col justify-right">
+          <div className="flex flex-col gap-2 justify-right">
             <ChatModal
               context={schemaData.schemaUID}
               isOpen={modalIsOpen}
@@ -197,15 +200,28 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                 Attest with Schema
               </button>
             )}
-            {accessInfo.attestAccess ||
-              (accessInfo.viewAccess && (
-                <button
-                  className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                  onClick={openModal}
-                >
-                  feedbackChat
-                </button>
-              ))}
+            {accessInfo.attestAccess && (
+              <button
+                type="button"
+                className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                onClick={() => {
+                  toggleShowAttestations();
+                  setShowAttestations(!showAttestations);
+                }}
+              >
+                {showAttestations
+                  ? "showDelegatedRequests"
+                  : "showAttestations"}
+              </button>
+            )}
+            {(accessInfo.attestAccess || accessInfo.viewAccess) && (
+              <button
+                className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                onClick={openModal}
+              >
+                feedbackChat
+              </button>
+            )}
             {/* @ts-ignore */}
             {!accessInfo.viewAccess &&
               !accessInfo.attestAccess &&
@@ -229,6 +245,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                 resolver={schemaData.resolverContract}
                 isOpen={isAttestModalOpen}
                 onClose={closeAttestModal}
+                revocable={schemaData.revocable}
               />
             )}
             {isSubscribeModalOpen && (
@@ -246,38 +263,6 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   );
 };
 export default SchemaProfile;
-
-function formatDescription(description: string) {
-  if (description) {
-    const maxLength = 32; // Maximum characters per line
-    const words = description.split(" "); // Split the text into words
-
-    let currentLine = "";
-    let formattedDescription = [];
-
-    for (let i = 0; i < words.length; i++) {
-      const word = words[i];
-
-      if (currentLine.length + word.length <= maxLength) {
-        // Add the word to the current line if it doesn't exceed the maximum length
-        if (currentLine !== "") {
-          currentLine += " "; // Add a space if it's not the first word on the line
-        }
-        currentLine += word;
-      } else {
-        // If adding the word would exceed the maximum length, start a new paragraph
-        formattedDescription.push(currentLine);
-        currentLine = word; // Start a new paragraph with the current word
-      }
-    }
-
-    // Add the last paragraph
-    formattedDescription.push(currentLine);
-
-    return formattedDescription;
-  }
-  return undefined;
-}
 
 interface BorderedBoxProps {
   strings: string[];

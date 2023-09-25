@@ -116,6 +116,7 @@ const allowedFileTypes = {
   "video/ogg": "Video",
   "application/pdf": "PDF",
   "text/csv": "CSV",
+  "application/json":"JSON"
 };
 
 export const bytesToMB = (bytes) => {

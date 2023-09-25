@@ -1,6 +1,5 @@
 import {
   polygonMumbai,
-  optimismGoerli,
   filecoinCalibration,
 } from "wagmi/chains";
 
@@ -16,7 +15,6 @@ export const ETH_CHAINS = [
       },
     },
   },
-  optimismGoerli,
   {
     ...filecoinCalibration,
     iconUrl:

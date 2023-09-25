@@ -56,9 +56,9 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   useEffect(() => {
     // Your useEffect logic here
     generateAttributeString();
-  }, [attributes,setAttributes]); // Add attributes as a dependency
+  }, [attributes,setAttributes]); 
 
-  const { config } = usePrepareContractWrite({
+  const { config,error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.SchemaRegistry[chainid].contract,
     // @ts-ignore
@@ -88,6 +88,17 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     confirmations: 2,
     hash: data?.hash,
   });
+
+  useEffect(() => {
+    if (succ) {
+      const timeout = setTimeout(() => {
+        onClose();
+        window.location.reload();
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [succ]);
+
   const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
@@ -163,24 +174,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
         .join(", ")
     );
     return rawSchema;
-  };
-
-  const handleSubmit = () => {
-    const schemaData = {
-      schemaName,
-      schemaDescription,
-      isRevocable,
-      resolver,
-      attributes: attributes.map((attr) => ({
-        type: attr.type,
-        name: attr.name,
-        isArray: attr.isArray,
-      })),
-    };
-
-    console.log(JSON.stringify(schemaData, null, 2));
-    onCreate(schemaData);
-    onClose();
   };
 
   return (
@@ -434,7 +427,11 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <Notification
             isLoading={isLoading}
             isSuccess={isSuccess}
-            isError={isError}
+            isError={error?.message
+              ? error.message.indexOf(".") !== -1
+                ? error.message.substring(0, error.message.indexOf("."))
+                : error.message
+              : undefined}
             wait={wait}
             error={err}
             success={succ}

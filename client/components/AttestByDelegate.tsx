@@ -3,12 +3,11 @@ import {
   useChainId,
   useAccount,
   useSignTypedData,
-  useContractRead,
   usePrepareContractWrite,
   useContractWrite,
   useWaitForTransaction,
 } from "wagmi";
-import { recoverTypedDataAddress, hexToSignature } from "viem";
+import { hexToSignature } from "viem";
 // @ts-ignore
 import { Orbis } from "@orbisclub/orbis-sdk";
 import { CONTRACTS } from "@/constants/contracts/index";
@@ -17,8 +16,8 @@ import {
   AttestTypes,
   getAttestDelegateTypedData,
 } from "@/lib/offchain";
-import crypto from "crypto";
 import Notification from "./Notification";
+import { create } from "domain";
 interface Signature {
   v: BigInt;
   r: `0x${string}`;
@@ -60,7 +59,7 @@ interface SignProps {
 
 const orbis = new Orbis();
 
-const AttestByDelegate = ({
+const AttestByDelegateRequest = ({
   schema,
   recipient,
   revocable,
@@ -137,6 +136,39 @@ const AttestByDelegate = ({
     });
 
   useEffect(() => {
+    const createPost = async (v: BigInt, r: string, s: string) => {
+      let content = createDelegatedRequestPostContent(v, r, s);
+      const post = {
+        title: `Delegated Attestation Request for schemaUID: ${schema}`,
+        body: `Off chain delegated request for TAS protocol`,
+        data: content,
+        mentions: [],
+        tags: [
+          {
+            slug: `DelegatedAttestationRequest/${schema}`,
+            title: address,
+          },
+          {
+            slug: `delegator/${address?.toLowerCase()}/${TAS}`,
+            title: "attester",
+          },
+          {
+            slug: `recipient/${address?.toLowerCase()}/${TAS}`,
+            title: "recipient",
+          },
+        ],
+        context: `DelegatedAttestationRequest/${schema}`,
+        // Other properties based on your requirements
+      };
+      await orbis.isConnected();
+      const res = await orbis.createPost(post);
+      console.log(res);
+      if (res.status == 200) {
+        setSuccess(true);
+      } else {
+        setError(true);
+      }
+    };
     if (!done) {
       let tdata: AttestDelegateTypedData = getAttestDelegateTypedData(
         schema,
@@ -155,32 +187,43 @@ const AttestByDelegate = ({
       const res = hexToSignature(data as `0x${string}`);
       console.log(res, data);
       setDecodedSig({ v: res.v, r: res.r, s: res.s });
+      createPost(res.v, res.r, res.s);
+      setDoneAttest(!doneAttest);
+      setDecodedSig({
+        v: BigInt(0),
+        r: "0x",
+        s: "0x",
+      });
+      setSuccess(!success)
     }
-    if (decodedSig.v !== BigInt(0)) {
-      setTimeout(() => {
-        // Code to execute after a 500ms delay
-      }, 500);
-    }
-  }, [
-    data,
-    schema,
-    recipient,
-    revocable,
-    refUID,
-    AttestationData,
-    chainID,
-    TAS,
-    decodedSig,
-    success,
-    error,
-  ]);
+  }, [data, decodedSig, success, error]);
 
-  const handleSignAndCreate = async () => {
-    // await recover();
-    if (decodedSig.v !== BigInt(0)) {
-      // @ts-ignore
-      write();
-    }
+  const createDelegatedRequestPostContent = (
+    v: BigInt,
+    r: string,
+    s: string
+  ) => {
+    const postContent = {
+      schemaUID: schema,
+      AttestationRequestData: {
+        recipient: recipient,
+        expirationTime: 0,
+        revocable: revocable,
+        refUID: refUID,
+        AttestationData: AttestationData,
+        Base64Data: Base64Data,
+        value: 0,
+      },
+      signature: {
+        v: v,
+        r: r as `0x${string}`,
+        s: s as `0x${string}`,
+      },
+      attester: address,
+      deadline: 0,
+    };
+
+    return postContent;
   };
 
   return (
@@ -194,19 +237,16 @@ const AttestByDelegate = ({
           e.preventDefault(); // Prevent default behavior
           if (!signature) {
             signTypedData();
-          } else {
-            handleSignAndCreate();
-            setDoneAttest(!doneAttest);
           }
         }}
       >
-        {!signature ? "sign" : "attest"}
+        signDelegation
       </button>
       {(success || error) && (
         <Notification
           isLoading={false}
           isSuccess={false}
-          isError={false}
+          isError={undefined}
           wait={false}
           success={success}
           error={error}
@@ -217,4 +257,4 @@ const AttestByDelegate = ({
   );
 };
 
-export default AttestByDelegate;
+export default AttestByDelegateRequest;

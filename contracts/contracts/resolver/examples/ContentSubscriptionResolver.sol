@@ -72,7 +72,7 @@ contract ContentSubscriptionResolver is SchemaResolver {
         uint256 monthlySubscriptionPrice,
         SchemaRegistrationInput memory input
     ) external {
-        require(monthlySubscriptionPrice > 0);
+        require(monthlySubscriptionPrice > 0, "Subscription price must be > 0");
         // Register the schema and get its UID
         bytes32 schemaUID = registerSchema(input);
 
@@ -164,14 +164,14 @@ contract ContentSubscriptionResolver is SchemaResolver {
      * @param schemaUID The UID of the schema for which tokens are being minted.
      */
     function subscribe(bytes32 schemaUID, uint256 months) external payable {
-        require(months > 0, "min 1 month subscription");
+        require(months > 0, "min subscription = 1 month");
         require(
             schemas[schemaUID].subscriptionPrice * months == msg.value,
-            "Incorrect value"
+            "Incorrect payment value "
         );
         require(
             schemas[schemaUID].splitterContract != address(0),
-            "non existed"
+            "non existed subscription schemaUID"
         );
 
         uint256 subscriptionEndDate = userSubscriptions[msg.sender][schemaUID];

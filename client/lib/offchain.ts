@@ -19,6 +19,7 @@ export const getPostData = (
   verifyingContract: `0x${string}`,
   chainId: number,
   time: string,
+  expirationTime:number,
   attester: `0x${string}`
 ) => {
   const message = {
@@ -26,7 +27,7 @@ export const getPostData = (
     schema: schema,
     recipient: recipient,
     time: time,
-    expirationTime: 0,
+    expirationTime: expirationTime,
     revocable: revocable,
     refUID: refUID,
     data: data,
@@ -70,8 +71,8 @@ export const getPostData = (
       },
       signature: {
         v: signatureV.toString(),
-        r: signatureR,
-        s: signatureS,
+        r: signatureR as `0x${string}`,
+        s: signatureS as `0x${string}`,
       },
       uid: uid,
     },
@@ -170,7 +171,7 @@ export const getAttestDelegateTypedData = (
     refUID: refUID,
     data: data,
     value: "0", // ETH amount as a string
-    nonce: "0", // The nonce value
+    nonce: "2", // The nonce value
     deadline: "0", // The deadline value
   } as const;
   const typedData = {
@@ -211,6 +212,14 @@ export const getOffChainAttestationsForSchema = async (
   console.log(data);
   return data;
 };
+
+export const getDelegatedRequestForSchema = async(schemaUID:string) => { 
+  const { data, error } = await orbis.getPosts({
+    tag: `DelegatedAttestationRequest/${schemaUID}`,
+  });
+  console.log(data);
+  return data;
+}
 
 export const getOffChainAttestationsNumberForSchema = async (
   chainID: number,
@@ -279,7 +288,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
     attester: fromAddress,
     recipient: toAddress,
     revocable: revocable,
-    expirationTime: expirationTime,
+    expirationTime: expirationTime.toString(),
     age: age,
     data: body.sig.message.base64Data,
     revoker: "0x0000000000000000000000000000000000000000",

@@ -31,14 +31,14 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
   const [visiblePrice, setVisiblePrice] = useState("0");
   const [open, setOpen] = useState(isOpen);
 
-  const { config } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.SubscriptionResolver[chainID].contract,
     // @ts-ignore
     abi: CONTRACTS.SubscriptionResolver[chainID].abi,
     functionName: "subscribe",
     args: [schemaUID, months],
-    value: BigInt(price  * months),
+    value: BigInt(price * months),
   });
   const { write, data, isLoading, isSuccess, isError } =
     useContractWrite(config);
@@ -53,12 +53,22 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     hash: data?.hash,
   });
 
+  useEffect(() => {
+    if (succ) {
+      const timeout = setTimeout(() => {
+        onClose();
+        window.location.reload();
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [succ]);
+
   const { address } = useAccount();
 
   useEffect(() => {
     const fetch = async () => {
       let res = await getSubscriptionPrice(chainID, schemaUID);
-      console.log(res)
+      console.log(res);
       setPrice(Number(getPrice(res)));
       setVisiblePrice(getPrice(res));
     };
@@ -83,7 +93,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
           {`Price per month: ${visiblePrice}`}
         </Typography>
         <Typography color="gray" className="mt-1 font-normal">
-          {`total : ${price/10**18 * months} ethers for ${months} months`}
+          {`total : ${(price / 10 ** 18) * months} ethers for ${months} months`}
         </Typography>
         <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96 flex flex-col items-center mx-auto">
           <div className="mb-4 flex flex-col items-center mx-auto gap-6">
@@ -118,7 +128,13 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
           <Notification
             isLoading={isLoading}
             isSuccess={isSuccess}
-            isError={isError}
+            isError={
+              error?.message
+                ? error.message.indexOf(".") !== -1
+                  ? error.message.substring(0, error.message.indexOf("."))
+                  : error.message
+                : undefined
+            }
             wait={wait}
             error={err}
             success={succ}

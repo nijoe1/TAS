@@ -128,7 +128,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       case "imageCID":
       case "videoCID":
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col border border-black rounded-md p-2">
             <label htmlFor={`${type.slice(0, -3)} Upload`} className="mb-1">
               {`${type.slice(0, -3)} Upload`}
             </label>
@@ -162,7 +162,7 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       case "imageCIDs":
       case "videoCIDs":
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col border border-black rounded-md p-2">
             <label htmlFor={`${type.slice(0, -4)} upload`} className="mb-1">
               {`${type.slice(0, -4)}s Upload`}
             </label>

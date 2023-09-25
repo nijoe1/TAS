@@ -122,7 +122,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     generateAttributeString();
   };
 
-  const { config } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.SubscriptionResolver[chainID].contract,
     // @ts-ignore
@@ -170,6 +170,17 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     console.log(rawSchema);
     console.log(monthlySubscriptionPrice);
   }, [attributes, monthlySubscriptionPrice, schemaAttributes, rawSchema]);
+
+  useEffect(() => {
+    if (succ) {
+      const timeout = setTimeout(() => {
+        onClose();
+        window.location.reload();
+
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [succ]);
 
   const handleTagChange = (tags: any) => {
     setCategories({ tags });
@@ -524,7 +535,13 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <Notification
             isLoading={isLoading}
             isSuccess={isSuccess}
-            isError={isError}
+            isError={
+              error?.message
+                ? error.message.indexOf(".") !== -1
+                  ? error.message.substring(0, error.message.indexOf("."))
+                  : error.message
+                : undefined
+            }
             wait={wait}
             error={err}
             success={succ}

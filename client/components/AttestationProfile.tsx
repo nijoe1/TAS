@@ -114,7 +114,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
     <Card
       color="white"
       shadow={true}
-      className="mb-4 p-4 border  border border-black-black rounded-xl"
+      className="mb-4 p-4 border  border border-black rounded-xl"
     >
       <div className={`flex flex-col mx-auto text-black`}>
         <div className="bg-white rounded-xl p-4 flex flex-col mx-auto">
@@ -189,14 +189,27 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
                 label="created"
                 value={<TimeCreated createdAt={attestationData.created} />}
               />
-              <Field
-                label="expiration"
-                value={
-                  <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
-                    {attestationData.expiration}
-                  </p>
-                }
-              />
+              {attestationData.expiration == "Never" ? (
+                <Field
+                  label="expiration"
+                  value={
+                    // @ts-ignore
+                    <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
+                      {attestationData.expiration}
+                    </p>
+                  }
+                />
+              ) : (
+                <Field
+                  label="expiration"
+                  value={
+                    <TimeCreated
+                      subscription={true}
+                      createdAt={attestationData.expiration}
+                    />
+                  }
+                />
+              )}
               <Field
                 label="revoked"
                 value={
@@ -281,7 +294,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
               <Notification
                 isLoading={isLoading}
                 isSuccess={isSuccess}
-                isError={isError}
+                isError={undefined}
                 wait={wait}
                 error={err}
                 success={succ}

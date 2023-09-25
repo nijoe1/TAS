@@ -130,7 +130,7 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                   </>
                 ) : (
                   <th className="py-2 text-white mx-4">
-                    Remaining Subscription
+                    Subscription Expires
                   </th>
                 )}
               </tr>

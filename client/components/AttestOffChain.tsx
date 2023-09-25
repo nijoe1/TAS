@@ -61,6 +61,7 @@ const AttestOffChain = ({
   refUID,
   AttestationData,
   AttestationBase64,
+  expirationTime
 }: SignProps) => {
   const chainID = useChainId();
   const { address } = useAccount();
@@ -148,6 +149,7 @@ const AttestOffChain = ({
       TAS,
       chainID,
       currentTimestamp?.toString() || "",
+      expirationTime,
       address
     );
 
@@ -181,14 +183,6 @@ const AttestOffChain = ({
     }
   }, [
     data,
-    schema,
-    recipient,
-    revocable,
-    refUID,
-    AttestationData,
-    time,
-    chainID,
-    TAS,
     decodedSig,
     success,
     error,
@@ -271,7 +265,7 @@ const AttestOffChain = ({
           if (!signature) {
             signTypedData();
           } else {
-            handleSignAndCreate();
+            await handleSignAndCreate();
             setDoneAttest(!doneAttest);
           }
         }}
@@ -282,7 +276,7 @@ const AttestOffChain = ({
         <Notification
           isLoading={false}
           isSuccess={false}
-          isError={false}
+          isError={undefined}
           wait={false}
           success={success}
           error={error}

@@ -7,16 +7,21 @@ import { useRouter } from "next/router";
 import { useChainId } from "wagmi";
 import { CONTRACTS } from "@/constants/contracts";
 import { useAccount } from "wagmi";
-import { getSchemaData, SchemaInfo } from "@/lib/tas";
+import {
+  getDelegatedRequestsForSchema,
+  getSchemaData,
+  SchemaInfo,
+} from "@/lib/tas";
 import AttestationsTable from "@/components/AttestationsTable";
 import { getIsEncrypted } from "@/lib/tableland";
 import { Card } from "@material-tailwind/react";
+import SchemaDelegationsTable from "@/components/SchemaDelegationsTable";
 
 interface SchemaData {
   schemaUID: string;
   name: string;
   description: string;
-  categories:string[];
+  categories: string[];
   created: string;
   creator: string;
   resolverContract: string;
@@ -36,6 +41,8 @@ const Schema = () => {
   const [subscriptionResolver, setSubscriptionResolver] = useState();
   const [isEncrypted, setIsEncrypted] = useState<boolean>(false);
   const { address } = useAccount();
+  const [showAttestations, setShowAttestations] = useState(true);
+  const [requestsData, setRequestsData] = useState();
 
   const router = useRouter();
   const schemaUID = router?.query?.schemaUID;
@@ -52,11 +59,21 @@ const Schema = () => {
     console.log(newAccessInfo);
   };
 
+  const togggleShowAttestations = () => {
+    setShowAttestations(!showAttestations);
+  };
+
   useEffect(() => {
     async function fetch() {
       if (schemaUID) {
         let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
         let resp = (await getIsEncrypted(chainID, schemaUID)) as boolean;
+        let requests = await getDelegatedRequestsForSchema(
+          schemaUID as string,
+          res.schemaInfo.rawSchema
+        );
+        // @ts-ignore
+        setRequestsData(requests);
         resp =
           schemaData?.resolverContract ==
           // @ts-ignore
@@ -79,7 +96,7 @@ const Schema = () => {
     if (!taken && schemaUID && chainID) {
       fetch();
     }
-  }, [schemaUID, chainID, address,router]);
+  }, [schemaUID, chainID, address, router]);
 
   return (
     <div className={`flex flex-col min-h-screen bg-blue-gray-100`}>
@@ -87,30 +104,45 @@ const Schema = () => {
       {taken ? (
         <>
           <div className="flex flex-col items-center">
-            
-              <SchemaProfile
-                schemaData={schemaData ? schemaData : SchemaInfo}
-                onAccessInfoChange={handleAccessInfoChange}
-                chainID={chainID}
-                isEncrypted={
+            <SchemaProfile
+              schemaData={schemaData ? schemaData : SchemaInfo}
+              onAccessInfoChange={handleAccessInfoChange}
+              chainID={chainID}
+              isEncrypted={
+                schemaData?.resolverContract ==
+                // @ts-ignore
+                CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
+                  ? true
+                  : isEncrypted
+              }
+              toggleShowAttestations={togggleShowAttestations}
+            ></SchemaProfile>
+            {showAttestations ? (
+              <div>
+                {(tableData.length > 0 &&
+                  // @ts-ignore
+                  accessInfo.viewAccess) ||
+                accessInfo.attestAccess ? (
+                  <AttestationsTable
+                    attestationsTableData={tableData}
+                    notSchemaUID={true}
+                  />
+                ) : (
+                  <div>No access</div>
+                )}
+              </div>
+            ) : (
+              <SchemaDelegationsTable
+                // @ts-ignore
+                schemaDelegationsTableData={requestsData}
+                encrypted={
                   schemaData?.resolverContract ==
                   // @ts-ignore
                   CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
                     ? true
                     : isEncrypted
                 }
-              ></SchemaProfile>
-
-            {(tableData.length > 0 &&
-              // @ts-ignore
-              accessInfo.viewAccess) ||
-            accessInfo.attestAccess ? (
-              <AttestationsTable
-                attestationsTableData={tableData}
-                notSchemaUID={true}
               />
-            ) : (
-              <div>No access</div>
             )}
           </div>
         </>

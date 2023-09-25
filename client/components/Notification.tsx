@@ -3,11 +3,11 @@ import React, { useEffect, useState } from "react";
 type NotificationProps = {
   isLoading: boolean;
   isSuccess: boolean;
-  isError: boolean;
+  isError: string | undefined;
   wait: boolean;
   success: boolean;
   error: boolean;
-  offchain?:boolean
+  offchain?: boolean;
 };
 
 const Notification: React.FC<NotificationProps> = ({
@@ -17,7 +17,7 @@ const Notification: React.FC<NotificationProps> = ({
   wait,
   success,
   error,
-  offchain
+  offchain,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [started, setStarted] = useState(false);
@@ -27,14 +27,28 @@ const Notification: React.FC<NotificationProps> = ({
       setStarted(false);
     }
 
-    if (success || isError) {
+    if ((success || isError) && !offchain) {
       const timeout = setTimeout(() => {
         setIsVisible(false);
       }, 3000);
 
       return () => clearTimeout(timeout);
     }
-  }, [isLoading, isSuccess, isError, wait, success, error,offchain]);
+
+    if (success && offchain) {
+      const timeout = setTimeout(() => {
+        setIsVisible(false);
+        window.location.reload();
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+    if (isError && offchain) {
+      const timeout = setTimeout(() => {
+        setIsVisible(false);
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isLoading, isSuccess, isError, wait, success, error, offchain]);
 
   const notificationStyles: React.CSSProperties = {
     position: "fixed",
@@ -45,17 +59,19 @@ const Notification: React.FC<NotificationProps> = ({
     color: "#fff",
     fontWeight: "bold",
     display: isVisible ? "block" : "none",
-    zIndex: 9999,  // Ensure it's on top of other elements
+    zIndex: 9999, // Ensure it's on top of other elements
   };
 
   const notificationText = isLoading
     ? "Confirm Transaction..."
     : isError
-    ? "Transaction will fail Attest off chain or Add less data"
+    ? isError
     : wait && !success
     ? "Wait until transaction is confirmed"
     : success
-    ? offchain?"Attested Succesfully":"Transaction confirmed"
+    ? offchain
+      ? "Attested Succesfully"
+      : "Transaction confirmed"
     : error
     ? "An error occured try again"
     : "";

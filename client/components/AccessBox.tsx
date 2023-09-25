@@ -80,8 +80,6 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         accessData.attestAccess = res ? res.attestAccess : false;
         accessData.viewAccess = hasViewAccess2 ? true : false;
       } else {
-        let res = await getAttestRevokeAccess(chainid, address, uid);
-        console.log(res);
         accessData.revokeAccess = isRevocable;
         accessData.attestAccess = true;
         accessData.viewAccess = true;

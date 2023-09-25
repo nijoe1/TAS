@@ -74,7 +74,7 @@ const TimeCreated: React.FC<TimeCreatedProps> = ({
             ? `${duration.minutes()} minutes`
             : "less than a minute";
         // @ts-ignore
-        setDisplayTime(`expires in : ${formattedTime}`);
+        setDisplayTime(`in : ${formattedTime}`);
       } else {
         // If the elapsed time is positive, display it in the original format
         const duration = moment.duration(elapsedMilliseconds * 1000);

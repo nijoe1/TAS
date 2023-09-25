@@ -37,7 +37,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const [revokersTags, setRevokersTags] = useState({ tags: [] });
   const [isEncrypted, setIsEncrypted] = useState(false);
 
-  const { config } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.ACResolver[chainID].contract,
     // @ts-ignore
@@ -86,6 +86,17 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     hash: data?.hash,
   });
 
+  useEffect(() => {
+    if (succ) {
+      const timeout = setTimeout(() => {
+        onClose();
+        window.location.reload();
+
+      }, 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [succ]);
+
   const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
@@ -96,7 +107,6 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       updatedAttributes[index]["name"] = value;
       updatedAttributes[index]["readonly"] = true;
       updatedAttributes[index]["isArray"] = false;
-
     } else if (
       value === "videoCIDs" ||
       value === "imageCIDs" ||
@@ -126,7 +136,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const addAttribute = () => {
     setAttributes([
       ...attributes,
-      { type: "Select Type", name: "", isArray: false ,readonly:false},
+      { type: "Select Type", name: "", isArray: false, readonly: false },
     ]);
     generateAttributeString();
   };
@@ -187,7 +197,6 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
         className="mb-4 p-4 border border-black rounded-xl card-container" // Added card-container class
         style={{ maxHeight: "80vh", overflowY: "auto" }} // Added style for max height and scroll
       >
-        
         <div className="mb-4">
           <Typography variant="h4" color="black">
             Create Access Control Schema
@@ -196,7 +205,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             Add fields below that are relevant to your use case.
           </Typography>
         </div>
-        
+
         <form className="mt-4">
           <div className="mb-1 ">
             <div className="mb-1 flex">
@@ -411,7 +420,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             </Typography>
           </div>
           <div className="mt-4 flex">
-            <Typography className="ml-2"variant="h6" color="black">
+            <Typography className="ml-2" variant="h6" color="black">
               Generated schema :
             </Typography>
             <Typography color="black">{rawSchema}</Typography>
@@ -459,7 +468,13 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <Notification
             isLoading={isLoading}
             isSuccess={isSuccess}
-            isError={isError}
+            isError={
+              error?.message
+                ? error.message.indexOf(".") !== -1
+                  ? error.message.substring(0, error.message.indexOf("."))
+                  : error.message
+                : undefined
+            }
             wait={wait}
             error={err}
             success={succ}

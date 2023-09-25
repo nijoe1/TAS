@@ -37,6 +37,7 @@
     "next-seo": "^6.0.0",
     "postcss": "8.4.23",
     "react": "18.2.0",
+    "react-calendar": "^4.6.0",
     "react-csv-viewer": "^1.0.4",
     "react-dom": "18.2.0",
     "react-elastic-carousel": "^0.11.5",

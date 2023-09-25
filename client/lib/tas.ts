@@ -9,7 +9,6 @@ import {
   getUserRecievedAttestations,
   getUserSubscriptions,
   getCreatedSchemasRevenue,
-  getAttestRevokeAccess,
   getReferencedAttestations,
 } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
@@ -21,6 +20,7 @@ import {
   getUserOffChainAttestations,
   getUserOffChainRecievedAttestations,
   getOffChainAttestationReferences,
+  getDelegatedRequestForSchema,
 } from "@/lib/offchain";
 import {
   transformDecodedData,
@@ -264,7 +264,8 @@ export const getAttestationData = async (
     // @ts-ignore
     attestationUID: uid,
     created: attestation.creationTimestamp,
-    expiration: attestation.expirationTime === "0" ? "Never" : "Somewhere",
+    expiration:
+      attestation.expirationTime === "0" ? "Never" : attestation.expirationTime,
     revoked:
       attestation.revoker === "0x0000000000000000000000000000000000000000"
         ? false
@@ -462,6 +463,50 @@ export const getUserSchemaSubscriptions = async (
     tableData.push(entry);
   });
   return tableData;
+};
+
+export const getDelegatedRequestsForSchema = async (
+  schemaUID: string,
+  schema: string
+) => {
+  let requests = await getDelegatedRequestForSchema(schemaUID);
+  let requestsArray = [];
+  const encoder = new SchemaEncoder(schema);
+
+  for (const request of requests) {
+    let temp = request.content.data;
+    let TransformedData;
+    try {
+      TransformedData = transformDecodedData(
+        encoder.decodeData(temp.AttestationRequestData.AttestationData)
+      );
+    } catch {
+      TransformedData = undefined;
+    }
+    let entry = {
+      schemaUID: temp.schemaUID,
+      AttestationRequestData: {
+        recipient: temp.AttestationRequestData.recipient,
+        expirationTime: temp.AttestationRequestData.expirationTime,
+        revocable: temp.AttestationRequestData.revocable,
+        refUID: temp.AttestationRequestData.refUID,
+        transformedData: TransformedData,
+        attestationData: temp.AttestationRequestData.AttestationData,
+        Base64Data: temp.AttestationRequestData.Base64Data,
+        value: temp.AttestationRequestData.value,
+      },
+      signature: {
+        v: temp.signature.v,
+        r: temp.signature.r,
+        s: temp.signature.s,
+      },
+      attester: temp.attester,
+      deadline: temp.deadline,
+    };
+    console.log(entry)
+    requestsArray.push(entry);
+  }
+  return requestsArray;
 };
 
 export const getSchemaData = async (
