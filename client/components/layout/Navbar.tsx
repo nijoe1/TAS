@@ -156,7 +156,7 @@ const CustomNavbar = () => {
 
   return (
     <div>
-      <div className={`bg-black py-2 border  flex ${divCount==1? "flex-col gap-2":""} items-center max-w-full mb-3`}>
+      <div className={`bg-black py-2 border  flex ${divCount==1? "flex-col gap-2":""} items-center  mb-3`}>
         <div className="w-4/40 flex rounded-xl ml-4 z-50">
           <Image
             src="/logo.png"
