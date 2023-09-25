@@ -6,6 +6,7 @@ import {
   usePrepareContractWrite,
   useContractWrite,
   useWaitForTransaction,
+  useContractRead,
 } from "wagmi";
 import { hexToSignature } from "viem";
 // @ts-ignore
@@ -101,6 +102,15 @@ const AttestByDelegateRequest = ({
     ],
     value: BigInt(0),
   });
+  const { data: userNonce } = useContractRead({
+    // @ts-ignore
+    address: CONTRACTS.TAS[chainID].contract,
+    // @ts-ignore
+    abi: CONTRACTS.TAS[chainID].abi,
+    functionName: "getNonce",
+    args: [address],
+    watch: true,
+  });
   const {
     write,
     data: txdata,
@@ -153,7 +163,7 @@ const AttestByDelegateRequest = ({
             title: "attester",
           },
           {
-            slug: `recipient/${address?.toLowerCase()}/${TAS}`,
+            slug: `Delegate_recipient/${address?.toLowerCase()}/${TAS}`,
             title: "recipient",
           },
         ],
@@ -177,6 +187,7 @@ const AttestByDelegateRequest = ({
         refUID,
         AttestationData,
         chainID,
+        userNonce,
         TAS
       );
       setTypedData(tdata);
@@ -194,9 +205,9 @@ const AttestByDelegateRequest = ({
         r: "0x",
         s: "0x",
       });
-      setSuccess(!success)
+      setSuccess(!success);
     }
-  }, [data, decodedSig, success, error]);
+  }, [data, decodedSig, success, error, userNonce]);
 
   const createDelegatedRequestPostContent = (
     v: BigInt,

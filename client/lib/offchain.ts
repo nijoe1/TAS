@@ -160,6 +160,7 @@ export const getAttestDelegateTypedData = (
   refUID: `0x${string}`,
   data: `0x${string}`,
   chainID: number,
+  userNonce:any,
   verifyingContract: `0x${string}`
 ) => {
   let domain = getDomain(chainID, verifyingContract);
@@ -171,7 +172,7 @@ export const getAttestDelegateTypedData = (
     refUID: refUID,
     data: data,
     value: "0", // ETH amount as a string
-    nonce: "2", // The nonce value
+    nonce: userNonce?.toString(), // The nonce value
     deadline: "0", // The deadline value
   } as const;
   const typedData = {
@@ -275,7 +276,7 @@ export const getOffChainAttestation = async (chainID: number, uid: string) => {
   const fromAddress = body.signer;
   const age = body.sig.message.time;
   const revocable = body.sig.message.revocable ? "true" : "false";
-  const schemaUID = body.sig.message.schema;
+  const schemaUID = body.sig?.message?.schema;
   const refUID = body.sig.message.refUID;
   const expirationTime = body.sig.message.expirationTime;
   let info = await getSchemaInfo(chainID, schemaUID);

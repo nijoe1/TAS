@@ -48,7 +48,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
-  const [showAttestations, setShowAttestations] = useState(true);
+  const [showAttestations, setShowAttestations] = useState(true)
 
   const openModal = () => {
     setModalIsOpen(true);
@@ -204,14 +204,9 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
               <button
                 type="button"
                 className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                onClick={() => {
-                  toggleShowAttestations();
-                  setShowAttestations(!showAttestations);
-                }}
+                onClick={()=> {toggleShowAttestations();setShowAttestations(!showAttestations) }}
               >
-                {showAttestations
-                  ? "showDelegatedRequests"
-                  : "showAttestations"}
+                {showAttestations? "showDelegatedRequests":"showAttestations"}
               </button>
             )}
             {(accessInfo.attestAccess || accessInfo.viewAccess) && (

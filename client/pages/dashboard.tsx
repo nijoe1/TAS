@@ -37,6 +37,8 @@ export function DashboardPage({}) {
   const [dataInfo, setDataInfo] = useState<any>();
   const [selection, setSelection] = useState("created");
   const [isUser, setIsUser] = useState(false);
+  const [userr, setUserr] = useState(false);
+
   const [tabsValue, setTabsValue] = useState("");
   const handleDataFetch = (isuser: boolean) => {
     setIsDataFetched(true);
@@ -105,6 +107,8 @@ export function DashboardPage({}) {
     }
 
     if (!taken && chainID && user) {
+      // @ts-ignore
+      setUserr(user)
       fetch(user as `0x${string}`);
     }
   }, [isUser]);
@@ -228,9 +232,9 @@ export function DashboardPage({}) {
                 )}
               </TabsBody>
             </Tabs>
-          ) : (
+          ) : userr? (
             <Loading />
-          )}
+          ):(<div className="text-lg font-semibold bg-white text-black rounded-md p-3">Connect your wallet</div>)}
         </div>
       </div>
 

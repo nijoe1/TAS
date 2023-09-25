@@ -183,6 +183,14 @@ const AttestOffChain = ({
     }
   }, [
     data,
+    schema,
+    recipient,
+    revocable,
+    refUID,
+    AttestationData,
+    time,
+    chainID,
+    TAS,
     decodedSig,
     success,
     error,
@@ -265,7 +273,7 @@ const AttestOffChain = ({
           if (!signature) {
             signTypedData();
           } else {
-            await handleSignAndCreate();
+            handleSignAndCreate();
             setDoneAttest(!doneAttest);
           }
         }}

@@ -58,17 +58,29 @@ const CustomNavbar = () => {
   if (divCount === 4) {
     blackDivs = (
       <>
-        <div className="w-7/40 ml-8" style={{ height: "50%" }}>
-          <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
-        </div>
+        {!address ? (
+          <></>
+        ) : (
+          <>
+            <div className="w-7/40 ml-8" style={{ height: "50%" }}>
+              <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
+            </div>
 
-        <div className="w-4/40 ml-8" style={{ height: "50%" }}>
-          <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
-        </div>
+            <div className="w-4/40 ml-8" style={{ height: "50%" }}>
+              <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+            </div>
 
-        <div className="w-5/40 ml-8" style={{ height: "50%" }}>
-          <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
-        </div>
+            <div className="w-5/40 ml-8" style={{ height: "50%" }}>
+              <div className="w-19 h-2 bg-black mx-auto rounded-full"></div>
+            </div>
+            <div className="w-7/40 ml-8" style={{ height: "50%" }}>
+              <div className="w-15 h-2 bg-black mx-auto rounded-full"></div>
+            </div>
+            <div className="w-1/40 ml-8" style={{ height: "50%" }}>
+              <div className="w-9 h-2 bg-black mx-auto rounded-full"></div>
+            </div>
+          </>
+        )}
       </>
     );
   } else if (divCount === 3) {
@@ -156,7 +168,11 @@ const CustomNavbar = () => {
 
   return (
     <div>
-      <div className={`bg-black py-2 border  flex ${divCount==1? "flex-col gap-2":""} items-center  mb-3`}>
+      <div
+        className={`bg-black py-2 border  flex ${
+          divCount == 1 ? "flex-col gap-2" : ""
+        } items-center  mb-3`}
+      >
         <div className="w-4/40 flex rounded-xl ml-4 z-50">
           <Image
             src="/logo.png"
