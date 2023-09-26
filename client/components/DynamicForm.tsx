@@ -507,7 +507,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         }
         wait={wait}
         error={err}
-        success={succ}
+        success={succ?"Attested ONCHAIN with success":undefined}
       />
     </div>
   );

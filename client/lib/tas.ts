@@ -470,6 +470,7 @@ export const getDelegatedRequestsForSchema = async (
   schema: string
 ) => {
   let requests = await getDelegatedRequestForSchema(schemaUID);
+  console.log(requests)
   let requestsArray = [];
   const encoder = new SchemaEncoder(schema);
 
@@ -502,8 +503,10 @@ export const getDelegatedRequestsForSchema = async (
       },
       attester: temp.attester,
       deadline: temp.deadline,
+      nonce: temp.nonce,
+      createdAt: temp.createdAt,
     };
-    console.log(entry)
+    console.log(entry);
     requestsArray.push(entry);
   }
   return requestsArray;

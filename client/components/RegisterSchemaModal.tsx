@@ -434,7 +434,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               : undefined}
             wait={wait}
             error={err}
-            success={succ}
+            success={succ?"Schema created successfully":undefined}
           />
         </form>
       </Card>

@@ -1,24 +1,18 @@
 import React, { useEffect, useState } from "react";
 import EthereumAddress from "./EthereumAddress"; // Make sure to import EthereumAddress and TimeCreated components
 import TimeCreated from "./TimeCreated";
-import { RiLinkUnlinkM } from "react-icons/ri"; // Import the RiLinkUnlinkM icon
-import { bytesToMB, getFileTypeFromAccept } from "@/lib/utils";
 import Pagination from "./Pagination";
-import FileViewer from "./FileViewer";
-import { ImEye, ImEyeBlocked } from "react-icons/im";
-import { FaDownload } from "react-icons/fa";
-import { decrypt } from "@/lib/lighthouse";
 import {
   useChainId,
   useAccount,
-  useSignTypedData,
-  usePrepareContractWrite,
   useContractWrite,
   useWaitForTransaction,
 } from "wagmi";
 import { getEncryptedFilesBlobs } from "@/lib/tas";
 import DecodedData from "./DecodedData";
-
+// @ts-ignore
+import { Orbis } from "@orbisclub/orbis-sdk";
+import Notification from "@/components/Notification";
 import { CONTRACTS } from "@/constants/contracts/index";
 type delegationObject = {
   schemaUID: string;
@@ -39,11 +33,14 @@ type delegationObject = {
   };
   attester: string;
   deadline: number;
+  nonce: number;
+  createdAt: number;
 };
 interface SchemaDelegationsTableProps {
   schemaDelegationsTableData: delegationObject[];
   encrypted: boolean;
 }
+const orbis = new Orbis();
 
 const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
   schemaDelegationsTableData,
@@ -58,8 +55,8 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
   const chainID = useChainId();
   const startIdx = (currentPage - 1) * rowsPerPage;
   const endIdx = startIdx + rowsPerPage;
-
   const paginatedData = schemaDelegationsTableData.slice(startIdx, endIdx);
+  const [selecterRow, setSelectedRow] = useState(paginatedData[0]);
 
   const {
     write,
@@ -88,6 +85,31 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
   });
 
   useEffect(() => {
+    const createPost = async () => {
+      const post = {
+        title: `Delegated Attestation for schemaUID: ${selecterRow.schemaUID}`,
+        body: `AttestationRequestDelegated/${selecterRow.attester}/${selecterRow.nonce}`,
+        mentions: [],
+        tags: [
+          {
+            slug: `DelegatedBy/${address}`,
+            title: address,
+          },
+          {
+            slug: `DelegatedAttestation/${selecterRow.attester}`,
+            title: address,
+          },
+        ],
+        context: `AttestationRequestDelegated/${selecterRow.attester}/${selecterRow.nonce}`,
+        // Other properties based on your requirements
+      };
+      await orbis.isConnected();
+      const res = await orbis.createPost(post);
+      console.log(res);
+      if (res.status != 200) {
+        alert("true");
+      }
+    };
     const fetch = async () => {
       for (const request of schemaDelegationsTableData) {
         let decodedData = await getEncryptedFilesBlobs(
@@ -105,7 +127,10 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
         setFetched(!fetched);
       }
     }
-  }, [fetched]);
+    if (isSuccesss) {
+      createPost();
+    }
+  }, [fetched, isSuccesss]);
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -129,6 +154,7 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
                 <th className="py-2 text-white border-r border-gray">
                   attestationData
                 </th>
+                <th className="py-2 text-white border-r border-gray">Age</th>
                 <th className="py-2 text-white">attestByDelegate</th>
               </tr>
             </thead>
@@ -170,10 +196,17 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">
                     <div className="flex items-center justify-center">
+                      <TimeCreated createdAt={row.createdAt} />
+                    </div>
+                  </td>
+                  <td className="py-2 border-r border-gray border-b border-gray">
+                    <div className="flex items-center justify-center p-2">
                       <button
+                        className="bg-black text-white p-1 rounded-md"
                         // disabled={!write}
-                        onClick={() => {
-                          console.log(row);
+                        onClick={async () => {
+                          //@ts-ignore
+                          setSelectedRow(row);
                           write({
                             args: [
                               [
@@ -200,7 +233,7 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
                           });
                         }}
                       >
-                        Claim
+                        AttestByDelegate
                       </button>
                     </div>
                   </td>
@@ -208,13 +241,22 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
               ))}
             </tbody>
           </table>
+
           <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
             handlePageChange={handlePageChange}
           />
+          <Notification
+            isLoading={isLoadingg}
+            isSuccess={isSuccesss}
+            isError={error ? "Delegated Request Nonce Expired" : undefined}
+            wait={wait}
+            error={err}
+            success={succ ? "Attestation sponsored with success" : undefined}
+          />
         </div>
-      ) : totalRows < 0 ? (
+      ) : totalRows == 0 ? (
         <div>No Data</div>
       ) : (
         <div>Loading</div>

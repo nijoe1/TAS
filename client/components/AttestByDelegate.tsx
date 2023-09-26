@@ -3,9 +3,6 @@ import {
   useChainId,
   useAccount,
   useSignTypedData,
-  usePrepareContractWrite,
-  useContractWrite,
-  useWaitForTransaction,
   useContractRead,
 } from "wagmi";
 import { hexToSignature } from "viem";
@@ -18,7 +15,6 @@ import {
   getAttestDelegateTypedData,
 } from "@/lib/offchain";
 import Notification from "./Notification";
-import { create } from "domain";
 interface Signature {
   v: BigInt;
   r: `0x${string}`;
@@ -85,23 +81,7 @@ const AttestByDelegateRequest = ({
     null
   );
 
-  const { config, error: errr } = usePrepareContractWrite({
-    // @ts-ignore
-    address: CONTRACTS.TAS[chainID].contract,
-    // @ts-ignore
-    abi: CONTRACTS.TAS[chainID].abi,
-    functionName: "attestByDelegation",
-    args: [
-      [
-        schema,
-        [recipient, 0, revocable, refUID, AttestationData, Base64Data, 0],
-        [decodedSig.v, decodedSig.r, decodedSig.s],
-        address,
-        0,
-      ],
-    ],
-    value: BigInt(0),
-  });
+
   const { data: userNonce } = useContractRead({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
@@ -109,25 +89,16 @@ const AttestByDelegateRequest = ({
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "getNonce",
     args: [address],
-    watch: true,
+    // watch: true,
   });
-  const {
-    write,
-    data: txdata,
-    isError: isErrorr,
-    isLoading: isLoadingg,
-    isSuccess: isSuccesss,
-  } = useContractWrite(config);
 
-  const {
-    data: res,
-    isError: err,
-    isLoading: wait,
-    isSuccess: succ,
-  } = useWaitForTransaction({
-    confirmations: 2,
-
-    hash: txdata?.hash,
+  // @ts-ignore
+  const { data: currentTimestamp } = useContractRead({
+    // @ts-ignore
+    address: CONTRACTS.TAS[chainID].contract,
+    // @ts-ignore
+    abi: CONTRACTS.TAS[chainID].abi,
+    functionName: "getTime",
   });
 
   // @ts-ignore
@@ -147,7 +118,12 @@ const AttestByDelegateRequest = ({
 
   useEffect(() => {
     const createPost = async (v: BigInt, r: string, s: string) => {
-      let content = createDelegatedRequestPostContent(v, r, s);
+      let content = createDelegatedRequestPostContent(
+        v,
+        r,
+        s,
+        userNonce as unknown as number
+      );
       const post = {
         title: `Delegated Attestation Request for schemaUID: ${schema}`,
         body: `Off chain delegated request for TAS protocol`,
@@ -159,11 +135,15 @@ const AttestByDelegateRequest = ({
             title: address,
           },
           {
+            slug: `DelegatedAttestationRequest/${address}/${userNonce}`,
+            title: address,
+          },
+          {
             slug: `delegator/${address?.toLowerCase()}/${TAS}`,
             title: "attester",
           },
           {
-            slug: `Delegate_recipient/${address?.toLowerCase()}/${TAS}`,
+            slug: `DelegateRecipient/${address?.toLowerCase()}/${TAS}`,
             title: "recipient",
           },
         ],
@@ -179,7 +159,7 @@ const AttestByDelegateRequest = ({
         setError(true);
       }
     };
-    if (!done) {
+    if (!done && userNonce) {
       let tdata: AttestDelegateTypedData = getAttestDelegateTypedData(
         schema,
         recipient,
@@ -212,7 +192,8 @@ const AttestByDelegateRequest = ({
   const createDelegatedRequestPostContent = (
     v: BigInt,
     r: string,
-    s: string
+    s: string,
+    nonce: number
   ) => {
     const postContent = {
       schemaUID: schema,
@@ -232,6 +213,8 @@ const AttestByDelegateRequest = ({
       },
       attester: address,
       deadline: 0,
+      createdAt: currentTimestamp,
+      nonce: nonce,
     };
 
     return postContent;
@@ -259,7 +242,7 @@ const AttestByDelegateRequest = ({
           isSuccess={false}
           isError={undefined}
           wait={false}
-          success={success}
+          success={success?"Your delegation request submitted with success":undefined}
           error={error}
           offchain={true}
         />

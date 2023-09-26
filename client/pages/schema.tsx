@@ -45,7 +45,7 @@ const Schema = () => {
 
   const router = useRouter();
   const schemaUID = router?.query?.schemaUID;
-
+  const [delegatesFetched, setDelegatesFetched] = useState(false);
   const [accessInfo, setAccessInfo] = useState({
     attestAccess: false,
     revokeAccess: false,
@@ -61,18 +61,32 @@ const Schema = () => {
   const togggleShowAttestations = () => {
     setShowAttestations(!showAttestations);
   };
+  useEffect(() => {
+    async function fetch() {
+      let requests = await getDelegatedRequestsForSchema(
+        schemaUID as string,
+        schemaData?.rawSchema || ""
+      );
+      // @ts-ignore
+      setRequestsData(requests);
+      setDelegatesFetched(true);
+    }
+    if (!delegatesFetched && schemaData?.rawSchema) {
+      fetch();
+    }
+  }, [showAttestations,delegatesFetched]);
 
   useEffect(() => {
     async function fetch() {
       if (schemaUID) {
         let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
         let resp = (await getIsEncrypted(chainID, schemaUID)) as boolean;
-        let requests = await getDelegatedRequestsForSchema(
-          schemaUID as string,
-          res.schemaInfo.rawSchema
-        );
-        // @ts-ignore
-        setRequestsData(requests);
+        // let requests = await getDelegatedRequestsForSchema(
+        //   schemaUID as string,
+        //   res.schemaInfo.rawSchema
+        // );
+        // // @ts-ignore
+        // setRequestsData(requests);
         resp =
           schemaData?.resolverContract ==
           // @ts-ignore
@@ -116,11 +130,13 @@ const Schema = () => {
               }
               toggleShowAttestations={togggleShowAttestations}
             ></SchemaProfile>
-            {showAttestations ? (
+            {showAttestations && (
               <div>
                 {(tableData.length > 0 &&
                   // @ts-ignore
-                  (accessInfo.viewAccess || schemaData?.resolverContract == "0x0000000000000000000000000000000000000000")) ||
+                  (accessInfo.viewAccess ||
+                    schemaData?.resolverContract ==
+                      "0x0000000000000000000000000000000000000000")) ||
                 accessInfo.attestAccess ? (
                   <AttestationsTable
                     attestationsTableData={tableData}
@@ -130,7 +146,9 @@ const Schema = () => {
                   <div>No access</div>
                 )}
               </div>
-            ) : (
+            )}
+
+            {!showAttestations && delegatesFetched ? (
               <SchemaDelegationsTable
                 // @ts-ignore
                 schemaDelegationsTableData={requestsData}
@@ -142,6 +160,8 @@ const Schema = () => {
                     : isEncrypted
                 }
               />
+            ) : (
+              !showAttestations && !delegatesFetched && <Loading />
             )}
           </div>
         </>

@@ -477,7 +477,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             }
             wait={wait}
             error={err}
-            success={succ}
+            success={succ?"Access controll schema created successfully":undefined}
           />
         </form>
       </Card>

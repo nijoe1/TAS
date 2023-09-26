@@ -137,7 +137,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
             }
             wait={wait}
             error={err}
-            success={succ}
+            success={succ?"You Subscribed successfully":undefined}
           />
         </form>
       </Card>

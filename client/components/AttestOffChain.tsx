@@ -200,7 +200,7 @@ const AttestOffChain = ({
     let content = createPostContent();
     const post = {
       title: `uid: ${uid}`,
-      body: `Off chain attestation for TAS protocol https://tas.vercel.app/attestation?uid=${uid}&type=OFFCHAIN.`,
+      body: `Off chain attestation for TAS protocol link => tas.vercel.app/attestation?uid=${uid}&type=OFFCHAIN.`,
       data: content,
       mentions: [],
       tags: [
@@ -286,7 +286,7 @@ const AttestOffChain = ({
           isSuccess={false}
           isError={undefined}
           wait={false}
-          success={success}
+          success={success?"Attested OFFCHAIN with success":undefined}
           error={error}
           offchain={true}
         />

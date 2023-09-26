@@ -544,7 +544,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             }
             wait={wait}
             error={err}
-            success={succ}
+            success={succ?"Subscription schema created successfully":undefined}
           />
         </form>
       </Card>

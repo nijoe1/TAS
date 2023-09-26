@@ -11,7 +11,7 @@ export const getPostData = (
   revocable: boolean,
   refUID: `0x${string}`,
   data: `0x${string}`,
-  AttestationBase64:string,
+  AttestationBase64: string,
   signatureV: BigInt,
   signatureR: string,
   signatureS: string,
@@ -19,7 +19,7 @@ export const getPostData = (
   verifyingContract: `0x${string}`,
   chainId: number,
   time: string,
-  expirationTime:number,
+  expirationTime: number,
   attester: `0x${string}`
 ) => {
   const message = {
@@ -55,7 +55,7 @@ export const getPostData = (
         schema: message.schema,
         refUID: message.refUID,
         data: message.data,
-        base64Data : AttestationBase64
+        base64Data: AttestationBase64,
       },
       types: {
         Attest: [
@@ -160,7 +160,7 @@ export const getAttestDelegateTypedData = (
   refUID: `0x${string}`,
   data: `0x${string}`,
   chainID: number,
-  userNonce:any,
+  userNonce: any,
   verifyingContract: `0x${string}`
 ) => {
   let domain = getDomain(chainID, verifyingContract);
@@ -214,14 +214,54 @@ export const getOffChainAttestationsForSchema = async (
   return data;
 };
 
-export const getDelegatedRequestForSchema = async(schemaUID:string) => { 
+export const getDelegatedRequestForSchema = async (schemaUID: string) => {
   const { data, error } = await orbis.getPosts({
     tag: `DelegatedAttestationRequest/${schemaUID}`,
   });
-  console.log(data);
-  return data;
-}
 
+  const requests = [];
+  const visited = new Set();
+
+  for (const request of data) {
+    const temp = request.content.data;
+
+    // Check if we've already fetched data for this attester and nonce
+    const key = `${temp.attester}-${temp.nonce}`;
+    if (visited.has(key)) {
+      // Skip fetching and processing if already visited
+      continue;
+    }
+
+    visited.add(key);
+
+    const { data: alreadyDelegated, errorr } = await orbis.getPosts({
+      context: `AttestationRequestDelegated/${temp.attester}/${temp.nonce}`,
+    });
+
+    const { data: subData, error } = await orbis.getPosts({
+      tag: `DelegatedAttestationRequest/${temp.attester}/${temp.nonce}`,
+    });
+
+    if (subData.length === 0 && alreadyDelegated.length === 0) {
+      requests.push(request);
+    } else if (subData.length !== 0 && alreadyDelegated.length === 0) {
+      // Find the entry with the maximum createdAt value
+      const maxCreatedAtEntry = subData.reduce((prev: any, current: any) =>
+        new Date(prev.content.data.createdAt) >
+        new Date(current.content.data.createdAt)
+          ? prev
+          : current
+      );
+
+      requests.push(maxCreatedAtEntry);
+    } else {
+      continue;
+    }
+  }
+
+  console.log(requests);
+  return requests;
+};
 export const getOffChainAttestationsNumberForSchema = async (
   chainID: number,
   schemaUID: string

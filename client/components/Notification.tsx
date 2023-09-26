@@ -5,7 +5,7 @@ type NotificationProps = {
   isSuccess: boolean;
   isError: string | undefined;
   wait: boolean;
-  success: boolean;
+  success: string | undefined;
   error: boolean;
   offchain?: boolean;
 };
@@ -30,7 +30,7 @@ const Notification: React.FC<NotificationProps> = ({
     if ((success || isError) && !offchain) {
       const timeout = setTimeout(() => {
         setIsVisible(false);
-      }, 3000);
+      }, 2000);
 
       return () => clearTimeout(timeout);
     }
@@ -39,13 +39,13 @@ const Notification: React.FC<NotificationProps> = ({
       const timeout = setTimeout(() => {
         setIsVisible(false);
         window.location.reload();
-      }, 3000);
+      }, 1500);
       return () => clearTimeout(timeout);
     }
     if (isError && offchain) {
       const timeout = setTimeout(() => {
         setIsVisible(false);
-      }, 3000);
+      }, 1000);
       return () => clearTimeout(timeout);
     }
   }, [isLoading, isSuccess, isError, wait, success, error, offchain]);
@@ -70,8 +70,8 @@ const Notification: React.FC<NotificationProps> = ({
     ? "Wait until transaction is confirmed"
     : success
     ? offchain
-      ? "Attested Succesfully"
-      : "Transaction confirmed"
+      ? success
+      : success
     : error
     ? "An error occured try again"
     : "";
