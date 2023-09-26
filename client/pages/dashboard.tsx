@@ -195,7 +195,7 @@ export function DashboardPage({}) {
                     }
                   />
                   <div
-                    style={{ height: "1000px", backgroundColor: "transparent" }}
+                    style={{ height: "2000px", backgroundColor: "transparent" }}
                   ></div>
                 </TabPanel>
                 <TabPanel value="user-schemas">
@@ -229,7 +229,7 @@ export function DashboardPage({}) {
                     />
                   )}
                   <div
-                    style={{ height: "1000px", backgroundColor: "transparent" }}
+                    style={{ height: "2000px", backgroundColor: "transparent" }}
                   ></div>
                 </TabPanel>
 

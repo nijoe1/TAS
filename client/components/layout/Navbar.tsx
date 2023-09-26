@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useAccount, useChainId } from "wagmi";
 import StepperForm from "@/components/StepperForm";
 import { useConnect } from "wagmi";
+import { BsGithub } from "react-icons/bs";
+import { RiTwitterLine } from "react-icons/ri";
 
 const navLinks = [
   { text: "Attestations", href: "/attestations" },
@@ -62,21 +64,21 @@ const CustomNavbar = () => {
         ) : (
           <>
             <div className="w-7/40 ml-8" style={{ height: "50%" }}>
-              <div className="w-20 h-2 bg-black mx-auto rounded-full"></div>
+              <div className="w-10 h-2 bg-black mx-auto rounded-full"></div>
             </div>
 
             <div className="w-4/40 ml-8" style={{ height: "50%" }}>
-              <div className="w-20 h-2 bg-black  mx-auto rounded-full"></div>
+              <div className="w-10 h-2 bg-black  mx-auto rounded-full"></div>
             </div>
 
             <div className="w-5/40 ml-8" style={{ height: "50%" }}>
-              <div className="w-19 h-2 bg-black mx-auto rounded-full"></div>
+              <div className="w-10 h-2 bg-black mx-auto rounded-full"></div>
             </div>
             <div className="w-7/40 ml-8" style={{ height: "50%" }}>
-              <div className="w-15 h-2 bg-black mx-auto rounded-full"></div>
+              <div className="w-10 h-2 bg-black mx-auto rounded-full"></div>
             </div>
             <div className="w-1/40 ml-8" style={{ height: "50%" }}>
-              <div className="w-9 h-2 bg-black mx-auto rounded-full"></div>
+              <div className="w-10 h-2 bg-black mx-auto rounded-full"></div>
             </div>
           </>
         )}
@@ -198,6 +200,8 @@ const CustomNavbar = () => {
           ))}
         </div>
         <div className="w-7/40 flex rounded-xl mr-4">
+          <BsGithub/>
+          <RiTwitterLine/>
           <ConnectButton />
         </div>
       </div>

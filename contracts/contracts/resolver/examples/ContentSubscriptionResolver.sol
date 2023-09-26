@@ -3,8 +3,6 @@ pragma solidity 0.8.19;
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {ITAS, Attestation} from "../../ITAS.sol";
@@ -33,8 +31,6 @@ contract ContentSubscriptionResolver is SchemaResolver {
         uint256 totalRevenue;
         address splitterContract;
     }
-
-    string schema = "string jsonCID";
 
     mapping(bytes32 => SchemaInfo) schemas;
 

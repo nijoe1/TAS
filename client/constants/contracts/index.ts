@@ -1,7 +1,4 @@
-import TAS from "./deployments/optimism_goerli/TAS.json";
-import SubscriptionResolver from "./deployments/optimism_goerli/ContentSubscriptionResolver.json";
-import SchemaRegistry from "./deployments/optimism_goerli/SchemaRegistry.json";
-import ACResolver from "./deployments/optimism_goerli/ACResolver.json";
+
 
 import TAS_m from "./deployments/mumbai/TAS.json";
 import SubscriptionResolver_m from "./deployments/mumbai/ContentSubscriptionResolver.json";
@@ -15,10 +12,6 @@ import ACResolver_f from "./deployments/calibration/ACResolver.json";
 
 export const CONTRACTS = {
   TAS: {
-    420: {
-      contract: TAS.address,
-      abi: TAS.abi,
-    },
     80001: {
       contract: TAS_m.address,
       abi: TAS_m.abi,
@@ -29,10 +22,6 @@ export const CONTRACTS = {
     },
   },
   SubscriptionResolver: {
-    420: {
-      contract: SubscriptionResolver.address,
-      abi: SubscriptionResolver.abi,
-    },
     80001: {
       contract: SubscriptionResolver_m.address,
       abi: SubscriptionResolver_m.abi,
@@ -43,10 +32,6 @@ export const CONTRACTS = {
     },
   },
   SchemaRegistry: {
-    420: {
-      contract: SchemaRegistry.address,
-      abi: SchemaRegistry.abi,
-    },
     80001: {
       contract: SchemaRegistry_m.address,
       abi: SchemaRegistry_m.abi,
@@ -60,10 +45,6 @@ export const CONTRACTS = {
     80001: {
       contract: ACResolver_m.address,
       abi: ACResolver_m.abi,
-    },
-    420: {
-      contract: ACResolver.address,
-      abi: ACResolver.abi,
     },
     314159: {
       contract: ACResolver_f.address,

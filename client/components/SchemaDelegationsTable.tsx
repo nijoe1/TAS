@@ -170,15 +170,25 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
                 >
                   <td className="py-2 border-r border-gray border-b border-gray">
                     <div className="flex items-center justify-center">
-                      <EthereumAddress copy={true} address={row.attester} />
+                      <EthereumAddress
+                        address={row.attester}
+                        link={`/dashboard?address=${row.attester}`}
+                      />
                     </div>
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">
                     <div className="flex items-center justify-center">
-                      <EthereumAddress
-                        copy={true}
-                        address={row.AttestationRequestData.recipient}
-                      />
+                      {row.AttestationRequestData.recipient !==
+                      "0x0000000000000000000000000000000000000000" ? (
+                        <EthereumAddress
+                          link={`/dashboard?address=${row.AttestationRequestData.recipient}`}
+                          address={row.AttestationRequestData.recipient}
+                        />
+                      ) : (
+                        <EthereumAddress
+                          address={row.AttestationRequestData.recipient}
+                        />
+                      )}
                     </div>
                   </td>
                   <td className="py-2 border-r border-gray border-b border-gray">
