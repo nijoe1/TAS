@@ -32,12 +32,12 @@ module.exports = async ({ deployments }) => {
     SchemaTablelandIndexer.address
   );
 
-  // let makeRegistryOwner = await SchemaIndexerContractInstance.transferOwnership(
-  //   SchemaRegistry.address
-  // );
-  // await makeRegistryOwner.wait();
+  let makeRegistryOwner = await SchemaIndexerContractInstance.transferOwnership(
+    SchemaRegistry.address
+  );
+  await makeRegistryOwner.wait();
 
-  // console.log("Registry IS Schema_INDEXER OWNER");
+  console.log("Registry IS Schema_INDEXER OWNER");
   console.log(await SchemaIndexerContractInstance.tables(0))
   console.log(await SchemaIndexerContractInstance.tables(1))
 
@@ -60,12 +60,12 @@ module.exports = async ({ deployments }) => {
     TASIndexer.address
   );
 
-  // let makeTasOwner = await TasIndexerContractInstance.transferOwnership(
-  //   TAS.address
-  // );
-  // await makeTasOwner.wait();
+  let makeTasOwner = await TasIndexerContractInstance.transferOwnership(
+    TAS.address
+  );
+  await makeTasOwner.wait();
 
-  // console.log("TAS IS INDEXER OWNER");
+  console.log("TAS IS INDEXER OWNER");
 
   console.log(await TasIndexerContractInstance.tables(0))
   console.log(await TasIndexerContractInstance.tables(1))
