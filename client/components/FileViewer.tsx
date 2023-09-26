@@ -111,7 +111,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
   }, [filesBlobs, fileType]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg my-auto mb-6 transition duration-300 transform hover:scale-105">
+    <div className="bg-white p-6 rounded-lg shadow-lg my-auto overflow-y-auto mb-6 transition duration-300 transform hover:scale-105">
       {filesBlobs || fileUri ? (
         <div>
           {fileType === "JSON" && jsonContent && (

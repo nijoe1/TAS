@@ -174,12 +174,12 @@ const CustomNavbar = () => {
         } items-center  mb-3`}
       >
         <div className="w-4/40 flex rounded-xl ml-4 z-50">
-          <Image
-            src="/logo.png"
+          <img
+            src="/logo2.jpeg"
             alt="TAS Logo"
             onClick={() => handleLinkClick("/")}
-            width={125}
-            height={37}
+            width={100}
+            height={50}
             className="rounded-lg cursor-pointer"
           />
         </div>

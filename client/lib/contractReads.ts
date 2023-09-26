@@ -33,7 +33,7 @@ export const getSchemaRegistryTables = async (chainID: number) => {
 
 export const getSchemaType = (resolver: string, chainID: number) => {
   if (resolver == "0x0000000000000000000000000000000000000000") {
-    return "CLASIC";
+    return "STANDARD";
   } else if (
     // @ts-ignore
     resolver == CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()

@@ -53,15 +53,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     hash: data?.hash,
   });
 
-  useEffect(() => {
-    if (succ) {
-      const timeout = setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [succ]);
+
 
   const { address } = useAccount();
 

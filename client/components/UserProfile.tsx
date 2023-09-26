@@ -14,10 +14,15 @@ import { Orbis } from "@orbisclub/orbis-sdk";
 import { uploadFile, getIpfsGatewayUri } from "@/lib/lighthouse";
 import { useAccount } from "wagmi";
 import { FaEdit } from "react-icons/fa";
-
 const orbis = new Orbis();
 
-export function ProfileCard({ onDataFetch }: { onDataFetch: (isUser:boolean) => void }) {
+export function ProfileCard({
+  onDataFetch,
+  onUpdate,
+}: {
+  onDataFetch: (isUser: boolean) => void;
+  onUpdate: (success: boolean) => void;
+}) {
   const router = useRouter();
   const [userProfile, setUserProfile] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -59,25 +64,28 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: (isUser:boolean) => 
     console.log("Updated profile details:", profileDetails);
     await orbis.isConnected();
     const res = await orbis.updateProfile(profileDetails);
-    toggleModal();
+    if (res === 200) {
+      onUpdate(true);
+      toggleModal();
+    }
   };
 
   useEffect(() => {
     const fetch = async () => {
       await orbis.isConnected();
-      let temp
+      let temp;
       let userDid = router.query.address;
       if (!userDid) {
         setUpdate(true);
-        temp = true
+        temp = true;
       } else if (userDid == address?.toLowerCase()) {
         setUpdate(false);
-        temp = false
+        temp = false;
       } else {
         setUpdate(false);
-        temp = false
+        temp = false;
       }
-      let user
+      let user;
       if (!userDid) {
         // If address is null, get it from local storage
         user = localStorage.getItem("userdid") || "";
@@ -86,33 +94,34 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: (isUser:boolean) => 
         user = `did:pkh:eip155:1:${userDid}`;
       }
 
-      if (!user) {
-        return; // Handle the case when userDid is still null
-      }
+      if (user) {
+        const { data, error } = await orbis.getProfile(user);
 
-      const { data, error } = await orbis.getProfile(user);
-
-      if (data) {
-        setUserProfile(data);
-        setFetched(true);
-        onDataFetch(temp); // Invoke the callback when data is fetched
-      } else if (error) {
-        console.error("Error fetching user profile: ", error);
+        if (data) {
+          setUserProfile(data);
+          setFetched(true);
+          onDataFetch(temp); // Invoke the callback when data is fetched
+        } else if (error) {
+          console.error("Error fetching user profile: ", error);
+        }
       }
     };
     fetch();
-  }, [router]);
+  }, [router, isModalOpen]);
 
   return (
     <div>
       {" "}
       {fetched && (
         <Card className="w-96">
-          <CardHeader floated={false} className="h-80">
+          <CardHeader floated={false} className="h-80 flex flex-col items-center">
             <img
               className="rounded-lg mt-2 mb-2"
               // @ts-ignore
               src={userProfile?.details?.profile?.pfp}
+              height={"60%"}
+              width={"60%"}
+              
               alt="profile-picture"
             />
           </CardHeader>
@@ -129,7 +138,9 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: (isUser:boolean) => 
           <CardFooter className="flex justify-center  pt-3">
             {update && (
               <div className="flex flex-wrap gap-1">
-                <p className="cursor-pointer" onClick={toggleModal}>edit profile:</p>
+                <p className="cursor-pointer" onClick={toggleModal}>
+                  edit profile:
+                </p>
                 <FaEdit className="cursor-pointer mt-1" onClick={toggleModal} />
               </div>
             )}
@@ -144,31 +155,43 @@ export function ProfileCard({ onDataFetch }: { onDataFetch: (isUser:boolean) => 
                     >
                       &times;
                     </span>
-                    <h2 className="text-xl text-center font-bold mb-4">
-                      Update Profile
-                    </h2>
-                    <input
-                      type="text"
-                      name="username"
-                      value={profileDetails.username}
-                      onChange={handleInputChange}
-                      placeholder="Username"
-                      className="mx-auto text-center mb-2 p-2 border rounded flex flex-col items-centrer"
-                    />
-                    <input
-                      type="text"
-                      name="description"
-                      value={profileDetails.description}
-                      onChange={handleInputChange}
-                      placeholder="Description"
-                      className="mx-auto text-center mb-2 p-2 border rounded flex flex-col items-centrer"
-                    />
                     <div className="flex flex-col items-center">
+                      <h2 className="text-xl text-center font-bold mb-4">
+                        Update Profile
+                      </h2>
                       <label
                         htmlFor={"image upload"}
                         className="mx-auto text-center mb-2 p-2 mt-1flex flex-col items-centrer"
                       >
-                        {"Profile Picture"}
+                        {"username"}
+                      </label>
+                      <input
+                        type="text"
+                        name="username"
+                        value={profileDetails.username}
+                        onChange={handleInputChange}
+                        placeholder={`${profileDetails.username}`}
+                        className="mx-auto text-center mb-2 p-2 border rounded flex flex-col items-centrer"
+                      />
+                      <label
+                        htmlFor={"image upload"}
+                        className="mx-auto text-center mb-2 p-2 mt-1flex flex-col items-centrer"
+                      >
+                        {"description"}
+                      </label>
+                      <input
+                        type="text"
+                        name="description"
+                        value={profileDetails.description}
+                        onChange={handleInputChange}
+                        placeholder={`${profileDetails.description}`}
+                        className="mx-auto text-center mb-2 p-2 border rounded flex flex-col items-centrer"
+                      />
+                      <label
+                        htmlFor={"image upload"}
+                        className="mx-auto text-center mb-2 p-2 mt-1flex flex-col items-centrer"
+                      >
+                        {"pfp"}
                       </label>
 
                       {onProgress < 0 ? (

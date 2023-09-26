@@ -86,17 +86,6 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     hash: data?.hash,
   });
 
-  useEffect(() => {
-    if (succ) {
-      const timeout = setTimeout(() => {
-        onClose();
-        window.location.reload();
-
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [succ]);
-
   const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
@@ -356,6 +345,11 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                   className="attribute-select rounded-full px-4 py-2 border border-black mr-20"
                 >
                   <option value="Select Type">Select Type</option>
+                  {solidityTypes.map((type, typeIndex) => (
+                    <option key={typeIndex} value={type}>
+                      {type}
+                    </option>
+                  ))}
                   <option value="imageCID">imageCID</option>
                   <option value="imageCIDs">imageCIDs</option>
 
@@ -364,12 +358,6 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
                   <option value="jsonCID">jsonCID</option>
                   <option value="jsonCIDs">jsonCIDs</option>
-
-                  {solidityTypes.map((type, typeIndex) => (
-                    <option key={typeIndex} value={type}>
-                      {type}
-                    </option>
-                  ))}
                 </select>
               </div>
               <div className="flex justify-center items-center gap-2 ">
@@ -477,7 +465,9 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             }
             wait={wait}
             error={err}
-            success={succ?"Access controll schema created successfully":undefined}
+            success={
+              succ ? "Access controll schema created successfully" : undefined
+            }
           />
         </form>
       </Card>

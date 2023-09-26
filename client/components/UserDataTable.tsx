@@ -273,7 +273,7 @@ const UserDataTable: React.FC<UserDataTableProps> = ({
                         100 <=
                       2 ? (
                         <ImEye
-                        title="view file"
+                          title="view file"
                           className="cursor-pointer"
                           onClick={async () =>
                             await handleOpenModal(
@@ -319,7 +319,6 @@ const UserDataTable: React.FC<UserDataTableProps> = ({
       ) : (
         <div>No Data</div>
       )}
-
     </div>
   );
 };
@@ -371,25 +370,26 @@ const Modal: React.FC<ModalProps> = ({
     position: "fixed",
     zIndex: 9000, // Set a high z-index
     left: 0,
-    top: 0,
+    top: "20px",
     width: "100%",
     height: "100%",
     backgroundColor: "rgba(0, 0, 0, 0)", // Semi-transparent background
   };
 
   const modalContentStyle: React.CSSProperties = {
+    top: "20px",
     backgroundColor: "#fff",
     margin: "15% auto", // Adjusted margin for centering
-    padding: "25px",
-    border: "1px solid #ccc",
-    borderRadius: "10px", // Added border radius for a more modern look
-    width: "80%", // Adjust the width as needed
+    // padding: "25px",
+    // border: "1px solid #ccc",
+    // borderRadius: "10px", // Added border radius for a more modern look
+    width: "60%", // Adjust the width as needed
     maxWidth: "500px", // Limit the maximum width
-    position: "relative", // Make it relative for button positioning
+    // position: "fixed", // Make it relative for button positioning
   };
 
   const buttonStyle: React.CSSProperties = {
-    position: "absolute",
+    // position: "absolute",
     bottom: "0px", // Adjusted button position
     right: "20px", // Adjusted button position
     padding: "10px 20px",
@@ -401,10 +401,7 @@ const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="modal flex flex-col my-auto" style={modalStyle}>
-      <div
-        className="modal-content overflow-y-auto rounded-md "
-        style={modalContentStyle}
-      >
+      <div className="modal-content  rounded-md " style={modalContentStyle}>
         <FileViewer {...fileViewerProps} />
         <button onClick={onClose} style={buttonStyle}>
           Close

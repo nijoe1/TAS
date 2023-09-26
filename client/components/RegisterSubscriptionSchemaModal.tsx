@@ -171,17 +171,6 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     console.log(monthlySubscriptionPrice);
   }, [attributes, monthlySubscriptionPrice, schemaAttributes, rawSchema]);
 
-  useEffect(() => {
-    if (succ) {
-      const timeout = setTimeout(() => {
-        onClose();
-        window.location.reload();
-
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [succ]);
-
   const handleTagChange = (tags: any) => {
     setCategories({ tags });
     console.log(tags);
@@ -278,7 +267,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             />
           </div>
           <div className="mb-4">
-            <div className="mb-1 flex">
+            <div className="mb-1 flex ">
               <Tooltip
                 placement="right-start"
                 content="describe your schema useCase"
@@ -291,7 +280,9 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
             <TagsInput
-              className="background-color-white"
+              inputProps={{ placeholder: "Add category" }}
+              onlyUnique={true}
+              className="background-color-white flex"
               value={categories.tags}
               onChange={handleTagChange}
             />
@@ -441,6 +432,11 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                   className="attribute-select rounded-full px-4 py-2 border border-black mr-20"
                 >
                   <option value="Select Type">Select Type</option>
+                  {solidityTypes.map((type, typeIndex) => (
+                    <option key={typeIndex} value={type}>
+                      {type}
+                    </option>
+                  ))}
                   <option value="imageCID">imageCID</option>
                   <option value="imageCIDs">imageCIDs</option>
 
@@ -449,11 +445,6 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
                   <option value="jsonCID">jsonCID</option>
                   <option value="jsonCIDs">jsonCIDs</option>
-                  {solidityTypes.map((type, typeIndex) => (
-                    <option key={typeIndex} value={type}>
-                      {type}
-                    </option>
-                  ))}
                 </select>
               </div>
               <div className="flex justify-center items-center gap-2 ">
@@ -544,7 +535,9 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             }
             wait={wait}
             error={err}
-            success={succ?"Subscription schema created successfully":undefined}
+            success={
+              succ ? "Subscription schema created successfully" : undefined
+            }
           />
         </form>
       </Card>

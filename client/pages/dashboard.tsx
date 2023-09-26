@@ -4,6 +4,7 @@ import {
   Tab,
   TabsBody,
   TabPanel,
+  Typography,
 } from "@material-tailwind/react";
 import { ProfileCard } from "@/components/UserProfile";
 import { Navbar } from "@/components/layout";
@@ -22,6 +23,7 @@ import { useRouter } from "next/router";
 import AttestationsTable from "@/components/AttestationsTable";
 import SchemasTable from "@/components/SchemasTable";
 import UserDataTable from "@/components/UserDataTable";
+import Notification from "@/components/Notification";
 
 export function DashboardPage({}) {
   const [isDataFetched, setIsDataFetched] = useState(false);
@@ -31,6 +33,7 @@ export function DashboardPage({}) {
   const [taken, setTaken] = useState(false);
   const [attestationsTableData, setAttestationsTableData] = useState([]);
   const [subscriptionTableData, setSubscriptionTableData] = useState([]);
+  const [subscriptions, setSubscriptions] = useState(false);
   const [attestationsRecievedTableData, setAttestationsRecievedTableData] =
     useState([]);
   const [schemasTableData, setSchemasTableData] = useState([]);
@@ -38,16 +41,19 @@ export function DashboardPage({}) {
   const [selection, setSelection] = useState("created");
   const [isUser, setIsUser] = useState(false);
   const [userr, setUserr] = useState(false);
-
+  const [success, setSuccess] = useState(false);
+  const [noUser, setNoUser] = useState(false);
   const [tabsValue, setTabsValue] = useState("");
   const handleDataFetch = (isuser: boolean) => {
     setIsDataFetched(true);
     setIsUser(isuser);
   };
+  const handleUpdate = (success: boolean) => {
+    setSuccess(success);
+  };
   const [data, setData] = useState([
     { label: "Attestations", value: "attestations" },
     { label: "User Schemas", value: "user-schemas" },
-    { label: "Subscribed Schemas", value: "subscribed-schemas" },
   ]);
 
   useEffect(() => {
@@ -83,7 +89,6 @@ export function DashboardPage({}) {
         setData([
           { label: "Attestations", value: "attestations" },
           { label: "User Schemas", value: "user-schemas" },
-          { label: "Subscribed Schemas", value: "subscribed-schemas" },
           { label: "Lighthouse data usage", value: "user-data" },
         ]);
       }
@@ -108,17 +113,30 @@ export function DashboardPage({}) {
 
     if (!taken && chainID && user) {
       // @ts-ignore
-      setUserr(user)
+      setUserr(user);
       fetch(user as `0x${string}`);
     }
-  }, [isUser]);
-
+    if (!user && chainID) {
+      setNoUser(!noUser);
+    }
+  }, [isUser, selection]);
+  useEffect(() => {}, [success]);
   return (
     <div>
       <div className="flex flex-col min-h-screen bg-blue-gray-100">
         <Navbar />
         <div className="flex flex-col items-center flex-1 mt-10">
-          <ProfileCard onDataFetch={handleDataFetch} />
+          <ProfileCard onDataFetch={handleDataFetch} onUpdate={handleUpdate} />
+          <Notification
+            isLoading={false}
+            isSuccess={false}
+            isError={undefined}
+            wait={false}
+            error={false}
+            success={
+              success ? "Profile details updated successfully" : undefined
+            }
+          />
           {isDataFetched && taken ? (
             <Tabs value="attestations" className="mx-auto mt-10">
               <TabsHeader
@@ -176,37 +194,41 @@ export function DashboardPage({}) {
                     }
                   />
                   <div
-                    style={{ height: "500px", backgroundColor: "transparent" }}
+                    style={{ height: "1000px", backgroundColor: "transparent" }}
                   ></div>
                 </TabPanel>
                 <TabPanel value="user-schemas">
-                  {/* Content for Created Schemas Tab */}
-                  <h2 className="text-lg font-semibold mb-2">
-                    Created Schemas Content
-                  </h2>
-                  <SchemasTable
-                    schemaTableData={schemasTableData}
-                    chainID={chainID}
-                    showRevenue={true}
-                    showRole={true}
-                  />
+                  <div className="flex  justify-center items-center gap-2 mt-2 p-3">
+                    <input
+                      type="checkbox"
+                      checked={subscriptions}
+                      onChange={() => setSubscriptions(!subscriptions)}
+                      className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer "
+                    />
+                    <Typography
+                      className="cursor-pointer focus:ring-blue-500 focus:ring-2"
+                      color="black"
+                      onClick={() => setSubscriptions(!subscriptions)}
+                    >
+                      view subscriptions
+                    </Typography>
+                  </div>
+                  {!subscriptions ? (
+                    <SchemasTable
+                      schemaTableData={schemasTableData}
+                      chainID={chainID}
+                      showRevenue={true}
+                      showRole={true}
+                    />
+                  ) : (
+                    <SchemasTable
+                      schemaTableData={subscriptionTableData}
+                      subscription={true}
+                      chainID={chainID}
+                    />
+                  )}
                   <div
-                    style={{ height: "500px", backgroundColor: "transparent" }}
-                  ></div>
-                </TabPanel>
-                <TabPanel value="subscribed-schemas">
-                  {/* Content for Created Schemas Tab */}
-                  <h2 className="text-lg font-semibold mb-2">
-                    subscribed Schemas Content
-                  </h2>
-                  {/* Add your content here */}
-                  <SchemasTable
-                    schemaTableData={subscriptionTableData}
-                    subscription={true}
-                    chainID={chainID}
-                  />
-                  <div
-                    style={{ height: "700px", backgroundColor: "transparent" }}
+                    style={{ height: "1000px", backgroundColor: "transparent" }}
                   ></div>
                 </TabPanel>
 
@@ -228,13 +250,19 @@ export function DashboardPage({}) {
                         }}
                       ></div>
                     )}
+                    <div
+                      style={{
+                        height: "1000px",
+                        backgroundColor: "transparent",
+                      }}
+                    ></div>
                   </TabPanel>
                 )}
               </TabsBody>
             </Tabs>
-          ) : userr? (
+          ) : (
             <Loading />
-          ):(<div className="text-lg font-semibold bg-white text-black rounded-md p-3">Connect your wallet</div>)}
+          )}
         </div>
       </div>
 

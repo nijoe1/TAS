@@ -10,6 +10,7 @@ import { Card, CardBody, Typography } from "@material-tailwind/react";
 import SubscriptionForm from "./SubscriptionForm";
 import { CONTRACTS } from "@/constants/contracts";
 import { getSchemaType } from "@/lib/contractReads";
+import CategoriesContainer from "./CategoriesContainer";
 
 type SchemaDataProps = {
   schemaData: {
@@ -48,7 +49,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
-  const [showAttestations, setShowAttestations] = useState(true)
+  const [showAttestations, setShowAttestations] = useState(true);
 
   const openModal = () => {
     setModalIsOpen(true);
@@ -94,197 +95,185 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   };
 
   return (
-    <Card
-      color="white"
-      shadow={true}
-      className="mb-4 p-4 border border-black rounded-xl"
-    >
-      <div className={`flex flex-col mx-auto `}>
-        <div className="bg-white rounded-xl p-4 ">
-          <Card className="flex flex-col border rounded-lg items-center">
-            <CardBody>
-              <div className="border rounded-lg flex flex-col items-center text-center mx-auto p-2">
-                <Typography variant="h5" color="black">
-                  {"SchemaUID"}
-                </Typography>
-                <EthereumAddress address={schemaData.schemaUID} />
-              </div>
-              <Typography
-                variant="h5"
-                color="black"
-                className="mb-2 mt-2 text-center"
-              >
-                {`${schemaData.name}`}
-              </Typography>
-              <div className="text-center">
-                {splitTextIntoChunks(schemaData.description, 50).map(
-                  (chunk: any, index: any) => (
-                    <React.Fragment key={index}>
-                      {chunk}
-                      <br />
-                    </React.Fragment>
-                  )
-                )}
-              </div>
-
-              {schemaData.categories && (
-                <BorderedBox strings={schemaData.categories}></BorderedBox>
-              )}
-            </CardBody>
-          </Card>
-
-          <div className="flex min-w-full justify-between mt-2 ">
-            {/* Left Box */}
-            <div className="border rounded-xl p-2  overflow-x-auto">
-              <Field
-                label="Created"
-                value={<TimeCreated createdAt={schemaData.created} />}
-              />
-              <Field
-                label="Creator"
-                value={
-                  <EthereumAddress
-                    address={schemaData.creator}
-                    link={`/dashboard?address=${schemaData.creator}`}
-                  />
-                }
-              />
-              <Field
-                label="Resolver"
-                value={
-                  <EthereumAddress address={schemaData.resolverContract} />
-                }
-              />
-
-              <Field
-                label="Type"
-                value={
-                  <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
-                    {`${getSchemaType(schemaData.resolverContract, chainID)} (${
-                      isEncrypted ? "Encrypted" : "Unencrypted"
-                    })`}
-                  </p>
-                }
-              />
-            </div>
-
-            {/* Right Box */}
-            <div className="text-center flex-flex-col items-center border rounded-xl p-4  ">
-              <p className="font-extrabold text-center text-black px-2 py-1 rounded-full text-md whitespace-nowrap ">
-                Schema
-              </p>
-              <DecodedSchema schema={schemaData.decodedSchema} />
-            </div>
-          </div>
-          <div className="w-full mb-2  mt-2 items-center">
-            <AccessBox
-              uid={schemaData.schemaUID}
-              isSchema={true}
-              isRevocable={schemaData.revocable}
-              onAccessInfoChange={handleAccessInfoChange}
-              resolverContract={schemaData.resolverContract}
-            />
-          </div>
-          <div className="flex flex-col gap-2 justify-right">
-            <ChatModal
-              context={schemaData.schemaUID}
-              isOpen={modalIsOpen}
-              closeModal={closeModal}
-            />
-            {accessInfo.attestAccess && (
-              <button
-                type="button"
-                className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                onClick={openAttestModal}
-              >
-                Attest with Schema
-              </button>
-            )}
-            {accessInfo.attestAccess && (
-              <button
-                type="button"
-                className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                onClick={()=> {toggleShowAttestations();setShowAttestations(!showAttestations) }}
-              >
-                {showAttestations? "showDelegatedRequests":"showAttestations"}
-              </button>
-            )}
-            {(accessInfo.attestAccess || accessInfo.viewAccess) && (
-              <button
-                className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                onClick={openModal}
-              >
-                feedbackChat
-              </button>
-            )}
-            {/* @ts-ignore */}
-            {!accessInfo.viewAccess &&
-              !accessInfo.attestAccess &&
-              schemaData.resolverContract.toLowerCase() ==
-                // @ts-ignore
-                CONTRACTS.SubscriptionResolver[
-                  chainID
-                ].contract.toLowerCase() && (
-                <button
-                  className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                  onClick={openSubscribeModal}
+    <div className="flex flex-col items-center">
+      <Card
+        color="white"
+        shadow={true}
+        className="mb-4 p-4 border border-black rounded-xl"
+      >
+        <div className={`flex flex-col mx-auto `}>
+          <div className="bg-white rounded-xl p-4 ">
+            <Card className="flex flex-col border border-black rounded-lg items-center">
+              <CardBody>
+                <div className="border border-black rounded-lg flex flex-col items-center text-center mx-auto p-2">
+                  <Typography variant="h5" color="black">
+                    {"SchemaUID"}
+                  </Typography>
+                  <EthereumAddress address={schemaData.schemaUID} />
+                </div>
+                <Typography
+                  variant="h5"
+                  color="black"
+                  className="mb-2 mt-2 text-center"
                 >
-                  Subscribe
+                  {`${schemaData.name}`}
+                </Typography>
+                <div className="text-center">
+                  {splitTextIntoChunks(schemaData.description, 50).map(
+                    (chunk: any, index: any) => (
+                      <React.Fragment key={index}>
+                        {chunk}
+                        <br />
+                      </React.Fragment>
+                    )
+                  )}
+                </div>
+
+                {schemaData.categories && (
+                  <CategoriesContainer
+                    strings={schemaData.categories}
+                  ></CategoriesContainer>
+                )}
+              </CardBody>
+            </Card>
+
+            <div className="flex min-w-full justify-between mt-2 ">
+              {/* Left Box */}
+              <div className="border border-black rounded-xl p-2  overflow-x-auto">
+                <Field
+                  label="Created"
+                  value={<TimeCreated createdAt={schemaData.created} />}
+                />
+                <Field
+                  label="Creator"
+                  value={
+                    <EthereumAddress
+                      address={schemaData.creator}
+                      link={`/dashboard?address=${schemaData.creator}`}
+                    />
+                  }
+                />
+                <Field
+                  label="Resolver"
+                  value={
+                    <EthereumAddress address={schemaData.resolverContract} />
+                  }
+                />
+
+                <Field
+                  label="Type"
+                  value={
+                    <p className="flex  font-extrabold text-black px-2 py-1 rounded-full text-xxs whitespace-nowrap ">
+                      {`${getSchemaType(
+                        schemaData.resolverContract,
+                        chainID
+                      )} (${isEncrypted ? "Encrypted" : "Unencrypted"})`}
+                    </p>
+                  }
+                />
+              </div>
+
+              {/* Right Box */}
+              <div className="text-center flex-flex-col items-center border border-black rounded-xl p-4  ">
+                <p className="font-extrabold text-center text-black px-2 py-1 rounded-full text-md whitespace-nowrap ">
+                  Schema
+                </p>
+                <DecodedSchema schema={schemaData.decodedSchema} />
+              </div>
+            </div>
+            <div className="w-full mb-2  mt-2 items-center">
+              <AccessBox
+                uid={schemaData.schemaUID}
+                isSchema={true}
+                isRevocable={schemaData.revocable}
+                onAccessInfoChange={handleAccessInfoChange}
+                resolverContract={schemaData.resolverContract}
+              />
+            </div>
+            <div className="flex flex-col gap-2 justify-right">
+              <ChatModal
+                context={schemaData.schemaUID}
+                isOpen={modalIsOpen}
+                closeModal={closeModal}
+              />
+              {accessInfo.attestAccess && (
+                <button
+                  type="button"
+                  className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                  onClick={openAttestModal}
+                >
+                  Attest with Schema
                 </button>
               )}
-            {isAttestModalOpen && (
-              <DynamicForm
-                schema={schemaData.rawSchema}
-                schemaUID={schemaData.schemaUID}
-                isSubscription={isEncrypted}
-                resolver={schemaData.resolverContract}
-                isOpen={isAttestModalOpen}
-                onClose={closeAttestModal}
-                revocable={schemaData.revocable}
-              />
-            )}
-            {isSubscribeModalOpen && (
-              <SubscriptionForm
-                schemaUID={schemaData.schemaUID}
-                isOpen={isSubscribeModalOpen}
-                onClose={closeSubscribeModal}
-                onCreate={subscribe}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-};
-export default SchemaProfile;
-
-interface BorderedBoxProps {
-  strings: string[];
-}
-
-const BorderedBox: React.FC<BorderedBoxProps> = ({ strings }) => {
-  return (
-    <div>
-      {strings.length > 0 && (
-        <div className="flex flex-col item-center text-center ">
-          <Typography variant="h5" color="black" className=" mt-2 text-center">
-            Categories
-          </Typography>
-          <div className="border p-4 rounded-md   flex flex-wrap gap-2 mx-auto">
-            {strings.map((str, index) => (
-              <div key={index} className="flex flex-col mx-auto">
-                <span
-                  className="bg-black rounded-md text-center text-white font-bold p-1"
-                  style={{ flex: "1 0 30%", minWidth: "100px" }}
+              {(accessInfo.attestAccess || accessInfo.viewAccess) && (
+                <button
+                  className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                  onClick={openModal}
                 >
-                  {str}
-                </span>
-              </div>
-            ))}
+                  feedbackChat
+                </button>
+              )}
+              {/* @ts-ignore */}
+              {!accessInfo.viewAccess &&
+                !accessInfo.attestAccess &&
+                schemaData.resolverContract.toLowerCase() ==
+                  // @ts-ignore
+                  CONTRACTS.SubscriptionResolver[
+                    chainID
+                  ].contract.toLowerCase() && (
+                  <button
+                    className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                    onClick={openSubscribeModal}
+                  >
+                    Subscribe
+                  </button>
+                )}
+              {isAttestModalOpen && (
+                <DynamicForm
+                  schema={schemaData.rawSchema}
+                  schemaUID={schemaData.schemaUID}
+                  isSubscription={isEncrypted}
+                  resolver={schemaData.resolverContract}
+                  isOpen={isAttestModalOpen}
+                  onClose={closeAttestModal}
+                  revocable={schemaData.revocable}
+                />
+              )}
+              {isSubscribeModalOpen && (
+                <SubscriptionForm
+                  schemaUID={schemaData.schemaUID}
+                  isOpen={isSubscribeModalOpen}
+                  onClose={closeSubscribeModal}
+                  onCreate={subscribe}
+                />
+              )}
+            </div>
           </div>
         </div>
-      )}
+      </Card>
+      {accessInfo.attestAccess &&
+        schemaData.resolverContract !==
+          // @ts-ignore
+          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() && (
+          <div className="flex flex-wrap items-center">
+            <label htmlFor="attestationsDisplay" className="mb-3 mr-1">
+              {` Display: `}
+            </label>
+            <select
+              id="attestationsDisplay"
+              className="border border-black rounded py-2 px-4 mb-4"
+              value={!showAttestations ? "delegatedRequests" : "attestations"}
+              onChange={() => {
+                toggleShowAttestations();
+                setShowAttestations(!showAttestations);
+              }}
+            >
+              <option value="attestations">Attestations</option>
+              <option value="delegatedRequests">Delegated Requests</option>
+            </select>
+          </div>
+        )}
     </div>
   );
 };
+export default SchemaProfile;

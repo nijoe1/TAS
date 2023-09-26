@@ -55,7 +55,6 @@ const Schema = () => {
   // Define a function to update the accessInfo state
   const handleAccessInfoChange = (newAccessInfo: any) => {
     setAccessInfo(newAccessInfo);
-    console.log(newAccessInfo);
   };
 
   const togggleShowAttestations = () => {

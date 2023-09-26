@@ -27,7 +27,16 @@ const Notification: React.FC<NotificationProps> = ({
       setStarted(false);
     }
 
-    if ((success || isError) && !offchain) {
+    if ((success ) && !offchain) {
+      const timeout = setTimeout(() => {
+        setIsVisible(false);
+        window.location.reload();
+      }, 2000);
+
+      return () => clearTimeout(timeout);
+    }
+
+    if ((isError) && !offchain) {
       const timeout = setTimeout(() => {
         setIsVisible(false);
       }, 2000);

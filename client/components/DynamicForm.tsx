@@ -113,16 +113,6 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     hash: txdata?.hash,
   });
 
-  useEffect(() => {
-    if (succ) {
-      const timeout = setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [succ]);
-
   useEffect(() => {}, [expirationTime]);
 
   useEffect(() => {
@@ -389,62 +379,62 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                     Revocable
                   </Typography>
                 </div>
+                <div className="flex justify-center items-center gap-1 mx-auto  rounded-md">
+                  <div className="flex flex-col  justify-center items-center border border-black mx-auto p-2 rounded-md">
+                    <Typography
+                      className="cursor-pointer focus:ring-blue-500 focus:ring-2 "
+                      color="black"
+                      onClick={() => {
+                        setIsOffChain(!isOffChain);
+                        if (isDelegated) {
+                          setIsDelegated(!isDelegated);
+                        }
+                      }}
+                    >
+                      OffChain
+                    </Typography>
+                    <input
+                      type="checkbox"
+                      checked={isOffChain}
+                      onChange={() => {
+                        setIsOffChain(!isOffChain);
+                        if (isDelegated) {
+                          setIsDelegated(!isDelegated);
+                        }
+                      }}
+                      className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
+                    />
+                  </div>
+                  <div className="flex flex-col  items-center border border-black mx-auto p-2 rounded-md">
+                    <div>
+                      <Typography
+                        className="cursor-pointer focus:ring-blue-500 focus:ring-2"
+                        color="black"
+                        onClick={() => {
+                          setIsDelegated(!isDelegated);
+                          if (isOffChain) {
+                            setIsOffChain(!isOffChain);
+                          }
+                        }}
+                      >
+                        Delegated request
+                      </Typography>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={isDelegated}
+                      onChange={() => {
+                        setIsDelegated(!isDelegated);
+                        if (isOffChain) {
+                          setIsOffChain(!isOffChain);
+                        }
+                      }}
+                      className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
+                    />
+                  </div>
+                </div>
               </div>
             )}
-            <div className="flex justify-center items-center gap-1 border border-black mx-auto p-2 rounded-md">
-              <div className="flex flex-col  justify-center items-center border border-black mx-auto p-2 rounded-md">
-                <Typography
-                  className="cursor-pointer focus:ring-blue-500 focus:ring-2 "
-                  color="black"
-                  onClick={() => {
-                    setIsOffChain(!isOffChain);
-                    if (isDelegated) {
-                      setIsDelegated(!isDelegated);
-                    }
-                  }}
-                >
-                  OffChain
-                </Typography>
-                <input
-                  type="checkbox"
-                  checked={isOffChain}
-                  onChange={() => {
-                    setIsOffChain(!isOffChain);
-                    if (isDelegated) {
-                      setIsDelegated(!isDelegated);
-                    }
-                  }}
-                  className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
-                />
-              </div>
-              <div className="flex flex-col  items-center border border-black mx-auto p-2 rounded-md">
-                <div>
-                  <Typography
-                    className="cursor-pointer focus:ring-blue-500 focus:ring-2"
-                    color="black"
-                    onClick={() => {
-                      setIsDelegated(!isDelegated);
-                      if (isOffChain) {
-                        setIsOffChain(!isOffChain);
-                      }
-                    }}
-                  >
-                    Delegated request
-                  </Typography>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={isDelegated}
-                  onChange={() => {
-                    setIsDelegated(!isDelegated);
-                    if (isOffChain) {
-                      setIsOffChain(!isOffChain);
-                    }
-                  }}
-                  className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
-                />
-              </div>
-            </div>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {!isOffChain && !isDelegated ? (
@@ -507,7 +497,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         }
         wait={wait}
         error={err}
-        success={succ?"Attested ONCHAIN with success":undefined}
+        success={succ ? "Attested ONCHAIN with success" : undefined}
       />
     </div>
   );

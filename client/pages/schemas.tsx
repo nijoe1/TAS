@@ -32,6 +32,7 @@ const Schemas = () => {
   useEffect(() => {
     async function fetch() {
       let tableData = await getSchemas(chainID);
+      console.log(tableData.tableData)
       setTaken(!taken);
       // @ts-ignore
       setTableData(tableData.tableData);

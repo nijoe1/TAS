@@ -63,12 +63,14 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         CONTRACTS.SubscriptionResolver[chainid].contract.toLowerCase()
       ) {
         accessData.revokeAccess = false;
-        accessData.attestAccess = (await getAttestAccess(
+        let attAcc = await getAttestAccess(
           chainid,
           uid,
           address
-        )) as boolean
-        accessData.viewAccess = hasViewAccess || accessData.attestAccess?true:false
+        )
+        console.log(attAcc)
+        accessData.attestAccess = attAcc as boolean
+        accessData.viewAccess = hasViewAccess as unknown as boolean || accessData.attestAccess
       } else if (
         resolverContract ==
         // @ts-ignore

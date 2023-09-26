@@ -73,7 +73,7 @@ export default function Home() {
                 <div className="flex flex-wrap justify-center gap-4">
                   <button
                     onClick={() => handleLinkClick("/schemas")}
-                    className="px-8 py-3 m-2 text-lg font-semibold rounded-sm bg-black text-white hover:bg-white hover:text-black transition duration-300"
+                    className="px-8 py-3 m-2 text-lg font-semibold rounded-md bg-black text-white hover:bg-white hover:text-black transition duration-300"
                   >
                     Get Started
                   </button>
@@ -81,7 +81,7 @@ export default function Home() {
                     onClick={() =>
                       handleLinkClick("https://github.com/nijoe1/tas")
                     }
-                    className="px-8 py-3 m-2 text-lg border rounded-sm hover:bg-black hover:text-white transition duration-300"
+                    className="px-8 py-3 m-2 text-lg border rounded-md hover:bg-black hover:text-white transition duration-300"
                   >
                     Source Code
                   </button>

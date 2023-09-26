@@ -50,26 +50,26 @@ const Attestations = () => {
                 <Typography color="black">
                   Showing the most recent attestations.
                 </Typography>
-                <div className="border rounded-lg flex flex-col items-center mx-2 mt-3 mb-3">
-                  <div className="flex flex-wrap mx-2 items-center text-center">
+                <div className="border border-black rounded-lg flex flex-col items-center mx-2 mt-3 mb-3 gap-2">
+                  <div className="flex flex-wrap mx-2 mt-2 items-center text-center border border-black rounded-md p-1">
                     <Typography color="black">
                       Total Attestations:{"  "}
                     </Typography>
-                    <Typography className="ml-2" variant="h6" color="black">
+                    <Typography className="ml-2 " variant="h6" color="black">
                       {totalOffChain + totalOnChain}
                     </Typography>
                   </div>
-                  <div className="flex flex-wrap mx-2 ">
+                  <div className="flex flex-wrap mx-2  border border-black rounded-md p-1">
                     <Typography color="black">
-                      OnChain Attestations: {"  "}
+                      ONCHAIN: {"  "}
                     </Typography>
                     <Typography className="ml-2" variant="h6" color="black">
                       {totalOnChain}
                     </Typography>
                   </div>
-                  <div className="flex flex-wrap mx-2 items-center text-center">
+                  <div className="flex flex-wrap mx-2 mb-2 items-center border border-black rounded-md p-1 text-center">
                     <Typography color="black">
-                      Offchain Attestations: {"  "}
+                      OFFCHAIN: {"  "}
                     </Typography>
                     <Typography className="ml-2 " variant="h6" color="black">
                       {totalOffChain}

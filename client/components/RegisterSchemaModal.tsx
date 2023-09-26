@@ -56,9 +56,9 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   useEffect(() => {
     // Your useEffect logic here
     generateAttributeString();
-  }, [attributes,setAttributes]); 
+  }, [attributes, setAttributes]);
 
-  const { config,error } = usePrepareContractWrite({
+  const { config, error } = usePrepareContractWrite({
     // @ts-ignore
     address: CONTRACTS.SchemaRegistry[chainid].contract,
     // @ts-ignore
@@ -89,16 +89,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     hash: data?.hash,
   });
 
-  useEffect(() => {
-    if (succ) {
-      const timeout = setTimeout(() => {
-        onClose();
-        window.location.reload();
-      }, 3000);
-      return () => clearTimeout(timeout);
-    }
-  }, [succ]);
-
   const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
@@ -109,7 +99,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       updatedAttributes[index]["name"] = value;
       updatedAttributes[index]["readonly"] = true;
       updatedAttributes[index]["isArray"] = false;
-
     } else if (
       value === "videoCIDs" ||
       value === "imageCIDs" ||
@@ -249,6 +238,8 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               <FaInfoCircle className="mt-1 ml-2" />
             </div>
             <TagsInput
+              inputProps={{ placeholder: "Add category" }}
+              onlyUnique={true}
               className="background-color-white flex"
               value={categories.tags}
               onChange={handleTagChange}
@@ -337,6 +328,12 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                   className="attribute-select rounded-full px-4 py-2 border border-black mr-20"
                 >
                   <option value="Select Type">Select Type</option>
+
+                  {solidityTypes.map((type, typeIndex) => (
+                    <option key={typeIndex} value={type}>
+                      {type}
+                    </option>
+                  ))}
                   <option value="imageCID">imageCID</option>
                   <option value="imageCIDs">imageCIDs</option>
 
@@ -345,11 +342,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
                   <option value="jsonCID">jsonCID</option>
                   <option value="jsonCIDs">jsonCIDs</option>
-                  {solidityTypes.map((type, typeIndex) => (
-                    <option key={typeIndex} value={type}>
-                      {type}
-                    </option>
-                  ))}
                 </select>
               </div>
               <div className="flex justify-center items-center gap-2 ">
@@ -427,14 +419,16 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <Notification
             isLoading={isLoading}
             isSuccess={isSuccess}
-            isError={error?.message
-              ? error.message.indexOf(".") !== -1
-                ? error.message.substring(0, error.message.indexOf("."))
-                : error.message
-              : undefined}
+            isError={
+              error?.message
+                ? error.message.indexOf(".") !== -1
+                  ? error.message.substring(0, error.message.indexOf("."))
+                  : error.message
+                : undefined
+            }
             wait={wait}
             error={err}
-            success={succ?"Schema created successfully":undefined}
+            success={succ ? "Schema created successfully" : undefined}
           />
         </form>
       </Card>

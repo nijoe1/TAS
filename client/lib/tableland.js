@@ -8,20 +8,31 @@ export const getAllSchemas = async (chainId) => {
   const getAllSchemasQuery =
     TablelandGateway +
     `SELECT
-          ${tables[chainId].schema}.resolver,
-          ${tables[chainId].schema}.schema,
-          ${tables[chainId].schema}.schemaUID,
-          ${tables[chainId].schema}.creationTimestamp,
-          COUNT(${tables[chainId].attestation}.uid) AS total
-      FROM
-          ${tables[chainId].schema}
-      LEFT JOIN
-          ${tables[chainId].attestation}
-      ON
-          ${tables[chainId].schema}.schemaUID = ${tables[chainId].attestation}.schemaUID
-      GROUP BY
-          ${tables[chainId].schema}.schemaUID
-      ORDER BY ${tables[chainId].schema}.creationTimestamp DESC`;
+        ${tables[chainId].schema}.name,
+        ${tables[chainId].schema}.description,
+        ${tables[chainId].schema}.creator,
+        ${tables[chainId].schema}.resolver,
+        ${tables[chainId].schema}.schema,
+        ${tables[chainId].schema}.schemaUID,
+        ${tables[chainId].schema}.creationTimestamp,
+        COUNT(${tables[chainId].attestation}.uid) AS total,
+        json_group_array(
+            json_object('category', ${tables[chainId].categories}.category)
+        ) AS categories
+    FROM
+        ${tables[chainId].schema}
+    LEFT JOIN
+        ${tables[chainId].attestation}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${tables[chainId].attestation}.schemaUID
+    LEFT JOIN
+        ${tables[chainId].categories}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${tables[chainId].categories}.schemaUID
+    GROUP BY
+        ${tables[chainId].schema}.schemaUID
+    ORDER BY
+        ${tables[chainId].schema}.creationTimestamp DESC`;
 
   try {
     const result = await axios.get(getAllSchemasQuery);
@@ -40,10 +51,17 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
   const getAllSchemasQuery =
     TablelandGateway +
     `SELECT
+        ${tables[chainId].schema}.name,
+        ${tables[chainId].schema}.description,
+        ${tables[chainId].schema}.creator,
         ${tables[chainId].schema}.resolver,
         ${tables[chainId].schema}.schema,
         ${tables[chainId].schema}.schemaUID,
         ${tables[chainId].schema}.creationTimestamp,
+        COUNT(${tables[chainId].attestation}.uid) AS total,
+        json_group_array(
+          json_object('category', ${tables[chainId].categories}.category)
+        ) AS categories,        
         SUM(CASE WHEN ${
           tables[chainId].attesters
         }.attester = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS attester_count,
@@ -55,6 +73,18 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
         }.admin = '${address?.toLowerCase()}' THEN 1 ELSE 0 END) AS admin_count
     FROM
         ${tables[chainId].schema}
+    LEFT JOIN
+        ${tables[chainId].attestation}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${
+      tables[chainId].attestation
+    }.schemaUID
+    LEFT JOIN
+        ${tables[chainId].categories}
+    ON
+        ${tables[chainId].schema}.schemaUID = ${
+      tables[chainId].categories
+    }.schemaUID
     LEFT JOIN
         ${tables[chainId].revokers}
     ON
@@ -77,6 +107,8 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
         ${tables[chainId].attesters}.attester='${address?.toLowerCase()}'
     GROUP BY
         ${tables[chainId].schema}.schemaUID,
+        ${tables[chainId].schema}.name,
+        ${tables[chainId].schema}.description,
         ${tables[chainId].schema}.resolver,
         ${tables[chainId].schema}.schema,
         ${tables[chainId].schema}.creationTimestamp
@@ -158,6 +190,44 @@ export const getSchemaInfo = async (chainId, schemaUID) => {
   try {
     const result = await axios.get(getAllSchemasQuery);
     return result.data[0];
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const getSubscriptionSchemaCreators = async (chainId, schemaUID) => {
+  const getAllSchemasQuery =
+    TablelandGateway +
+    `SELECT attester
+    FROM ${tables[chainId].content_admins}
+    WHERE schemaUID = '${schemaUID}'`;
+
+  try {
+    const result = await axios.get(getAllSchemasQuery);
+    return result.data;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+export const getACSchemaAttesters = async (chainId, schemaUID) => {
+  const getAllSchemasQuery =
+    TablelandGateway +
+    `SELECT 'revoker' AS type, ${tables[chainId].revokers}.revoker AS address, ${tables[chainId].revokers}.schemaUID
+    FROM ${tables[chainId].revokers}
+    WHERE ${tables[chainId].revokers}.schemaUID = '${schemaUID}'
+    
+    UNION ALL
+    
+    SELECT 'attester' AS type, ${tables[chainId].attesters}.attester AS address, ${tables[chainId].attesters}.schemaUID
+    FROM ${tables[chainId].attesters}
+    WHERE ${tables[chainId].attesters}.schemaUID = '${schemaUID}'`;
+
+  try {
+    const result = await axios.get(getAllSchemasQuery);
+    return result.data;
   } catch (err) {
     console.error(err);
     return null;

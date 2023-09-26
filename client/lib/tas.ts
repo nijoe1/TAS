@@ -10,6 +10,8 @@ import {
   getUserSubscriptions,
   getCreatedSchemasRevenue,
   getReferencedAttestations,
+  getACSchemaAttesters,
+  getSubscriptionSchemaCreators,
 } from "@/lib/tableland";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import {
@@ -312,9 +314,14 @@ export const getSchemas = async (chainID: number) => {
     resolverAddress: any;
     attestations: any;
     creationTimestamp: any;
+    schemaDetails: {
+      creator: any;
+      categories: string[];
+      name: any;
+      description: any;
+    };
   }[] = [];
   let schemas = await getAllSchemas(chainID);
-  console.log(schemas);
   schemas.forEach((inputObject: any, index: any) => {
     const schemaString = inputObject.schema;
     const schema = parseInputString(schemaString);
@@ -327,10 +334,24 @@ export const getSchemas = async (chainID: number) => {
       resolverAddress: inputObject.resolver,
       attestations: inputObject.total,
       creationTimestamp: inputObject.creationTimestamp,
+      schemaDetails: {
+        categories: Array.from(
+          new Set(
+            inputObject.categories.map(
+              (item: { category: any }) => item.category
+            )
+          )
+        ),
+        name: inputObject.name,
+        description: inputObject.description,
+        creator: inputObject.creator,
+      },
       // Add other properties as needed from the inputObject
     };
+    console.log(entry);
 
     // Push the entry to the tableData array
+    // @ts-ignore
     tableData.push(entry);
   });
   let size = tableData.length;
@@ -374,6 +395,31 @@ export const getUserSchemasRevenue = async (
   return tableData;
 };
 
+export const getSchemaAttesters = async (
+  chainID: number,
+  schemaUID: `0x${string}`,
+  type: string
+) => {
+  if (type == "ACCESS_CONTROL") {
+    let res = await getACSchemaAttesters(chainID, schemaUID);
+
+    const revokers = res.filter(
+      (item: { type: string }) => item.type === "revoker"
+    );
+    const attesters = res.filter(
+      (item: { type: string }) => item.type === "attester"
+    );
+    let ress = { attesters: attesters, revokers: revokers }
+    console.log(ress)
+    return ress;
+  } else if (type == "SUBSCRIPTION") {
+    let res = await getSubscriptionSchemaCreators(chainID, schemaUID);
+    let array = res.map((item: { attester: any }) => item.attester);
+
+    return array;
+  }
+};
+
 export const getUserCreatedSchemas = async (
   chainID: number,
   address: `0x${string}`
@@ -386,6 +432,12 @@ export const getUserCreatedSchemas = async (
     resolverAddress: any;
     attestations: any;
     creationTimestamp: any;
+    schemaDetails: {
+      creator: any;
+      categories: any[];
+      name: any;
+      description: any;
+    };
   }[] = [];
   let indexer = [[]];
   let schemas = await getCreatedSchemasRevenue(chainID, address);
@@ -420,11 +472,23 @@ export const getUserCreatedSchemas = async (
       role: typeOfRole,
       creationTimestamp: inputObject.creationTimestamp,
       revenue: indexer[inputObject.schemaUID],
+      schemaDetails: {
+        categories: Array.from(
+          new Set(
+            inputObject.categories.map(
+              (item: { category: any }) => item.category
+            )
+          )
+        ),
+        name: inputObject.name,
+        description: inputObject.description,
+        creator: inputObject.creator,
+      },
       // Add other properties as needed from the inputObject
     };
 
     // Push the entry to the tableData array
-
+    // @ts-ignore
     tableData.push(entry);
   });
   return tableData;
@@ -470,7 +534,7 @@ export const getDelegatedRequestsForSchema = async (
   schema: string
 ) => {
   let requests = await getDelegatedRequestForSchema(schemaUID);
-  console.log(requests)
+  console.log(requests);
   let requestsArray = [];
   const encoder = new SchemaEncoder(schema);
 

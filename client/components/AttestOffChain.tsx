@@ -278,7 +278,7 @@ const AttestOffChain = ({
           }
         }}
       >
-        {!signature ? "sign" : "attest"}
+        {!signature ? "sign attestation" : "attest OffChain"}
       </button>
       {(success || error) && (
         <Notification

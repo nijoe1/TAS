@@ -14,7 +14,7 @@
     "@ethereum-attestation-service/eas-sdk": "^1.2.0-beta.0",
     "@lighthouse-web3/sdk": "^0.2.7",
     "@material-tailwind/react": "^2.1.0",
-    "@mui/material": "^5.14.9",
+    "@mui/material": "^5.14.11",
     "@orbisclub/components": "^0.2.11",
     "@orbisclub/orbis-sdk": "^0.4.87",
     "@rainbow-me/rainbowkit": "^1.0.1",

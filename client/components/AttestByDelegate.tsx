@@ -234,7 +234,7 @@ const AttestByDelegateRequest = ({
           }
         }}
       >
-        signDelegation
+        CreateDelegationRequest
       </button>
       {(success || error) && (
         <Notification
