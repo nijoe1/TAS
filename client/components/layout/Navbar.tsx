@@ -167,10 +167,10 @@ const CustomNavbar = () => {
   }, [address, chainID]);
 
   return (
-    <div>
+    <div className="">
       <div
-        className={`bg-black py-2 border  flex ${
-          divCount == 1 ? "flex-col gap-2" : ""
+        className={`bg-black py-2 border w-full  flex ${
+          divCount == 1 ? "flex-col gap-2 w-full " : ""
         } items-center  mb-3`}
       >
         <div className="w-4/40 flex rounded-xl ml-4 z-50">

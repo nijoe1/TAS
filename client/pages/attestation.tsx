@@ -72,22 +72,22 @@ const Attestation = () => {
         CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
       ) {
         accessData.revokeAccess = false;
-        accessData.attestAccess = (await getAttestAccess(
-          chainID,
-          uid,
-          address
-        )) as boolean;
-        setViewAccess(hasViewAccess || accessData.attestAccess ? true : false);
+        let acc = (await getAttestAccess(chainID, uid, address)) as boolean;
+        accessData.attestAccess = acc;
+        accessData.viewAccess = hasViewAccess || acc ? true : false
+        setViewAccess(hasViewAccess || acc ? true : false);
       } else if (
         AttestationData.resolver ==
         // @ts-ignore
         CONTRACTS.ACResolver[chainID].contract.toLowerCase()
       ) {
-        setViewAccess(
-          encrypted ? (hasViewAccess2 as unknown as boolean) : true
-        );
-      } else {
+        let acc = encrypted ? (hasViewAccess2 as unknown as boolean) : true;
+        setViewAccess(acc);
+      } else if (
+        AttestationData.resolver == "0x0000000000000000000000000000000000000000"
+      ) {
         setViewAccess(true);
+        accessData.viewAccess = true;
       }
       console.log(viewAccess);
 
@@ -97,7 +97,8 @@ const Attestation = () => {
         CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() ==
           AttestationData.resolver
       ) {
-        if (accessData.viewAccess) {
+        // @ts-ignore
+        if (hasViewAccess || attestationData?attestationData?.resolver === "0x0000000000000000000000000000000000000000":false || hasViewAccess2) {
           AttestationData.decodedData = await getEncryptedFilesBlobs(
             AttestationData.decodedData ? AttestationData.decodedData : [],
             address as `0x${string}`
@@ -107,6 +108,7 @@ const Attestation = () => {
       } else {
         setIsEncrypted(false);
       }
+      setViewAccess(accessData.viewAccess)
       // @ts-ignore
       setAttestationData(AttestationData);
       setTaken(!taken);
@@ -129,7 +131,8 @@ const Attestation = () => {
                 // @ts-ignore
                 type={type}
                 isEncrypted={isEncrypted}
-                viewAccess={viewAccess}
+                // @ts-ignore
+                viewAccess={hasViewAccess || attestationData?attestationData?.resolver == "0x0000000000000000000000000000000000000000":false || hasViewAccess2}
               />
             </div>
           </div>

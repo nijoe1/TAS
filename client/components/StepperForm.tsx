@@ -3,31 +3,12 @@ import React, { useState } from "react";
 import { Orbis } from "@orbisclub/orbis-sdk";
 import { signMessage } from "@wagmi/core";
 import lighthouse from "@lighthouse-web3/sdk";
+import { usePublicClient } from "wagmi";
+
 import axios from "axios";
 import { generateLighthouseJWT } from "@/lib/lighthouse";
 const orbis = new Orbis();
 
-async function isConnected() {
-  const connected = await orbis.isConnected();
-
-  if (connected.status == 200) {
-    localStorage.setItem("userdid", connected.did);
-  } else {
-    await connect();
-  }
-}
-
-async function connect() {
-  const res = await orbis.connect_v2({ chain: "ethereum", lit: false });
-
-  /** Check if the connection is successful or not */
-  if (res.status == 200) {
-    localStorage.setItem("userdid", res.did);
-  } else {
-    console.log("Error connecting to Ceramic: ", res);
-    alert("Error connecting to Ceramic.");
-  }
-}
 const StepperForm: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -38,6 +19,32 @@ const StepperForm: React.FC<{
   const [ceramicClicked, setCeramicClicked] = useState(false);
   const [apiClicked, setApiClicked] = useState(false);
   const [tokenClicked, setTokenClicked] = useState(false);
+  const publicClient = usePublicClient();
+  async function isConnected() {
+    const connected = await orbis.isConnected();
+
+    if (connected.status == 200) {
+      localStorage.setItem("userdid", connected.did);
+    } else {
+      await connect();
+    }
+  }
+
+  async function connect() {
+    const res = await orbis.connect_v2({
+      provider: publicClient.account,
+      chain: "ethereum",
+      lit: false,
+    });
+
+    /** Check if the connection is successful or not */
+    if (res.status == 200) {
+      localStorage.setItem("userdid", res.did);
+    } else {
+      console.log("Error connecting to Ceramic: ", res);
+      alert("Error connecting to Ceramic.");
+    }
+  }
 
   const generateLighthouseApiKey = async (address: any) => {
     let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
@@ -52,7 +59,10 @@ const StepperForm: React.FC<{
       });
       const API_KEY = await lighthouse.getApiKey(address, signed);
       if (API_KEY.data.apiKey) {
-        localStorage.setItem(`API_KEY_${address?.toLowerCase()}`, API_KEY.data.apiKey);
+        localStorage.setItem(
+          `API_KEY_${address?.toLowerCase()}`,
+          API_KEY.data.apiKey
+        );
         nextStep();
       } else {
         setApiClicked(!apiClicked);
@@ -82,7 +92,6 @@ const StepperForm: React.FC<{
       }
     }
   };
-
 
   const steps = [
     {

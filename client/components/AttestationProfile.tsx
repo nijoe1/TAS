@@ -251,7 +251,7 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
 
           {
             // @ts-ignore
-            accessInfo.viewAccess ? (
+            accessInfo.viewAccess || viewAccess ? (
               <div className="flex flex-col mx-auto text-center items-center p-2 border border-black rounded-xl mt-2">
                 <p className="text-xl font-semibold mb-1">Decoded Data</p>
                 <DecodedData

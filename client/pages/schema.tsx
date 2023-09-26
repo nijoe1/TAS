@@ -14,7 +14,6 @@ import {
 } from "@/lib/tas";
 import AttestationsTable from "@/components/AttestationsTable";
 import { getIsEncrypted } from "@/lib/tableland";
-import { Card } from "@material-tailwind/react";
 import SchemaDelegationsTable from "@/components/SchemaDelegationsTable";
 
 interface SchemaData {
@@ -121,7 +120,7 @@ const Schema = () => {
               <div>
                 {(tableData.length > 0 &&
                   // @ts-ignore
-                  accessInfo.viewAccess) ||
+                  (accessInfo.viewAccess || schemaData?.resolverContract == "0x0000000000000000000000000000000000000000")) ||
                 accessInfo.attestAccess ? (
                   <AttestationsTable
                     attestationsTableData={tableData}
