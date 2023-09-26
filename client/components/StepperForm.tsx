@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Orbis } from "@orbisclub/orbis-sdk";
 import { signMessage } from "@wagmi/core";
 import lighthouse from "@lighthouse-web3/sdk";
-import { usePublicClient,useAccount } from "wagmi";
+import { usePublicClient, useAccount } from "wagmi";
 
 import axios from "axios";
 import { generateLighthouseJWT } from "@/lib/lighthouse";
@@ -19,9 +19,7 @@ const StepperForm: React.FC<{
   const [ceramicClicked, setCeramicClicked] = useState(false);
   const [apiClicked, setApiClicked] = useState(false);
   const [tokenClicked, setTokenClicked] = useState(false);
-  const {connector} = useAccount();
-  const provider = connector?.options.getProvider();
-
+  const { connector } = useAccount();
   const publicClient = usePublicClient();
   async function isConnected() {
     const connected = await orbis.isConnected();
@@ -34,8 +32,9 @@ const StepperForm: React.FC<{
   }
 
   async function connect() {
+    let provider = await connector?.getProvider();
     const res = await orbis.connect_v2({
-      provider: provider,
+      provider: provider ? provider : publicClient?.account,
       chain: "ethereum",
       lit: false,
     });
