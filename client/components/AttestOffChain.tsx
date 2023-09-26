@@ -5,7 +5,7 @@ import {
   useSignTypedData,
   useContractRead,
 } from "wagmi";
-import { recoverTypedDataAddress, hexToSignature } from "viem";
+import { hexToSignature } from "viem";
 // @ts-ignore
 import { Orbis } from "@orbisclub/orbis-sdk";
 import { CONTRACTS } from "@/constants/contracts/index";
@@ -61,7 +61,7 @@ const AttestOffChain = ({
   refUID,
   AttestationData,
   AttestationBase64,
-  expirationTime
+  expirationTime,
 }: SignProps) => {
   const chainID = useChainId();
   const { address } = useAccount();
@@ -246,7 +246,6 @@ const AttestOffChain = ({
     };
     await orbis.isConnected();
     const res = await orbis.createPost(post);
-    console.log(res);
     if (res.status == 200) {
       setSuccess(true);
     } else {
@@ -286,7 +285,7 @@ const AttestOffChain = ({
           isSuccess={false}
           isError={undefined}
           wait={false}
-          success={success?"Attested OFFCHAIN with success":undefined}
+          success={success ? "Attested OFFCHAIN with success" : undefined}
           error={error}
           offchain={true}
         />

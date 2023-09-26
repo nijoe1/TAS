@@ -4,7 +4,6 @@ import {
   CardBody,
   CardFooter,
   Typography,
-  Tooltip,
   Progress,
 } from "@material-tailwind/react";
 import { useRouter } from "next/router";
@@ -61,7 +60,6 @@ export function ProfileCard({
 
   const handleUpdateProfile = async () => {
     // Update profile details here
-    console.log("Updated profile details:", profileDetails);
     await orbis.isConnected();
     const res = await orbis.updateProfile(profileDetails);
     if (res === 200) {
@@ -89,7 +87,6 @@ export function ProfileCard({
       if (!userDid) {
         // If address is null, get it from local storage
         user = localStorage.getItem("userdid") || "";
-        console.log(userDid);
       } else {
         user = `did:pkh:eip155:1:${userDid}`;
       }
@@ -114,14 +111,16 @@ export function ProfileCard({
       {" "}
       {fetched && (
         <Card className="w-96">
-          <CardHeader floated={false} className="h-80 flex flex-col items-center">
+          <CardHeader
+            floated={false}
+            className="h-80 flex flex-col items-center"
+          >
             <img
               className="rounded-lg mt-2 mb-2"
               // @ts-ignore
               src={userProfile?.details?.profile?.pfp}
               height={"60%"}
               width={"60%"}
-              
               alt="profile-picture"
             />
           </CardHeader>

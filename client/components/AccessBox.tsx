@@ -63,21 +63,16 @@ const AccessBox: React.FC<AccessBoxProps> = ({
         CONTRACTS.SubscriptionResolver[chainid].contract.toLowerCase()
       ) {
         accessData.revokeAccess = false;
-        let attAcc = await getAttestAccess(
-          chainid,
-          uid,
-          address
-        )
-        console.log(attAcc)
-        accessData.attestAccess = attAcc as boolean
-        accessData.viewAccess = hasViewAccess as unknown as boolean || accessData.attestAccess
+        let attAcc = await getAttestAccess(chainid, uid, address);
+        accessData.attestAccess = attAcc as boolean;
+        accessData.viewAccess =
+          (hasViewAccess as unknown as boolean) || accessData.attestAccess;
       } else if (
         resolverContract ==
         // @ts-ignore
         CONTRACTS.ACResolver[chainid].contract.toLowerCase()
       ) {
         let res = await getAttestRevokeAccess(chainid, address, uid);
-        console.log(res);
         accessData.revokeAccess = res ? res.revokeAccess && isRevocable : false;
         accessData.attestAccess = res ? res.attestAccess : false;
         accessData.viewAccess = hasViewAccess2 ? true : false;
@@ -97,7 +92,7 @@ const AccessBox: React.FC<AccessBoxProps> = ({
     if (chainid && address) {
       fetch();
     }
-  }, [chainid, address, Router,hasViewAccess2,hasViewAccess]);
+  }, [chainid, address, Router, hasViewAccess2, hasViewAccess]);
 
   return (
     <div className="border border-black rounded-lg mx-auto p-4 flex flex-wrap text-black items-center space-x-4">

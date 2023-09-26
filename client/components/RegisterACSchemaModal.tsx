@@ -23,7 +23,6 @@ type RegisterSchemaModalProps = {
 const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   isOpen,
   onClose,
-  onCreate,
 }) => {
   const chainID = useChainId();
   const [schemaName, setSchemaName] = useState("");
@@ -159,17 +158,14 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
   const handleTagChange = (tags: any) => {
     setCategories({ tags });
-    console.log(tags);
   };
 
   const handleRevokersChange = (tags: any) => {
     setRevokersTags({ tags });
-    console.log(tags);
   };
 
   const handleAttestersChange = (tags: any) => {
     setAttestersTags({ tags });
-    console.log(tags);
   };
 
   const ethereumAddressRegex = /^0x[a-fA-F0-9]{40}$/; // Regular expression for Ethereum address

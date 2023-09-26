@@ -73,27 +73,19 @@ const Schema = () => {
     if (!delegatesFetched && schemaData?.rawSchema) {
       fetch();
     }
-  }, [showAttestations,delegatesFetched]);
+  }, [showAttestations, delegatesFetched]);
 
   useEffect(() => {
     async function fetch() {
       if (schemaUID) {
         let res = await getSchemaData(chainID, schemaUID as `0x${string}`);
         let resp = (await getIsEncrypted(chainID, schemaUID)) as boolean;
-        // let requests = await getDelegatedRequestsForSchema(
-        //   schemaUID as string,
-        //   res.schemaInfo.rawSchema
-        // );
-        // // @ts-ignore
-        // setRequestsData(requests);
         resp =
           schemaData?.resolverContract ==
           // @ts-ignore
           CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()
             ? true
             : resp;
-        console.log(resp, "  : in shema");
-
         setIsEncrypted(resp);
         // @ts-ignore
         setTableData(res.tableDt);

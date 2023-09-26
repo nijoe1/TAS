@@ -81,7 +81,6 @@ const AttestByDelegateRequest = ({
     null
   );
 
-
   const { data: userNonce } = useContractRead({
     // @ts-ignore
     address: CONTRACTS.TAS[chainID].contract,
@@ -152,7 +151,6 @@ const AttestByDelegateRequest = ({
       };
       await orbis.isConnected();
       const res = await orbis.createPost(post);
-      console.log(res);
       if (res.status == 200) {
         setSuccess(true);
       } else {
@@ -176,7 +174,6 @@ const AttestByDelegateRequest = ({
     if (data && !doneAttest) {
       setSignature(data);
       const res = hexToSignature(data as `0x${string}`);
-      console.log(res, data);
       setDecodedSig({ v: res.v, r: res.r, s: res.s });
       createPost(res.v, res.r, res.s);
       setDoneAttest(!doneAttest);
@@ -242,7 +239,11 @@ const AttestByDelegateRequest = ({
           isSuccess={false}
           isError={undefined}
           wait={false}
-          success={success?"Your delegation request submitted with success":undefined}
+          success={
+            success
+              ? "Your delegation request submitted with success"
+              : undefined
+          }
           error={error}
           offchain={true}
         />

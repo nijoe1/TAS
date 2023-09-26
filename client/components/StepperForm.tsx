@@ -43,7 +43,6 @@ const StepperForm: React.FC<{
     if (res.status == 200) {
       localStorage.setItem("userdid", res.did);
     } else {
-      console.log("Error connecting to Ceramic: ", res);
       alert("Error connecting to Ceramic.");
     }
   }

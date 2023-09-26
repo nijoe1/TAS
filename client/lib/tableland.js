@@ -36,7 +36,6 @@ export const getAllSchemas = async (chainId) => {
 
   try {
     const result = await axios.get(getAllSchemasQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -117,7 +116,6 @@ export const getAllUserCreatedSchemas = async (chainId, address) => {
 
   try {
     const result = await axios.get(getAllSchemasQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -147,7 +145,6 @@ export const getCreatedSchemasRevenue = async (chainId, user) => {
 
   try {
     const result = await axios.get(getAllSchemasQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -246,7 +243,6 @@ export const getIsEncrypted = async (chainId, schemaUID) => {
 
   try {
     const result = await axios.get(getAllSchemasQuery);
-    console.log("DFsdfsdfsdf:df:      ", result);
     if (result.data.length == 0) {
       return false;
     } else {
@@ -276,7 +272,6 @@ export const getAttestations = async (chainId) => {
         ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -307,7 +302,6 @@ export const getUserAttestations = async (chainId, address) => {
         ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -331,7 +325,6 @@ export const getReferencedAttestations = async (chainId, attestationUID) => {
         ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -362,7 +355,6 @@ export const getUserRecievedAttestations = async (chainId, address) => {
         ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -389,7 +381,6 @@ export const getSchema = async (chainId, schemaUID) => {
           s.schemaUID = '${schemaUID}'`;
   try {
     const result = await axios.get(getSchemaQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -416,7 +407,6 @@ export const getSchemaAttestations = async (chainId, schemaUID) => {
         ${tables[chainId].attestation}.creationTimestamp DESC`;
   try {
     const result = await axios.get(getAllSchemaAttestationsQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -450,7 +440,6 @@ export const getAttestation = async (chainId, uid) => {
         ${tables[chainId].attestation}.schemaUID = ${tables[chainId].schema}.schemaUID`;
   try {
     const result = await axios.get(getAttestationDataQuery);
-    console.log(result);
     return result.data;
   } catch (err) {
     console.error(err);
@@ -508,7 +497,6 @@ export const getAttestRevokeAccess = async (chainId, address, schemaUID) => {
           AND attesters.schemaUID = '${schemaUID.toLowerCase()}'`;
     try {
       const result = await axios.get(getSchemaQuery);
-      console.log(result);
       return {
         revokeAccess: result.data[0].rev > 0,
         attestAccess: result.data[0].at > 0,
@@ -534,7 +522,6 @@ export const getSubscriptionPrice = async (chainId, schemaUID) => {
           ${tables[chainId].content_group}.schemaUID='${schemaUID}'`;
   try {
     const result = await axios.get(getSchemaQuery);
-    console.log(result.data);
     return result.data[0].Price;
   } catch (err) {
     console.error(err);

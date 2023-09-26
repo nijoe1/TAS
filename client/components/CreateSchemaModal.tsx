@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Input, Typography, Tooltip } from "@material-tailwind/react";
+import { Card, Typography, Tooltip } from "@material-tailwind/react";
 import { FaInfoCircle } from "react-icons/fa";
 import RegisterSchemaModal from "./RegisterSchemaModal";
 import RegisterSubscriptionSchemaModal from "./RegisterSubscriptionSchemaModal";

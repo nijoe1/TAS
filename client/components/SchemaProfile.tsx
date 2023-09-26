@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import EthereumAddress from "@/components/EthereumAddress"; // Assuming your EthereumAddress component is in a separate file
 import Field from "./Field";
 import DecodedSchema from "./DecodedSchema";

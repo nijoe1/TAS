@@ -56,7 +56,6 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
   };
 
   const handleFolderUpload = async (files: any, type: any) => {
-    console.log(files);
     let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
 
     let CIDs = await uploadFolder(files, type, key, setOnProgress);
@@ -88,10 +87,8 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       );
       fileArray.push(res.data.cid);
     }
-    console.log(fileArray);
 
     let ret = await jsonCIDsUpload(key, files[0].type, fileArray);
-    console.log(ret);
     setOnProgress(100);
 
     handleInputChange(ret, type, "string[]");
@@ -108,7 +105,6 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
       token,
       setOnProgress
     );
-    console.log(CID[0].Hash)
 
     let res = await applyAccessConditions(
       CID[0].Hash,

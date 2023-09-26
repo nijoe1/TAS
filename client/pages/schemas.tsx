@@ -24,15 +24,11 @@ const Schemas = () => {
   };
 
   // Define a function to handle creating a schema
-  const createSchema = (schemaData: any) => {
-    // Handle schema creation logic here
-    console.log("Schema Data:", schemaData);
-  };
+  const createSchema = (schemaData: any) => {};
 
   useEffect(() => {
     async function fetch() {
       let tableData = await getSchemas(chainID);
-      console.log(tableData.tableData)
       setTaken(!taken);
       // @ts-ignore
       setTableData(tableData.tableData);
@@ -62,9 +58,9 @@ const Schemas = () => {
                   <Typography color="black">
                     Showing the most recent schemas.
                   </Typography>
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap mx-2 mt-2 items-center text-center border border-black rounded-md p-1">
                     <Typography color="black">Total Schemas:{"  "}</Typography>
-                    <Typography variant="h6" color="black">
+                    <Typography variant="h6" color="black" className="ml-2">
                       {total}
                     </Typography>
                   </div>

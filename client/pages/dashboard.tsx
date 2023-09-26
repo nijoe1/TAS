@@ -70,8 +70,9 @@ export function DashboardPage({}) {
       let createdSchemas = await getUserCreatedSchemas(chainID, user);
 
       let subscriptionData = await getUserSchemaSubscriptions(chainID, user);
+      let key = localStorage.getItem(`API_KEY_${address?.toLowerCase()}`);
 
-      let userDataInfo = await getUserDataInformation(user);
+      let userDataInfo = await getUserDataInformation(user, key as string);
       let temp: {
         publicKey: string;
         fileName: string;
@@ -89,7 +90,7 @@ export function DashboardPage({}) {
         setData([
           { label: "Attestations", value: "attestations" },
           { label: "User Schemas", value: "user-schemas" },
-          { label: "Lighthouse data usage", value: "user-data" },
+          { label: "Uploaded data", value: "user-data" },
         ]);
       }
 

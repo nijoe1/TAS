@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import { Card, Input, Typography } from "@material-tailwind/react";
 import {
   useContractWrite,
   usePrepareContractWrite,
@@ -53,14 +53,11 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
     hash: data?.hash,
   });
 
-
-
   const { address } = useAccount();
 
   useEffect(() => {
     const fetch = async () => {
       let res = await getSubscriptionPrice(chainID, schemaUID);
-      console.log(res);
       setPrice(Number(getPrice(res)));
       setVisiblePrice(getPrice(res));
     };
@@ -129,7 +126,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
             }
             wait={wait}
             error={err}
-            success={succ?"You Subscribed successfully":undefined}
+            success={succ ? "You Subscribed successfully" : undefined}
           />
         </form>
       </Card>

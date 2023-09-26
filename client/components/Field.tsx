@@ -1,6 +1,4 @@
 import React from "react";
-import { Typography } from "@material-tailwind/react";
-
 const Field: React.FC<{
   notshow?: boolean;
   label: string;

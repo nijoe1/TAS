@@ -105,16 +105,18 @@ const SchemaDelegationsTable: React.FC<SchemaDelegationsTableProps> = ({
       };
       await orbis.isConnected();
       const res = await orbis.createPost(post);
-      console.log(res);
       if (res.status != 200) {
         alert("true");
       }
     };
+    const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
+
     const fetch = async () => {
       for (const request of schemaDelegationsTableData) {
         let decodedData = await getEncryptedFilesBlobs(
           request.AttestationRequestData.transformedData,
-          address as `0x${string}`
+          address as `0x${string}`,
+          jwt as string
         );
         request.AttestationRequestData.transformedData = decodedData;
       }

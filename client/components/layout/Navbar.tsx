@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
 import { useRouter } from "next/router";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import Image from "next/image";
 import Link from "next/link";
 import { useAccount, useChainId } from "wagmi";
 import StepperForm from "@/components/StepperForm";
@@ -136,7 +135,6 @@ const CustomNavbar = () => {
   };
   const connect = useConnect({
     onSuccess(data) {
-      console.log("Connect", data);
     },
   });
 
@@ -145,7 +143,6 @@ const CustomNavbar = () => {
       connect;
     }
     const check = async () => {
-      console.log(chainID);
       if (currentAddress != address && address) {
         localStorage.removeItem("ceramic-session");
         openModal();

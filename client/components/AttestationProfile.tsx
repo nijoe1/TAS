@@ -297,7 +297,13 @@ const AttestationProfile: React.FC<AttestationProfileProps> = ({
                 isError={undefined}
                 wait={wait}
                 error={err}
-                success={succ?type == "ONCHAIN"?"Attestation revoked with success":"OFFCHAIN Attestation revoked with success":undefined}
+                success={
+                  succ
+                    ? type == "ONCHAIN"
+                      ? "Attestation revoked with success"
+                      : "OFFCHAIN Attestation revoked with success"
+                    : undefined
+                }
               />
             </div>
           )}

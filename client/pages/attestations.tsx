@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Button, Card } from "@material-tailwind/react";
+import { Typography, Card } from "@material-tailwind/react";
 import { Navbar } from "@/components/layout";
 import Footer from "@/components/Footer";
-import EthereumAddress from "@/components/EthereumAddress";
 import Loading from "@/components/Loading/Loading";
-import TimeCreated from "@/components/TimeCreated";
 import { useChainId } from "wagmi";
-import { RiLinkUnlinkM } from "react-icons/ri";
 import { getAllAttestations } from "@/lib/tas";
 import AttestationsTable from "@/components/AttestationsTable";
 
@@ -60,17 +57,13 @@ const Attestations = () => {
                     </Typography>
                   </div>
                   <div className="flex flex-wrap mx-2  border border-black rounded-md p-1">
-                    <Typography color="black">
-                      ONCHAIN: {"  "}
-                    </Typography>
+                    <Typography color="black">ONCHAIN: {"  "}</Typography>
                     <Typography className="ml-2" variant="h6" color="black">
                       {totalOnChain}
                     </Typography>
                   </div>
                   <div className="flex flex-wrap mx-2 mb-2 items-center border border-black rounded-md p-1 text-center">
-                    <Typography color="black">
-                      OFFCHAIN: {"  "}
-                    </Typography>
+                    <Typography color="black">OFFCHAIN: {"  "}</Typography>
                     <Typography className="ml-2 " variant="h6" color="black">
                       {totalOffChain}
                     </Typography>

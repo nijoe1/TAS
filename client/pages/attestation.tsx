@@ -55,7 +55,6 @@ const Attestation = () => {
             uid: string;
             type: string;
           }>;
-      console.log(referencedAttestations);
       let encrypted = (await getIsEncrypted(
         chainID,
         AttestationData.schemaUID
@@ -74,7 +73,7 @@ const Attestation = () => {
         accessData.revokeAccess = false;
         let acc = (await getAttestAccess(chainID, uid, address)) as boolean;
         accessData.attestAccess = acc;
-        accessData.viewAccess = hasViewAccess || acc ? true : false
+        accessData.viewAccess = hasViewAccess || acc ? true : false;
         setViewAccess(hasViewAccess || acc ? true : false);
       } else if (
         AttestationData.resolver ==
@@ -89,26 +88,32 @@ const Attestation = () => {
         setViewAccess(true);
         accessData.viewAccess = true;
       }
-      console.log(viewAccess);
-
       if (
         encrypted ||
         // @ts-ignore
         CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() ==
           AttestationData.resolver
       ) {
-        // @ts-ignore
-        if (hasViewAccess || attestationData?attestationData?.resolver === "0x0000000000000000000000000000000000000000":false || hasViewAccess2) {
+        const jwt = localStorage.getItem(`lighthouse-jwt-${address}`);
+
+        if (
+          hasViewAccess || attestationData
+            ? // @ts-ignore
+              attestationData?.resolver ===
+              "0x0000000000000000000000000000000000000000"
+            : false || hasViewAccess2
+        ) {
           AttestationData.decodedData = await getEncryptedFilesBlobs(
             AttestationData.decodedData ? AttestationData.decodedData : [],
-            address as `0x${string}`
+            address as `0x${string}`,
+            jwt as string
           );
         }
         setIsEncrypted(true);
       } else {
         setIsEncrypted(false);
       }
-      setViewAccess(accessData.viewAccess)
+      setViewAccess(accessData.viewAccess);
       // @ts-ignore
       setAttestationData(AttestationData);
       setTaken(!taken);
@@ -132,7 +137,13 @@ const Attestation = () => {
                 type={type}
                 isEncrypted={isEncrypted}
                 // @ts-ignore
-                viewAccess={hasViewAccess || attestationData?attestationData?.resolver == "0x0000000000000000000000000000000000000000":false || hasViewAccess2}
+                viewAccess={
+                  hasViewAccess || attestationData
+                    ? // @ts-ignore
+                      attestationData?.resolver ==
+                      "0x0000000000000000000000000000000000000000"
+                    : false || hasViewAccess2
+                }
               />
             </div>
           </div>

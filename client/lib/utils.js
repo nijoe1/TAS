@@ -87,15 +87,7 @@ export const decodeSchema = (rawSchema) => {
     decodedSchema.push({ type, name });
   });
   // @ts-ignore
-  console.log(decodedSchema);
-  // @ts-ignore
   return decodedSchema;
-};
-
-const getTypeForAttribute = (attributeName, schemaArray) => {
-  const schemaEntry = schemaArray.find((entry) => entry.name === attributeName);
-
-  return schemaEntry.type;
 };
 
 export const parseInputString = (inputString) => {
@@ -116,11 +108,11 @@ const allowedFileTypes = {
   "video/ogg": "Video",
   "application/pdf": "PDF",
   "text/csv": "CSV",
-  "application/json":"JSON"
+  "application/json": "JSON",
 };
 
 export const bytesToMB = (bytes) => {
-  if (bytes === 0) return '0 MB';
+  if (bytes === 0) return "0 MB";
 
   const megabyte = 1024 * 1024; // 1 MB = 1024 KB = 1024 * 1024 bytes
   const kilobyte = 1024; // 1 KB = 1024 bytes
@@ -132,14 +124,13 @@ export const bytesToMB = (bytes) => {
     return `${sizeInKB.toFixed(1)} KB`;
   } else {
     const sizeInMB = bytes / megabyte;
-    if(sizeInMB / megabyte*1024 >= 1){
-      return `${(sizeInMB / megabyte*1024).toFixed(1)} GB`;
-
+    if ((sizeInMB / megabyte) * 1024 >= 1) {
+      return `${((sizeInMB / megabyte) * 1024).toFixed(1)} GB`;
     }
     const roundedSizeInMB = Math.round(sizeInMB * 10000) / 10000; // Round to 4 decimal places
     return `${roundedSizeInMB.toFixed(1)} MB`;
   }
-}
+};
 
 export const getFileTypeFromAccept = (acceptValue, size) => {
   const acceptValues = acceptValue.split(",").map((val) => val.trim());
@@ -229,25 +220,5 @@ export const tables = {
     attesters: "schema_attesters_80001_7515",
     revokers: "schema_revokers_80001_7516",
     info: "schema_info_80001_7517",
-  },
-
-  420: {
-    // SchemaRegistry
-    schema: "schema_420_230",
-    categories: "schema_categories_420_231",
-    // Tableland Attestation Service
-    attestation: "attestation_420_232",
-    revocation: "revocation_420_233",
-    offChainTimestamp: "offChain_timestamp_420_234",
-    offChainRevocation: "offChain_revocation_420_235",
-    // ContentSubscriptionsResolver
-    content_group: "group_420_243",
-    content_admins: "creator_420_244",
-    content_subscription: "subscription_420_245",
-    group_revenue: "revenue_420_246",
-    // ACResolver
-    attesters: "schema_attesters_420_236",
-    revokers: "schema_revokers_420_237",
-    info: "schema_info_420_238",
   },
 };

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Input, Progress, Typography } from "@material-tailwind/react";
+import { Card, Input, Typography } from "@material-tailwind/react";
 import TagSelect from "@/components/TagSelect";
 import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import {
   validateInput,
   transformFormData,
-  decodeBase64ToHex,
   encodeHexToBase64,
 } from "@/lib/utils";
 import {
@@ -157,7 +156,6 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         attributeName == "imageCIDs"
       ) {
         // For array attributes, update the attribute directly within the array
-        console.log(newValue);
         updatedFormData[attributeName] = newValue;
       } else {
         if (
@@ -187,7 +185,6 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
     for (const attribute of schemaArray) {
       // @ts-ignore
       const error = validateInput(formData[attribute.name], attribute.type);
-      console.log(error, formData);
       if (error) {
         // @ts-ignore
         errors[attribute.name] = error;
@@ -198,9 +195,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
       }
     }
 
-    console.log("Form data:", formData, data); // Move the logging here
     let encodedData = encoder.encodeData(transformFormData(formData, schema));
-    console.log(formData, "  ", encodedData);
     let b64 = encodeHexToBase64(encodedData);
     setData(encodedData);
     setBase64Data(b64);

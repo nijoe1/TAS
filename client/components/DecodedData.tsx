@@ -25,7 +25,6 @@ const DecodedData: React.FC<DecodedDataProps> = ({
   };
 
   const getFileType = (name: string) => {
-    console.log(isEncrypted);
     if (name.endsWith("CIDs")) {
       const fileType = name.split("CID")[0];
       if (fileType === "image") return "Image[]";

@@ -167,13 +167,10 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     // @ts-ignore
     setShares(sharesList);
     generateAttributeString();
-    console.log(rawSchema);
-    console.log(monthlySubscriptionPrice);
   }, [attributes, monthlySubscriptionPrice, schemaAttributes, rawSchema]);
 
   const handleTagChange = (tags: any) => {
     setCategories({ tags });
-    console.log(tags);
   };
 
   const handleAttributeChange = (index: any, key: any, value: any) => {
@@ -307,7 +304,6 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 setMonthlySubscriptionPrice(
                   parseFloat(e.target.value) as unknown as number
                 );
-                // console.log(getWEI(adjustedPrice.toString()));
               }}
               min={1 / 10 ** 17}
               placeholder="Monthly Subscription Price"
@@ -506,10 +502,8 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
               // @ts-ignore
               onClick={() => {
                 setFinalPrice(monthlySubscriptionPrice * 10 ** 18),
-                  console.log(finalPrice);
-
-                // @ts-ignore
-                write();
+                  // @ts-ignore
+                  write();
               }}
               className="bg-black text-white rounded-md px-6 py-2 hover:bg-white hover:text-black border border-black"
             >

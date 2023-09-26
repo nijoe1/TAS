@@ -7,14 +7,10 @@ import {
   recoverShards,
   recoverKey,
 } from "@lighthouse-web3/kavach";
-import { CONTRACTS } from "@/constants/contracts/index";
 
 const LighthouseChains = {
   80001: {
     name: "Mumbai",
-  },
-  420: {
-    name: "OptimismGoerli",
   },
   314159: {
     name: "Calibration",
@@ -46,7 +42,6 @@ export const getUserDataInfo = async (address, apiKey) => {
   } catch {
     return { balance: balance.data, uploads: [] };
   }
-  console.log(uploads.data.fileList[0])
 
   return { balance: balance.data, uploads: uploads.data.fileList };
 };
@@ -66,7 +61,6 @@ export const uploadFile = async (file, apiKey, setUploadProgress) => {
     dealParams
   );
   let RAAS_Response = await registerCIDtoRAAS(output.data.Hash);
-  console.log(RAAS_Response);
 
   return output.data;
 };
@@ -87,14 +81,10 @@ export const uploadFolder = async (files, type, apiKey, setUploadProgress) => {
     progressCallback,
     dealParams
   );
-  console.log(output);
   for (const file of output.data) {
     if (file.Name != "") {
-      // console.log(file);
       CIDs.push(file.Hash);
-      console.log(file.Hash);
       let RAAS_Response = await registerCIDtoRAAS(file.Hash);
-      // console.log(RAAS_Response);
     }
   }
   // Create JSON object
@@ -120,7 +110,6 @@ export const uploadFolder = async (files, type, apiKey, setUploadProgress) => {
     progressCallback,
     dealParams
   );
-  console.log(jsonCID);
   return [jsonCID.data.Hash];
 };
 
@@ -173,7 +162,6 @@ export const uploadFileEncrypted = async (
     progressCallback,
     dealParams
   );
-  console.log("blablabla");
 
   const { masterKey, keyShards } = await generate();
 
@@ -183,10 +171,8 @@ export const uploadFileEncrypted = async (
     jwt,
     keyShards
   );
-  console.log(isSuccess);
 
-  let RAAS_Response = await registerCIDtoRAAS(output.data[0].cid);
-  console.log(RAAS_Response);
+  await registerCIDtoRAAS(output.data[0].cid);
 
   return output.data;
 };
@@ -209,7 +195,6 @@ const registerCIDtoRAAS = async (cid) => {
       "https://calibration.lighthouse.storage/api/register_job",
       formData
     );
-    console.log("Job registered successfully:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error registering job:", error);
@@ -228,7 +213,6 @@ export const getDealStatusByCID = async (cid) => {
     }
 
     const data = await response.json();
-    console.log(data);
     return data;
   } catch (error) {
     console.error("Error fetching deal status:", error.message);
@@ -257,7 +241,6 @@ export const decrypt = async (cid, address, jwt) => {
     const fileType = "application/json";
     decrypted = await lighthouse.decryptFile(cid, masterKey, fileType);
   } catch {
-    console.log("error in decription");
   }
   /*
     Response: blob
@@ -273,7 +256,6 @@ export const applyAccessConditions = async (
   jwt,
   resolver
 ) => {
-  console.log(resolver, chainID, uid);
   const conditions = [
     {
       id: 1,
@@ -310,6 +292,5 @@ export const applyAccessConditions = async (
     jwt,
     keyShards
   );
-  console.log(isSuccess);
   return response;
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface PaginationProps {
   totalPages: number;
@@ -32,7 +32,7 @@ const Pagination: React.FC<PaginationProps> = ({
         key={i}
         onClick={() => handlePageChange(i)}
         className={`cursor-pointer rounded-lg px-3 py-2 mx-1 ${
-          currentPage === i ? 'bg-gray-300' : 'bg-white'
+          currentPage === i ? "bg-gray-300" : "bg-white"
         }`}
       >
         {i}
@@ -48,11 +48,7 @@ const Pagination: React.FC<PaginationProps> = ({
     );
   }
 
-  return (
-    <div className="flex justify-center mt-4">
-      {pages}
-    </div>
-  );
+  return <div className="flex justify-center mt-4">{pages}</div>;
 };
 
 export default Pagination;

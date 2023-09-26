@@ -19,7 +19,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
   }
 
   // Close the modal when clicking outside of it
-  const handleOutsideClick = (e:any) => {
+  const handleOutsideClick = (e: any) => {
     if (e.target === e.currentTarget) {
       closeModal();
     }

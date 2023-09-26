@@ -43,7 +43,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
   useEffect(() => {
     const getFilesContent = async () => {
-      console.log(fileType, fileUri, filesBlobs, encrypted);
       try {
         if ((filesBlobs || fileUri) && fileType === "JSON") {
           const response = await fetch(
@@ -51,7 +50,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
           );
           const data = await response.json();
           setJsonContent([data]);
-          await fetchDeals([CIDs && CIDs[0] || ""]);
+          await fetchDeals([(CIDs && CIDs[0]) || ""]);
         }
 
         if (filesBlobs && (filesBlobs || fileUri) && fileType === "JSON[]") {
@@ -65,14 +64,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
             })
           );
           setJsonContent(jsons);
-          console.log(CIDs)
           await fetchDeals(CIDs || []);
         }
 
         if (fileUri && (filesBlobs || fileUri) && fileType === "JSON[]") {
           const response = await fetch(fileUri || "");
           const data = await response.json();
-          console.log(data);
           const jsons = await Promise.all(
             data.CIDs.map(async (CID: any) => {
               const uri = getIpfsGatewayUri(CID);
@@ -92,7 +89,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
         if (fileUri && (fileType === "Image[]" || fileType === "Video[]")) {
           const response = await fetch(fileUri || "");
           const data = await response.json();
-          console.log(data);
           const filesCIDs = data.CIDs.map((CID: any) => getIpfsGatewayUri(CID));
           setFiles(filesCIDs);
           fetchDeals(filesCIDs);
@@ -104,7 +100,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
       } catch (error) {
         console.error("Error fetching JSON content:", error);
       }
-      console.log(fileType, encrypted);
     };
 
     getFilesContent();
@@ -133,7 +128,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             </Carousel>
           )}
 
-          {fileType === "Image"  && (
+          {fileType === "Image" && (
             <ImageViewer
               fileSrc={
                 filesBlobs && filesBlobs.length > 0

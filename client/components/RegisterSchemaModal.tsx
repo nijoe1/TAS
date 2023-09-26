@@ -23,7 +23,6 @@ type RegisterSchemaModalProps = {
 const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   isOpen,
   onClose,
-  onCreate,
 }) => {
   const chainID = useChainId();
   const [attributes, setAttributes] = useState([
@@ -127,7 +126,6 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
   const handleTagChange = (tags: any) => {
     setCategories({ tags });
-    console.log(tags);
   };
 
   const handleCheckboxChange = (index: any) => {

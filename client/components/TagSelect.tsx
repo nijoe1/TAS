@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, Typography } from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { validateInput } from "@/lib/utils";
 interface TagSelectProps {
   name: string;

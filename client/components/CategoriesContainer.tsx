@@ -1,13 +1,15 @@
-import React from 'react';
+import React from "react";
 import { Typography } from "@material-tailwind/react";
 
 interface CategoriesContainerProps {
   strings: string[];
 }
 
-const CategoriesContainer: React.FC<CategoriesContainerProps> = ({ strings }) => {
+const CategoriesContainer: React.FC<CategoriesContainerProps> = ({
+  strings,
+}) => {
   return (
-    <div className='mx-auto flex flex-col items-center'>
+    <div className="mx-auto flex flex-col items-center">
       <Typography variant="h6" color="black" className="mt-2 text-center">
         Categories
       </Typography>
