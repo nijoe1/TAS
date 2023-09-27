@@ -41,12 +41,14 @@ export function DashboardPage({}) {
   const [selection, setSelection] = useState("created");
   const [isUser, setIsUser] = useState(false);
   const [userr, setUserr] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [success, setSuccess] = useState(false);
   const [noUser, setNoUser] = useState(false);
   const [tabsValue, setTabsValue] = useState("");
-  const handleDataFetch = (isuser: boolean) => {
+  const handleDataFetch = (isuser: boolean, connected: boolean) => {
     setIsDataFetched(true);
     setIsUser(isuser);
+    setIsConnected(connected);
   };
   const handleUpdate = (success: boolean) => {
     setSuccess(success);
@@ -261,8 +263,13 @@ export function DashboardPage({}) {
                 )}
               </TabsBody>
             </Tabs>
-          ) : (
+          ) : isConnected ? (
             <Loading />
+          ) : (
+            <div className="text-center">
+              <p>Connect Your Wallet</p>
+              <p>to view dashboard</p>
+            </div>
           )}
         </div>
       </div>

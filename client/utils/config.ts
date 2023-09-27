@@ -1,7 +1,4 @@
-import {
-  polygonMumbai,
-  filecoinCalibration,
-} from "wagmi/chains";
+import { polygonMumbai, filecoinCalibration } from "wagmi/chains";
 
 export const ETH_CHAINS = [
   {
@@ -17,6 +14,14 @@ export const ETH_CHAINS = [
   },
   {
     ...filecoinCalibration,
+    rpcUrls: {
+      public: {
+        http: ["https://filecoin-calibration.chainstacklabs.com/rpc/v1"],
+      },
+      default: {
+        http: ["https://filecoin-calibration.chainstacklabs.com/rpc/v1"],
+      },
+    },
     iconUrl:
       "https://gateway.lighthouse.storage/ipfs/QmXQMtADMsCqsYEvyuEA3PkFq2xtWAQetQFtkybjEXvk3Z",
   },

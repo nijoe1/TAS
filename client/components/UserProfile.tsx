@@ -19,7 +19,7 @@ export function ProfileCard({
   onDataFetch,
   onUpdate,
 }: {
-  onDataFetch: (isUser: boolean) => void;
+  onDataFetch: (isUser: boolean, isConnected:boolean) => void;
   onUpdate: (success: boolean) => void;
 }) {
   const router = useRouter();
@@ -97,7 +97,7 @@ export function ProfileCard({
         if (data) {
           setUserProfile(data);
           setFetched(true);
-          onDataFetch(temp); // Invoke the callback when data is fetched
+          onDataFetch(temp, user==""?false:true); // Invoke the callback when data is fetched
         } else if (error) {
           console.error("Error fetching user profile: ", error);
         }

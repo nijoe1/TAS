@@ -19,7 +19,15 @@ const navLinks = [
 const CustomNavbar = () => {
   const router = useRouter();
   const { address } = useAccount();
+  const [currentAddress, setCurrentAddress] = useState<`0x${string}` | null>(
+    null
+  );
+
+  const chainID = useChainId();
+  const [currentChainID, setCurrentChainID] = useState(0);
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [changeChain, setChangeChain] = useState(true);
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -42,11 +50,55 @@ const CustomNavbar = () => {
     setIsModalOpen(true);
   };
 
-  const handleLinkClick = (href: string) => {
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleLinkClick = (href: any) => {
     router.push(href);
   };
+  const connect = useConnect({
+    onSuccess(data) {
+      console.log("Connect", data);
+    },
+  });
+
+  useEffect(() => {
+    const check = async () => {
+      let prevAddress;
+      try {
+        prevAddress = localStorage.getItem("prevAddress");
+      } catch {}
+      if (address && address != prevAddress) {
+        localStorage.removeItem("ceramic-session");
+        localStorage.setItem("prevAddress", address ? address : "".toString());
+        localStorage.setItem("prevChain", chainID.toString());
+        setChangeChain(false)
+        openModal();
+      }
+    };
+    check();
+  }, [address]);
+
+  useEffect(() => {
+    let prevChain;
+    let prevAddress;
+    try {
+      prevAddress = localStorage.getItem("prevAddress");
+      prevChain = localStorage.getItem("prevChain");
+    } catch {}
+    if (prevAddress && parseInt(prevChain || "0") != chainID && changeChain) {
+      localStorage.setItem("prevChain", chainID.toString());
+      window.location.href = "/";
+    }
+  }, [chainID]);
+
   return (
-    <div className={` ${isMobile && " flex flex-col justify-between items-center"}`}>
+    <div
+      className={` ${
+        isMobile && " flex flex-col justify-between items-center"
+      }`}
+    >
       <div
         className={`flex ${
           isMobile ? "flex-col gap-2 items-center mx-50" : "flex-row"
@@ -103,8 +155,18 @@ const CustomNavbar = () => {
           )}
           {!isMobile && (
             <div className="flex flex-wrap items-center justify-between w-auto  gap-4 ml-4 text-white rounded-md">
-              <TfiTwitterAlt />
-              <BsGithub />
+              <TfiTwitterAlt
+                onClick={() =>
+                  handleLinkClick("https://twitter.com/TAS_Protocol")
+                }
+                className="cursor-pointer"
+              />
+              <BsGithub
+                onClick={() =>
+                  handleLinkClick("https://github.com/nijoe1/TAS/")
+                }
+                className="cursor-pointer"
+              />
             </div>
           )}
         </div>
@@ -129,8 +191,8 @@ const CustomNavbar = () => {
         </div>
         <StepperForm
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          currentAddress={address as `0x${string}`}
+          onClose={closeModal}
+          currentAddress={currentAddress as `0x${string}`}
           address={address as `0x${string}`}
         />
       </div>

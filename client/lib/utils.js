@@ -185,40 +185,40 @@ export const decodeBase64ToHex = (base64String) => {
 export const tables = {
   314159: {
     // SchemaRegistry
-    schema: "schema_314159_488",
-    categories: "schema_categories_314159_489",
+    schema: "schema_314159_347",
+    categories: "schema_categories_314159_348",
     // Tableland Attestation Service
-    attestation: "attestation_314159_490",
-    revocation: "revocation_314159_491",
-    offChainTimestamp: "offChain_timestamp_314159_492",
-    offChainRevocation: "offChain_revocation_314159_493",
+    attestation: "attestation_314159_349",
+    revocation: "revocation_314159_350",
+    offChainTimestamp: "offChain_timestamp_314159_351",
+    offChainRevocation: "offChain_revocation_314159_352",
     // ContentSubscriptionsResolver
-    content_group: "group_314159_497",
-    content_admins: "creator_314159_498",
-    content_subscription: "subscription_314159_499",
-    group_revenue: "revenue_314159_500",
+    content_group: "group_314159_363",
+    content_admins: "creator_314159_364",
+    content_subscription: "subscription_314159_365",
+    group_revenue: "revenue_314159_366",
     // ACResolver
-    info: "schema_info_314159_496",
-    attesters: "schema_attesters_314159_494",
-    revokers: "schema_revokers_314159_495",
+    info: "schema_info_314159_355",
+    attesters: "schema_attesters_314159_353",
+    revokers: "schema_revokers_314159_354",
   },
   80001: {
     // SchemaRegistry
-    schema: "schema_80001_7581",
-    categories: "schema_categories_80001_7582",
+    schema: "schema_80001_7509",
+    categories: "schema_categories_80001_7510",
     // Tableland Attestation Service
-    attestation: "attestation_80001_7583",
-    revocation: "revocation_80001_7584",
-    offChainTimestamp: "offChain_timestamp_80001_7585",
-    offChainRevocation: "offChain_revocation_80001_7586",
+    attestation: "attestation_80001_7511",
+    revocation: "revocation_80001_7512",
+    offChainTimestamp: "offChain_timestamp_80001_7513",
+    offChainRevocation: "offChain_revocation_80001_7514",
     // ContentSubscriptionsResolver
-    content_group: "group_80001_7590",
-    content_admins: "creator_80001_7591",
-    content_subscription: "subscription_80001_7592",
-    group_revenue: "revenue_80001_7593",
+    content_group: "group_80001_7518",
+    content_admins: "creator_80001_7519",
+    content_subscription: "subscription_80001_7520",
+    group_revenue: "revenue_80001_7521",
     // ACResolver
-    attesters: "schema_attesters_80001_7587",
-    revokers: "schema_revokers_80001_7588",
-    info: "schema_info_80001_7589",
+    attesters: "schema_attesters_80001_7515",
+    revokers: "schema_revokers_80001_7516",
+    info: "schema_info_80001_7517",
   },
 };
