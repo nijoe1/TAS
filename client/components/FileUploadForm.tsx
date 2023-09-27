@@ -128,25 +128,26 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
             <label htmlFor={`${type.slice(0, -3)} Upload`} className="mb-1">
               {`${type.slice(0, -3)} Upload`}
             </label>
-            {onProgress < 0 ? (
-              <input
-                className="rounded-lg"
-                type="file"
-                accept={getAcceptedFileTypes(type.slice(0, -3))}
-                onChange={(e) => {
-                  if (e.target.files) {
-                    if (isSubscription) {
-                      handleEncryptedFileUpload(e.target.files);
-                    } else {
-                      handleSimpleFileUpload(e.target.files);
-                    }
+
+            <input
+              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+              type="file"
+              accept={getAcceptedFileTypes(type.slice(0, -3))}
+              onChange={(e) => {
+                if (e.target.files) {
+                  if (isSubscription) {
+                    handleEncryptedFileUpload(e.target.files);
+                  } else {
+                    handleSimpleFileUpload(e.target.files);
                   }
-                }}
-              />
-            ) : (
-              <div className="items-center text-center">
+                }
+              }}
+            />
+
+            {onProgress > 0 && (
+              <div className="items-center text-center p-2 ">
                 <Progress
-                  className="text-white bg-black rounded-lg"
+                  className="text-white bg-black rounded-lg p-2  "
                   value={onProgress}
                   label="Completed"
                 />
@@ -162,23 +163,22 @@ const FileUploadForm: React.FC<FileUploadFormProps> = ({
             <label htmlFor={`${type.slice(0, -4)} upload`} className="mb-1">
               {`${type.slice(0, -4)}s Upload`}
             </label>
-            {onProgress < 0 ? (
-              <input
-                className="rounded-lg"
-                type="file"
-                multiple
-                accept={getAcceptedFileTypes(type.slice(0, -4))}
-                onChange={(e) => {
-                  if (e.target.files) {
-                    if (isSubscription) {
-                      handleEncryptedFolderUpload(e.target.files);
-                    } else {
-                      handleFolderUpload(e.target.files, type);
-                    }
+            <input
+              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+              type="file"
+              multiple
+              accept={getAcceptedFileTypes(type.slice(0, -4))}
+              onChange={(e) => {
+                if (e.target.files) {
+                  if (isSubscription) {
+                    handleEncryptedFolderUpload(e.target.files);
+                  } else {
+                    handleFolderUpload(e.target.files, type);
                   }
-                }}
-              />
-            ) : (
+                }
+              }}
+            />
+            {onProgress > 0 && (
               <div className="items-center text-center">
                 <Progress
                   className="text-white bg-black rounded-lg"

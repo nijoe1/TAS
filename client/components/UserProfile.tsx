@@ -193,21 +193,21 @@ export function ProfileCard({
                         {"pfp"}
                       </label>
 
-                      {onProgress < 0 ? (
-                        <input
-                          className="text-center mb-2  flex  justify-center items-centrer"
-                          type="file"
-                          accept={"image/jpeg, image/png, image/gif"}
-                          onChange={async (e) => {
-                            if (e.target.files) {
-                              handleSimpleFileUpload(e.target.files);
-                            }
-                          }}
-                        />
-                      ) : (
+                      <input
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                        type="file"
+                        accept={"image/jpeg, image/png, image/gif"}
+                        onChange={async (e) => {
+                          if (e.target.files) {
+                            handleSimpleFileUpload(e.target.files);
+                          }
+                        }}
+                      />
+
+                      {onProgress > 0 && (
                         <div className="items-center text-center">
                           <Progress
-                            className="text-white bg-black rounded-lg "
+                            className="text-white bg-black rounded-lg"
                             value={onProgress}
                             label="Completed"
                           />
