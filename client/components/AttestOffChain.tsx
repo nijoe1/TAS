@@ -12,6 +12,7 @@ import { CONTRACTS } from "@/constants/contracts/index";
 import { getTypedData, primaryType, types, getPostData } from "@/lib/offchain";
 import crypto from "crypto";
 import Notification from "./Notification";
+import { getTime } from "@/lib/contractReads";
 interface Signature {
   v: BigInt;
   r: `0x${string}`;
@@ -75,6 +76,7 @@ const AttestOffChain = ({
     r: "0x",
     s: "0x",
   });
+  const [timeFetched, setTimeFetched] = useState<any>()
 
   const [typedData, setTypedData] = useState<TypedData | null>(null);
   // @ts-ignore
@@ -85,7 +87,6 @@ const AttestOffChain = ({
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "getTime",
   });
-
   function randomUint32() {
     const uuid = crypto.randomBytes(16).toString("hex");
 
@@ -94,29 +95,21 @@ const AttestOffChain = ({
     const uint32Value = (M << 4) | N;
     return uint32Value;
   }
+  function generateRandomBytes32() {
+    // Generate a random 32-byte buffer
+    const randomBuffer = crypto.randomBytes(32);
+  
+    // Convert the buffer to a '0x' prefixed hexadecimal string
+    const hexString = '0x' + randomBuffer.toString('hex');
+  
+    // Ensure the string is exactly 66 characters long (32 bytes + '0x' prefix)
+    const paddedHexString = hexString.padEnd(66, '0');
+  
+    // Return the bytes32 representation
+    return paddedHexString;
+  }
+  const uid = generateRandomBytes32()
 
-  const { data: uid } = useContractRead({
-    // @ts-ignore
-    address: CONTRACTS.TAS[chainID].contract,
-    // @ts-ignore
-    abi: CONTRACTS.TAS[chainID].abi,
-    functionName: "_getUID",
-    args: [
-      [
-        "0x0000000000000000000000000000000000000000000000000000000000000000",
-        schema,
-        currentTimestamp,
-        0,
-        0,
-        refUID,
-        recipient,
-        address,
-        revocable,
-        AttestationData,
-      ],
-      randomUint32(),
-    ],
-  });
 
   // @ts-ignore
   const TAS = CONTRACTS.TAS[chainID].contract as `0x${string}`;
@@ -148,7 +141,7 @@ const AttestOffChain = ({
       uid,
       TAS,
       chainID,
-      currentTimestamp?.toString() || "",
+      currentTimestamp?.toString() || " ",
       expirationTime,
       address
     );
@@ -158,6 +151,7 @@ const AttestOffChain = ({
 
   useEffect(() => {
     if (!done) {
+      setTimeFetched(currentTimestamp)
       let tdata: TypedData = getTypedData(
         schema,
         recipient,
@@ -198,9 +192,10 @@ const AttestOffChain = ({
 
   const createPost = async () => {
     let content = createPostContent();
+    console.log(content)
     const post = {
-      title: `uid: ${uid}`,
-      body: `Off chain attestation for TAS protocol link => tas.vercel.app/attestation?uid=${uid}&type=OFFCHAIN.`,
+      title: `uid: ${uid||""}`,
+      body: `Off chain attestation for TAS protocol link => tas.vercel.app/attestation?uid=${uid||""}&type=OFFCHAIN.`,
       data: content,
       mentions: [],
       tags: [
@@ -226,7 +221,7 @@ const AttestOffChain = ({
         },
         {
           slug: "time",
-          title: currentTimestamp?.toString(),
+          title: timeFetched?.toString(),
         },
         {
           slug: "uid",

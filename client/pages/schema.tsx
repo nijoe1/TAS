@@ -128,7 +128,11 @@ const Schema = () => {
                   (accessInfo.viewAccess ||
                     schemaData?.resolverContract ==
                       "0x0000000000000000000000000000000000000000")) ||
-                accessInfo.attestAccess ? (
+                accessInfo.attestAccess ||
+                (schemaData?.resolverContract ==
+                  // @ts-ignore
+                  CONTRACTS.ACResolver[chainID].contract.toLowerCase() &&
+                  (accessInfo.viewAccess || !isEncrypted)) ? (
                   <AttestationsTable
                     attestationsTableData={tableData}
                     notSchemaUID={true}

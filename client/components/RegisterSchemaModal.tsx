@@ -95,7 +95,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
 
     if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
       updatedAttributes[index]["type"] = "string";
-      updatedAttributes[index]["name"] = value;
+      updatedAttributes[index]["name"] = value.replace("'", "");
       updatedAttributes[index]["readonly"] = true;
       updatedAttributes[index]["isArray"] = false;
     } else if (
@@ -106,10 +106,10 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       updatedAttributes[index]["type"] = "string";
       updatedAttributes[index]["isArray"] = true;
 
-      updatedAttributes[index]["name"] = value;
+      updatedAttributes[index]["name"] = value.replace("'", "");
       updatedAttributes[index]["readonly"] = true;
     } else {
-      updatedAttributes[index]["type"] = value;
+      updatedAttributes[index]["type"] = value.replace("'", "");
       updatedAttributes[index]["name"] = "";
       updatedAttributes[index]["readonly"] = false;
     }
@@ -120,11 +120,12 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const handleAttributeNameChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
-    updatedAttributes[index][key] = value;
+    updatedAttributes[index][key] = value.replace("'", "");
     setAttributes(updatedAttributes);
   };
 
   const handleTagChange = (tags: any) => {
+    tags.map((str: string) => str.replace("'", ""));
     setCategories({ tags });
   };
 
@@ -156,7 +157,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       attributes
         .map((attr: any) => {
           const type = attr.isArray ? `${attr.type}[]` : attr.type;
-          return `${type} ${attr.name}`;
+          return `${type} ${attr.name.replace("'", "")}`;
         })
         .join(", ")
     );
@@ -198,7 +199,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="text"
               value={schemaName}
-              onChange={(e) => setSchemaName(e.target.value)}
+              onChange={(e) => setSchemaName(e.target.value.replace("'", ""))}
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
@@ -218,7 +219,9 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="text"
               value={schemaDescription}
-              onChange={(e) => setSchemaDescription(e.target.value)}
+              onChange={(e) =>
+                setSchemaDescription(e.target.value.replace("'", ""))
+              }
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
@@ -418,11 +421,7 @@ const RegisterSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             isLoading={isLoading}
             isSuccess={isSuccess}
             isError={
-              error?.message
-                ? error.message.indexOf(".") !== -1
-                  ? error.message.substring(0, error.message.indexOf("."))
-                  : error.message
-                : undefined
+              undefined
             }
             wait={wait}
             error={err}

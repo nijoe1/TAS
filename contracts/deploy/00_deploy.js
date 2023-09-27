@@ -158,3 +158,5 @@ module.exports = async ({ deployments }) => {
   console.log(await TablelandSubscriptionsContractInstance.tables(2))
   console.log(await TablelandSubscriptionsContractInstance.tables(3))
 };
+
+

@@ -169,7 +169,7 @@ const SchemasTable: React.FC<SchemasTableProps> = ({
                   </td>
                   {!subscription ? (
                     <>
-                      <td className="flex flex-col py-2 border-r border-gray border-b border-gray">
+                      <td className="flex flex-col  py-2 border-r border-gray border-b border-gray">
                         <div className="flex flex-col  ">
                           <DecodedSchema schema={row.schema.fields} />
                         </div>

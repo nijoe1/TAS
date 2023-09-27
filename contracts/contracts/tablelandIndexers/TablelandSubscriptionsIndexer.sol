@@ -131,9 +131,7 @@ contract TablelandSubscriptionsIndexer is IERC721Receiver, Ownable {
                     string.concat(
                         SQLHelpers.quote(bytes32ToString(schemaUID)),
                         ",",
-                        SQLHelpers.quote(
-                            Strings.toHexString(contentCreators[i])
-                        ),
+                        SQLHelpers.quote(Strings.toHexString(contentCreators[i])),
                         ",",
                         SQLHelpers.quote(Strings.toString(creatorsShares[i]))
                     )

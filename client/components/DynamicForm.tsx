@@ -27,6 +27,7 @@ type DynamicFormModalProps = {
   isOpen: boolean;
   resolver?: string;
   revocable?: boolean;
+  onlyDelegated?: boolean;
   onClose: () => void;
 };
 
@@ -37,6 +38,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   isOpen,
   resolver,
   revocable,
+  onlyDelegated,
   onClose,
 }) => {
   const chainID = useChainId();
@@ -54,7 +56,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
   const [open, setOpen] = useState(isOpen);
   const [isRevocable, setIsRevocable] = useState(false);
   const [isOffChain, setIsOffChain] = useState(false);
-  const [isDelegated, setIsDelegated] = useState(false);
+  const [isDelegated, setIsDelegated] = useState(onlyDelegated?true:false);
   const [optionalParams, setOptionalParams] = useState(false);
 
   const [recipient, setRecipient] = useState(
@@ -374,7 +376,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                     Revocable
                   </Typography>
                 </div>
-                <div className="flex justify-center items-center gap-1 mx-auto  rounded-md">
+                {!onlyDelegated && (<div className="flex justify-center items-center gap-1 mx-auto  rounded-md">
                   <div className="flex flex-col  justify-center items-center border border-black mx-auto p-2 rounded-md">
                     <Typography
                       className="cursor-pointer focus:ring-blue-500 focus:ring-2 "
@@ -427,7 +429,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
                       className="w-4 h-4 text-black bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2  mb-3 cursor-pointer "
                     />
                   </div>
-                </div>
+                </div>)}
               </div>
             )}
           </div>
@@ -484,11 +486,7 @@ const DynamicForm: React.FC<DynamicFormModalProps> = ({
         isLoading={isLoading}
         isSuccess={isSuccess}
         isError={
-          error?.message
-            ? error.message.indexOf(".") !== -1
-              ? error.message.substring(0, error.message.indexOf("."))
-              : error.message
-            : undefined
+          undefined
         }
         wait={wait}
         error={err}

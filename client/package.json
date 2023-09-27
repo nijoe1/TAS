@@ -53,6 +53,7 @@
     "tailwindcss": "3.3.1",
     "typescript": "5.0.4",
     "use-debounce": "^9.0.4",
+    "uuid": "^9.0.1",
     "wagmi": "^1.0.8"
   },
   "devDependencies": {

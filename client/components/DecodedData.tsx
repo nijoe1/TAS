@@ -144,7 +144,7 @@ const DecodedData: React.FC<DecodedDataProps> = ({
               )}
           </div>
         ))}
-      {decodedData.length == 0 && (
+      {decodedData?.length == 0 && (
         <div>
           <p>Error in attested data</p>
         </div>

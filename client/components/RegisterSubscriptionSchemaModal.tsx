@@ -29,7 +29,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const [schemaName, setSchemaName] = useState("");
   const [schemaDescription, setSchemaDescription] = useState("");
 
-  const [monthlySubscriptionPrice, setMonthlySubscriptionPrice] = useState(0);
+  const [monthlySubscriptionPrice, setMonthlySubscriptionPrice] = useState(0.1);
   const [finalPrice, setFinalPrice] = useState(1);
   const [categories, setCategories] = useState({ tags: [] });
   const [attributes, setAttributes] = useState([
@@ -64,7 +64,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       schemaAttributes
         .map((attr: any) => {
           const type = attr.isArray ? `${attr.type}[]` : attr.type;
-          return `${type} ${attr.name}`;
+          return `${type} ${attr.name.replace("'", "")}`;
         })
         .join(", ")
     );
@@ -111,7 +111,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const handleAttributeNameChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...schemaAttributes];
     // @ts-ignore
-    updatedAttributes[index][key] = value;
+    updatedAttributes[index][key] = value.replace("'", "");
     setSchemaAttributes(updatedAttributes);
   };
 
@@ -164,12 +164,15 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
     }
     // @ts-ignore
     setCreators(creatorsList);
+    console.log(creatorsList);
     // @ts-ignore
     setShares(sharesList);
     generateAttributeString();
   }, [attributes, monthlySubscriptionPrice, schemaAttributes, rawSchema]);
 
   const handleTagChange = (tags: any) => {
+    tags.map((str: string) => str.replace("'", ""));
+
     setCategories({ tags });
   };
 
@@ -239,7 +242,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="text"
               value={schemaName}
-              onChange={(e) => setSchemaName(e.target.value)}
+              onChange={(e) => setSchemaName(e.target.value.replace("'", ""))}
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
@@ -259,7 +262,9 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="text"
               value={schemaDescription}
-              onChange={(e) => setSchemaDescription(e.target.value)}
+              onChange={(e) =>
+                setSchemaDescription(e.target.value.replace("'", ""))
+              }
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
@@ -411,7 +416,11 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                   type="text"
                   value={attr.name}
                   onChange={(e) =>
-                    handleAttributeNameChange(index, "name", e.target.value)
+                    handleAttributeNameChange(
+                      index,
+                      "name",
+                      e.target.value.replace("'", "")
+                    )
                   }
                   placeholder="field name"
                   // @ts-ignore
@@ -423,7 +432,11 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
                 <select
                   value={attr.type}
                   onChange={(e) =>
-                    handleSchemaAttributeChange(index, "type", e.target.value)
+                    handleSchemaAttributeChange(
+                      index,
+                      "type",
+                      e.target.value.replace("'", "")
+                    )
                   }
                   className="attribute-select rounded-full px-4 py-2 border border-black mr-20"
                 >
@@ -520,13 +533,7 @@ const RegisterSubscriptionSchemaModal: React.FC<RegisterSchemaModalProps> = ({
           <Notification
             isLoading={isLoading}
             isSuccess={isSuccess}
-            isError={
-              error?.message
-                ? error.message.indexOf(".") !== -1
-                  ? error.message.substring(0, error.message.indexOf("."))
-                  : error.message
-                : undefined
-            }
+            isError={undefined}
             wait={wait}
             error={err}
             success={

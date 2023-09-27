@@ -79,7 +79,7 @@ const SubscriptionForm: React.FC<DynamicFormModalProps> = ({
           Subscribe to get Access.
         </Typography>
         <Typography color="gray" className="mt-1 font-normal">
-          {`Price per month: ${visiblePrice}`}
+          {`Price per month: ${price/ 10 ** 18}`}
         </Typography>
         <Typography color="gray" className="mt-1 font-normal">
           {`total : ${(price / 10 ** 18) * months} ethers for ${months} months`}

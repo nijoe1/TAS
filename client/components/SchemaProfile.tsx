@@ -50,7 +50,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isSubscribeModalOpen, setIsSubscribeModalOpen] = useState(false);
   const [showAttestations, setShowAttestations] = useState(true);
-
+  const [allowDelegated, setAllowedDelegated] = useState(false);
   const openModal = () => {
     setModalIsOpen(true);
   };
@@ -65,8 +65,9 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
     setModalIsOpen(false);
   };
 
-  const openAttestModal = () => {
+  const openAttestModal = (onlyDelegated: boolean) => {
     setIsAttestModalOpen(true);
+    setAllowedDelegated(onlyDelegated);
   };
 
   const closeAttestModal = () => {
@@ -196,14 +197,27 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                 isOpen={modalIsOpen}
                 closeModal={closeModal}
               />
-              {accessInfo.attestAccess && (
+              {accessInfo.attestAccess ? (
                 <button
                   type="button"
                   className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
-                  onClick={openAttestModal}
+                  onClick={() => openAttestModal(false)}
                 >
                   Attest with Schema
                 </button>
+              ) : (
+                schemaData.resolverContract ==
+                  // @ts-ignore
+                  CONTRACTS.ACResolver[chainID].contract.toLowerCase() &&
+                (accessInfo.viewAccess || !isEncrypted) && (
+                  <button
+                    type="button"
+                    className="bg-black text-white hover:bg-white hover:text-black border border-black py-2 px-4 rounded mx-auto"
+                    onClick={() => openAttestModal(true)}
+                  >
+                    RequestAttestation
+                  </button>
+                )
               )}
               {(accessInfo.attestAccess || accessInfo.viewAccess) && (
                 <button
@@ -228,7 +242,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                     Subscribe
                   </button>
                 )}
-              {isAttestModalOpen && (
+              {isAttestModalOpen && !allowDelegated ? (
                 <DynamicForm
                   schema={schemaData.rawSchema}
                   schemaUID={schemaData.schemaUID}
@@ -238,6 +252,20 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                   onClose={closeAttestModal}
                   revocable={schemaData.revocable}
                 />
+              ) : (
+                isAttestModalOpen &&
+                allowDelegated && (
+                  <DynamicForm
+                    schema={schemaData.rawSchema}
+                    schemaUID={schemaData.schemaUID}
+                    isSubscription={isEncrypted}
+                    resolver={schemaData.resolverContract}
+                    isOpen={isAttestModalOpen}
+                    onClose={closeAttestModal}
+                    revocable={schemaData.revocable}
+                    onlyDelegated={true}
+                  />
+                )
               )}
               {isSubscribeModalOpen && (
                 <SubscriptionForm
@@ -251,28 +279,32 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
           </div>
         </div>
       </Card>
-      {accessInfo.attestAccess &&
+      {((accessInfo.attestAccess || accessInfo.viewAccess) &&
         schemaData.resolverContract !==
           // @ts-ignore
-          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase() && (
-          <div className="flex flex-wrap items-center">
-            <label htmlFor="attestationsDisplay" className="mb-3 mr-1">
-              {` Display: `}
-            </label>
-            <select
-              id="attestationsDisplay"
-              className="border border-black rounded py-2 px-4 mb-4"
-              value={!showAttestations ? "delegatedRequests" : "attestations"}
-              onChange={() => {
-                toggleShowAttestations();
-                setShowAttestations(!showAttestations);
-              }}
-            >
-              <option value="attestations">Attestations</option>
-              <option value="delegatedRequests">Delegated Requests</option>
-            </select>
-          </div>
-        )}
+          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()) ||
+        (schemaData.resolverContract ==
+          // @ts-ignore
+          CONTRACTS.ACResolver[chainID].contract.toLowerCase() &&
+          (accessInfo.viewAccess || !isEncrypted) && (
+            <div className="flex flex-wrap items-center">
+              <label htmlFor="attestationsDisplay" className="mb-3 mr-1">
+                {` Display: `}
+              </label>
+              <select
+                id="attestationsDisplay"
+                className="border border-black rounded py-2 px-4 mb-4"
+                value={!showAttestations ? "delegatedRequests" : "attestations"}
+                onChange={() => {
+                  toggleShowAttestations();
+                  setShowAttestations(!showAttestations);
+                }}
+              >
+                <option value="attestations">Attestations</option>
+                <option value="delegatedRequests">Delegated Requests</option>
+              </select>
+            </div>
+          ))}
     </div>
   );
 };

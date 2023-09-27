@@ -88,7 +88,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   const handleAttributeChange = (index: any, key: any, value: any) => {
     const updatedAttributes = [...attributes];
     // @ts-ignore
-    updatedAttributes[index][key] = value;
+    updatedAttributes[index][key] = value.replace("'", "");
 
     if (value === "videoCID" || value === "imageCID" || value === "jsonCID") {
       updatedAttributes[index]["type"] = "string";
@@ -103,10 +103,10 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
       updatedAttributes[index]["type"] = "string";
       updatedAttributes[index]["isArray"] = true;
 
-      updatedAttributes[index]["name"] = value;
+      updatedAttributes[index]["name"] = value.replace("'", "");
       updatedAttributes[index]["readonly"] = true;
     } else {
-      updatedAttributes[index]["type"] = value;
+      updatedAttributes[index]["type"] = value.replace("'", "");
       updatedAttributes[index]["name"] = "";
       updatedAttributes[index]["readonly"] = false;
     }
@@ -157,6 +157,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
   };
 
   const handleTagChange = (tags: any) => {
+    tags.map((str: string) => str.replace("'", ""));
     setCategories({ tags });
   };
 
@@ -206,7 +207,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="text"
               value={schemaName}
-              onChange={(e) => setSchemaName(e.target.value)}
+              onChange={(e) => setSchemaName(e.target.value.replace("'", ""))}
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
@@ -226,7 +227,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             <Input
               type="text"
               value={schemaDescription}
-              onChange={(e) => setSchemaDescription(e.target.value)}
+              onChange={(e) => setSchemaDescription(e.target.value.replace("'", ""))}
               className="rounded-full px-4 py-2 border border-black"
             />
           </div>
@@ -453,11 +454,7 @@ const RegisterACSchemaModal: React.FC<RegisterSchemaModalProps> = ({
             isLoading={isLoading}
             isSuccess={isSuccess}
             isError={
-              error?.message
-                ? error.message.indexOf(".") !== -1
-                  ? error.message.substring(0, error.message.indexOf("."))
-                  : error.message
-                : undefined
+              undefined
             }
             wait={wait}
             error={err}

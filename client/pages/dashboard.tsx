@@ -265,7 +265,7 @@ export function DashboardPage({}) {
             </Tabs>
           ) : isConnected ? (
             <Loading />
-          ) : (
+          ) :userr&& (
             <div className="text-center">
               <p>Connect Your Wallet</p>
               <p>to view dashboard</p>
