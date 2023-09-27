@@ -279,14 +279,6 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
           </div>
         </div>
       </Card>
-      {((accessInfo.attestAccess || accessInfo.viewAccess) &&
-        schemaData.resolverContract !==
-          // @ts-ignore
-          CONTRACTS.SubscriptionResolver[chainID].contract.toLowerCase()) ||
-        (schemaData.resolverContract ==
-          // @ts-ignore
-          CONTRACTS.ACResolver[chainID].contract.toLowerCase() &&
-          (accessInfo.viewAccess || !isEncrypted) && (
             <div className="flex flex-wrap items-center">
               <label htmlFor="attestationsDisplay" className="mb-3 mr-1">
                 {` Display: `}
@@ -304,7 +296,7 @@ const SchemaProfile: React.FC<SchemaDataProps> = ({
                 <option value="delegatedRequests">Delegated Requests</option>
               </select>
             </div>
-          ))}
+          
     </div>
   );
 };
