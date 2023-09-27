@@ -88,7 +88,7 @@ const AttestByDelegateRequest = ({
     abi: CONTRACTS.TAS[chainID].abi,
     functionName: "getNonce",
     args: [address],
-    // watch: true,
+    watch: true,
   });
 
   // @ts-ignore
@@ -157,7 +157,7 @@ const AttestByDelegateRequest = ({
         setError(true);
       }
     };
-    if (!done && userNonce) {
+    if (!done) {
       let tdata: AttestDelegateTypedData = getAttestDelegateTypedData(
         schema,
         recipient,
@@ -165,7 +165,7 @@ const AttestByDelegateRequest = ({
         refUID,
         AttestationData,
         chainID,
-        userNonce,
+        userNonce?userNonce:0,
         TAS
       );
       setTypedData(tdata);
