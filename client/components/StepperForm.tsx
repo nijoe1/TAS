@@ -135,9 +135,7 @@ const StepperForm: React.FC<{
       <div className="fixed inset-0 bg-gray-700 opacity-70"></div>
       <div className=" bg-white p-8 rounded flex flex-col items-center text-center mx-auto shadow-lg relative z-10">
         <div className="flex flex-col items-center text-center">
-          <h3 className="text-xl font-semibold mb-4">{`Step ${
-            currentStep + 1
-          }: ${steps[currentStep].title}`}</h3>
+          <h3 className="text-xl font-semibold mb-4">{`${steps[currentStep].title}`}</h3>
           <p className="mb-6">{steps[currentStep].description}</p>
           {currentStep === 0 && (
             <button
