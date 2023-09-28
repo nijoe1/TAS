@@ -56,8 +56,9 @@ TAS leverages several cutting-edge technologies to offer a comprehensive and sec
 ### Tableland:
 - Replacing the centralized GraphQL infrastructure of EAS with a decentralized network for faster and complex queries. [Tableland Queries](https://github.com/nijoe1/TAS/blob/main/client/lib/tableland.js)
 - Implemented a mechanism to create new tables within the contract whenever the number of entries exceeds **100,000**, surpassing Tableland's table limitation. This ensures the protocol can handle an unlimited number of schemas and attestations, with only SQL queries needing modification. Through the unionAll function applied to similarly created tables, the protocol's data remains accessible and structured.
+- Here are all the tableland Indexer Contracts. [Tableland Contracts](https://github.com/nijoe1/TAS/tree/main/contracts/contracts/tablelandIndexers)
 ### IPFS and Filecoin:
-- Utilized for storing attested files securely, ensuring persistent data storage and accessibility.
+- Utilized for storing attested files securely, ensuring persistent data storage and accessibility using Lighthouse RAAS service.
 ### Lighthouse Storage:
 - Powering file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility using the RAAS service. [Lighthouse Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
 ### Lighthouse Kavach Network:
