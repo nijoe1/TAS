@@ -13,13 +13,13 @@
 - **Dapp website:** [Check TAS](https://tas.vercel.app)
 - **Demo Video:** [Watch Demo](https://www.youtube.com/watch?v=La7Rdj48UJM&t=194s)
 ---
-## Introduction
+## 📖 Introduction
 
 - Tableland Attestation Service (TAS) brings attestation services to the Filecoin network. TAS migrated the EAS protocol together with Tableland to create the Tableland Attestation Service. TAS can seamlessly work with all networks supported by Tableland and is currently deployed on Filecoin Calibration and Polygon Mumbai networks.
 
 ---
 
-## Description
+## ♯ Description
 
 - TAS is a robust and extensible protocol designed to bring the power of attestations to the Filecoin ecosystem. It leverages Tableland, a decentralized SQLite indexing protocol, at its core, to seamlessly integrate with Filecoin and EVM-compatible blockchains. TAS empowers users to generate and verify attestations, providing cryptographically signed confirmation of the authenticity and accuracy of information.
 
@@ -27,7 +27,7 @@
 
 ---
 
-## Advantages compared to EAS
+## ☝ Advantages compared to EAS
 
 - **Tableland Integration**:
   - TAS leverages Tableland for indexing attestations and schemas, resulting in significantly faster performance compared to GraphQL.
@@ -42,36 +42,37 @@
 
 ---
 
-## Disadvantages compared to EAS
+## 👇 Disadvantages compared to EAS
 
 - Tableland has a limitation of supporting a maximum of 1024 string length per column insertion. The attested data are encoded to bytes, resulting in larger string lengths stored in the table, limiting the amount of data that can be attested.
   - To address this limitation, before making the attestation, we encode the data to base64, providing a 33% more space for attestation data.
 
 ---
 
-## Technologies Used
+# 👨‍💻Technologies Used 🤖
 
-- TAS leverages several cutting-edge technologies to offer a comprehensive and secure attestation service:
-  - **Tableland**:
-    - Replacing the centralized GraphQL infrastructure of EAS with a decentralized network for faster and complex queries. [Tableland Queries](https://github.com/nijoe1/TAS/blob/main/client/lib/tableland.js)
-  - **IPFS and Filecoin**:
-    - Utilized for storing attested files securely, ensuring persistent data storage and accessibility.
-  - **Lighthouse Storage**:
-    - Powering file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility using the RAAS service. [Lighthouse Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
-  - **Lighthouse Kavach Network**:
-    - Providing encryption capabilities for subscription-based schemas and encrypted access control based schemas, safeguarding sensitive data in attestations. [Kavach Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
-  - **Ceramic Network**:
-    - Enabling users to store and manage attestations securely and in a decentralized environment off-chain. Together with orbis.club, it offers a social layer about schemas and attestations. [Ceramic Usage](https://github.com/nijoe1/TAS/blob/main/client/lib/offchain.ts) [Signing Typed Data to Create Verifiable OffChain Attestations](https://github.com/nijoe1/TAS/blob/main/client/components/AttestOffChain.tsx)
+TAS leverages several cutting-edge technologies to offer a comprehensive and secure attestation service:
+
+### Tableland:
+- Replacing the centralized GraphQL infrastructure of EAS with a decentralized network for faster and complex queries. [Tableland Queries](https://github.com/nijoe1/TAS/blob/main/client/lib/tableland.js)
+### IPFS and Filecoin:
+- Utilized for storing attested files securely, ensuring persistent data storage and accessibility.
+### Lighthouse Storage:
+- Powering file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility using the RAAS service. [Lighthouse Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
+### Lighthouse Kavach Network:
+- Providing encryption capabilities for subscription-based schemas and encrypted access control based schemas, safeguarding sensitive data in attestations. [Kavach Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
+### Ceramic Network:
+- Enabling users to store and manage attestations securely and in a decentralized environment off-chain. Together with orbis.club, it offers a social layer about schemas and attestations. [Ceramic Usage](https://github.com/nijoe1/TAS/blob/main/client/lib/offchain.ts) [Signing Typed Data to Create Verifiable OffChain Attestations](https://github.com/nijoe1/TAS/blob/main/client/components/AttestOffChain.tsx)
 
 ---
 
-## Contracts
+## 🧾 Contracts
 
  - [contracts](https://github.com/nijoe1/TAS/tree/main/contracts/contracts)
 
 ---
 
-## Unlocked Use Cases for the Filecoin Ecosystem
+## ☯ Unlocked Use Cases for the Filecoin Ecosystem
 
 - **EAS Use Cases**:
   - [Example Use Cases](https://docs.attest.sh/docs/category/example-use-cases)
@@ -94,3 +95,25 @@
 ---
 
 TAS unlocks a multitude of possibilities within the Filecoin ecosystem, promoting trust, security, and transparency across diverse applications and industries.
+
+## 📄 License
+
+This project is licensed under the MIT License - See the [LICENSE](./LICENSE) file for details.
+
+## 🛠️ Built With
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [wagmi](https://web3js.readthedocs.io/en/v1.3.4/)
+- [viem](https://web3js.readthedocs.io/en/v1.3.4/)
+
+## 🤝 Acknowledgements
+
+- [OpenZeppelin](https://openzeppelin.com/)
+- [EAS](https://docs.attest.sh/docs/welcome)
+- [Lighthouse](https://www.lighthouse.storage/)
+- [Tableland](https://tableland.xyz/)
+- [IPFS](https://ipfs.io/)
+- Encode Team for the hackathon experience
+
