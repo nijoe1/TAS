@@ -1,39 +1,96 @@
 # Tableland Attestation Service (TAS)
-<div className="items-center">
-<img width="50%"src="./client/public/logo2.jpeg">
+
+---
+## Encode Open Data Hack Project 🚀
+
+<div >
+  <img src="./client/public/logo2.jpeg" alt="TAS Logo" style="border-radius: 5%; width: 400px;" />
 </div>
-Encode Hack project
 
-[author : nijoe1](https://github.com/nijoe1) 
+---
 
-Tableland Attestation Service (TAS) is a decentralized and versatile protocol bridging the gap between digital trust and the Filecoin ecosystem. TAS facilitates the secure verification of data, enabling trust and reliability in various online interactions. With TAS, you can effortlessly create, manage, and verify attestations, paving the way for a more trustworthy digital environment.
+- **Author:** [nijoe1](https://github.com/nijoe1)
+- **Dapp website:** [Check TAS](https://tas.vercel.app)
+- **Demo Video:** [Watch Demo](https://www.youtube.com/watch?v=La7Rdj48UJM&t=194s)
+---
+## Introduction
+
+- Tableland Attestation Service (TAS) brings attestation services to the Filecoin network. TAS migrated the EAS protocol together with Tableland to create the Tableland Attestation Service. TAS can seamlessly work with all networks supported by Tableland and is currently deployed on Filecoin Calibration and Polygon Mumbai networks.
+
+---
 
 ## Description
-Tableland Attestation Service (TAS) is a robust and extensible protocol designed to bring the power of attestations to the Filecoin ecosystem. At its core, TAS utilizes Tableland, a decentralized SQLite indexing protocol, to enable seamless integration with Filecoin and EVM-compatible blockchains. TAS empowers users to generate and verify attestations, offering cryptographically signed confirmation of the authenticity and accuracy of information.
 
-TAS goes beyond traditional attestation services by offering file attestations for various file types using Lighthouse storage. This means every kind of file can be securely stored on IPFS and replicated on Filecoin, ensuring persistent data storage in the decentralized web. Additionally, TAS provides subscription-based and access control schemas, allowing for tailored access to attestations and versatile data management, including support for private or open AC schemas.
+- TAS is a robust and extensible protocol designed to bring the power of attestations to the Filecoin ecosystem. It leverages Tableland, a decentralized SQLite indexing protocol, at its core, to seamlessly integrate with Filecoin and EVM-compatible blockchains. TAS empowers users to generate and verify attestations, providing cryptographically signed confirmation of the authenticity and accuracy of information.
 
-## Problem-Solution
-### Problem
-In the digital world, establishing trust and credibility can be challenging due to the lack of face-to-face interactions. Authenticating information and ensuring its accuracy is a vital concern, especially with the rise of AI-generated content and deep fakes.
+- TAS goes beyond traditional attestation services by offering file attestations for various file types using Lighthouse storage. This means every kind of file can be securely stored on IPFS and replicated on Filecoin, ensuring persistent data storage in the decentralized web. Additionally, TAS provides subscription-based and access control schemas, allowing for tailored access to attestations and versatile data management, including support for private or open AC schemas.
 
-### Solution
-Tableland Attestation Service (TAS) addresses these challenges by providing a reliable and secure way to verify and authenticate information. TAS leverages attestations, which are digital signatures on structured data, to offer a cryptographic stamp of approval. These attestations can be made on-chain or off-chain, ensuring the authenticity and immutability of the verified data. By utilizing Tableland and bridging into the Filecoin ecosystem, TAS provides a robust foundation for establishing trust and credibility in the digital realm.
+---
+
+## Advantages compared to EAS
+
+- **Tableland Integration**:
+  - TAS leverages Tableland for indexing attestations and schemas, resulting in significantly faster performance compared to GraphQL.
+  - Developers can create SQLite queries directly to the Tableland gateway, eliminating the need for a GraphQL client.
+
+- **Ceramic Network Integration**:
+  - TAS is integrated with the Ceramic network to provide OffChain attestations, enhancing decentralization.
+
+- **Out-of-the-Box Features**:
+  - TAS offers out-of-the-box file attestations stored on IPFS and Filecoin using Lighthouse.
+  - It also provides encrypted schemas with encrypted attestations using the Lighthouse Kavach network, providing a more efficient solution compared to costly merkle trees used in EAS.
+
+---
+
+## Disadvantages compared to EAS
+
+- Tableland has a limitation of supporting a maximum of 1024 string length per column insertion. The attested data are encoded to bytes, resulting in larger string lengths stored in the table, limiting the amount of data that can be attested.
+  - To address this limitation, before making the attestation, we encode the data to base64, providing a 33% more space for attestation data.
+
+---
 
 ## Technologies Used
-TAS leverages several cutting-edge technologies to offer a comprehensive and secure attestation service:
-- **Tableland**: A decentralized SQLite indexing protocol supporting Filecoin and EVM-compatible blockchains, providing seamless integration and efficient data management.
-- **IPFS and Filecoin**: Utilized for storing attested files securely, ensuring persistent data storage and accessibility.
-- **Lighthouse Storage**: Powering file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility.
-- **Ceramic Network**: Enabling users to store and manage attestations in a secure and decentralized environment.
-- **Lighthouse Kavach Network**: Providing encryption capabilities to safeguard sensitive data in attestation services.
+
+- TAS leverages several cutting-edge technologies to offer a comprehensive and secure attestation service:
+  - **Tableland**:
+    - Replacing the centralized GraphQL infrastructure of EAS with a decentralized network for faster and complex queries. [Tableland Queries](https://github.com/nijoe1/TAS/blob/main/client/lib/tableland.js)
+  - **IPFS and Filecoin**:
+    - Utilized for storing attested files securely, ensuring persistent data storage and accessibility.
+  - **Lighthouse Storage**:
+    - Powering file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility using the RAAS service. [Lighthouse Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
+  - **Lighthouse Kavach Network**:
+    - Providing encryption capabilities for subscription-based schemas and encrypted access control based schemas, safeguarding sensitive data in attestations. [Kavach Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
+  - **Ceramic Network**:
+    - Enabling users to store and manage attestations securely and in a decentralized environment off-chain. Together with orbis.club, it offers a social layer about schemas and attestations. [Ceramic Usage](https://github.com/nijoe1/TAS/blob/main/client/lib/offchain.ts) [Signing Typed Data to Create Verifiable OffChain Attestations](https://github.com/nijoe1/TAS/blob/main/client/components/AttestOffChain.tsx)
+
+---
+
+## Contracts
+
+ - [contracts](https://github.com/nijoe1/TAS/tree/main/contracts/contracts)
+
+---
 
 ## Unlocked Use Cases for the Filecoin Ecosystem
-Tableland Attestation Service (TAS) enriches the Filecoin ecosystem by unlocking various use cases, including:
-- **File Attestations**: Securely store and attest various file types on IPFS and Filecoin, ensuring the authenticity and integrity of the stored files.
-- **Decentralized Identity**: Utilize TAS to create decentralized, self-sovereign identity systems, providing individuals control over their personal data and identity.
-- **Supply Chain Provenance**: Verify the authenticity and origin of products by leveraging TAS to trace the supply chain and combat counterfeit goods.
-- **Intellectual Property Rights**: Establish ownership claims and verify intellectual property rights for AI-generated content, providing creators with a secure framework for licensing and protection.
+
+- **EAS Use Cases**:
+  - [Example Use Cases](https://docs.attest.sh/docs/category/example-use-cases)
+
+- **File Attestations**:
+  - Securely store and attest various file types on IPFS and Filecoin, ensuring the authenticity and integrity of the stored files.
+
+- **Filecoin Actors Reputation**:
+  - Monitoring and establishing reputations for Filecoin actors (like storage providers, clients, etc.) based on their behavior, reliability, and performance within the network.
+
+- **Retrieval Oracle Attestations**:
+  - Utilizing attestations to verify and validate the reliability and efficiency of retrieval oracles within the Filecoin ecosystem, ensuring accurate and timely data retrieval.
+
+- **Verifiable Credentials**:
+  - Generating and verifying verifiable credentials, providing a secure and tamper-proof way to manage and share important credentials and certifications within the Filecoin network.
+
+- **Users Reputation Scoring through Attestations**:
+  - Creating a reputation scoring system for users based on their interactions, contributions, and attestations within the Filecoin ecosystem, promoting trust and collaboration.
+
+---
 
 TAS unlocks a multitude of possibilities within the Filecoin ecosystem, promoting trust, security, and transparency across diverse applications and industries.
-
