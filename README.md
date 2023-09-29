@@ -11,7 +11,7 @@
 
 - **Author:** [nijoe1](https://github.com/nijoe1)
 - **Dapp website:** [Check TAS](https://tas.vercel.app)
-- **Demo Video:** [Watch Demo](https://www.youtube.com/watch?v=La7Rdj48UJM&t=194s)
+- **Demo Video:** [Watch Demo add subs!!!](https://www.youtube.com/watch?v=La7Rdj48UJM)
 ---
 ## 📖 Introduction
 
@@ -37,6 +37,7 @@
   - TAS is integrated with the Ceramic network to provide OffChain attestations, enhancing decentralization.
 
 - **Out-of-the-Box Features**:
+  - TAS offers Schema Name-Description-Categories out-of-the-box while EAS requires an additional attestation to achieve that. Which requires more fees and one more query to index those info.
   - TAS offers out-of-the-box file attestations stored on IPFS and Filecoin using Lighthouse.
   - It also provides encrypted schemas with encrypted attestations using the Lighthouse Kavach network, providing a more efficient solution compared to costly merkle trees used in EAS.
 
