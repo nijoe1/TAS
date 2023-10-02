@@ -61,7 +61,10 @@ TAS leverages several cutting-edge technologies to offer a comprehensive and sec
 ### IPFS and Filecoin:
 - Utilized for storing attested files securely, ensuring persistent data storage and accessibility using Lighthouse RAAS service.
 ### Lighthouse Storage:
-- Powering file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility using the RAAS service. [Lighthouse Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
+
+- Lighthouse Storage powers file attestations by securely storing files on IPFS and replicating them on Filecoin for longevity and accessibility through the RAAS service. Users can transparently check the established deals made by the Lighthouse nodes infrastructure for all files uploaded to the platform. Check an example in this [[GIF]](https://gateway.lighthouse.storage/ipfs/QmUGLmbHtrFPTxvcFTdtE2ou9hwRYBHjyaU1yUGmNtbWB7)
+- [Lighthouse Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
+
 ### Lighthouse Kavach Network:
 - Providing encryption capabilities for subscription-based schemas and encrypted access control based schemas, safeguarding sensitive data in attestations. [Kavach Usage Code Link](https://github.com/nijoe1/TAS/blob/main/client/lib/lighthouse.js)
 ### Ceramic Network:
