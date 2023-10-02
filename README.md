@@ -98,6 +98,16 @@ TAS leverages several cutting-edge technologies to offer a comprehensive and sec
 - **Users Reputation Scoring through Attestations**:
   - Creating a reputation scoring system for users based on their interactions, contributions, and attestations within the Filecoin ecosystem, promoting trust and collaboration.
 
+- **Additional Use Cases**:
+
+  - **Access Control Schemas (AC Schemas)**:
+
+    - Implementing access control schemas for verifiable credentials and tickets, enabling fine-grained control over who can attest and access certain data on the Filecoin network.
+
+  - **Subscription-Based Schemas**:
+
+    -Developing schemas where access to attestations and encrypted content is subscription-based, allowing for controlled access and monetization of premium content and services within the Filecoin ecosystem.
+
 ---
 
 TAS unlocks a multitude of possibilities within the Filecoin ecosystem, promoting trust, security, and transparency across diverse applications and industries.
