@@ -2,7 +2,9 @@ import { Html, Head, Main, NextScript } from "next/document";
 
 export default function Document() {
   return (
+    // @ts-ignore
     <Html lang="en">
+      {/* @ts-ignore */}
       <Head>
         {/* Character Set */}
         <meta charSet="utf-8" />
@@ -34,7 +36,9 @@ export default function Document() {
         />
       </Head>
       <body>
+        {/* @ts-ignore */}
         <Main />
+        {/* @ts-ignore */}
         <NextScript />
       </body>
     </Html>
