@@ -1,4 +1,5 @@
-import type { AppProps } from "next/app";
+import { AppProps } from 'next/app';
+import React from 'react';
 import Web3Provider from "@/providers/Web3";
 import { SEO } from "@/components/layout";
 
